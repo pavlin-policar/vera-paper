@@ -238,23 +238,32 @@ For ordinal and continuous variables, we only allow merging neighboring bins, e.
 
 For categorical variables, we apply one-hot encoding, and use the same variable merging scheme as before. For ordinal categorical variables we apply the same merging restriction as before, merging only adjacent bins. E.g, the ordinal values $\{1, 2, 3, 4\}$ could be merged into $\{\{1, 2, 3\}, \{4\}\}$, but not into $\{\{1, 4\}, \{2, 3\}\}$. For nominal categorical variables, we apply no such restriction. E.g., the categorical variable values $\{red, green, blue\}$ could be merged into $\{\{red, green\}, \{blue\}\}$.
 
-More concretely, we to merge two explanatory variables, by default we require that their sample overlap is at least 50\%. We also require that the merged region improves the overall purity of the regions by at least 5\%, and that their spatial localization is not decreased. We measure spatial localization using Geary's C spatial autocorrelation index. To compute Geary's C, we require an adjacency matrix indicating the spatial proximities between data points. To construct the adjacency matrix, we utilize the scale $\sigma$ computed in Sec.~\ref{sec:kde_estimation}. For each point we find all its neighbors that are at distance at most $3 \cdot \sigma$. We then compute the probability density function of each of these neigbhors using a Gaussian distribution centred at each point using bandwidth $\sigma$.
+More concretely, we to merge two explanatory variables, by default we require that their sample overlap is at least 50\%. 
+\begin{equation}
+\text{overlap}(r_1, r_2) = \notag
+\end{equation}
+where $r_1$ and $r_2$ are the regions in question.
+We also require that the merged region improves the overall purity of the regions by at least 5\%. The purity of a region is defined as
+\begin{equation}
+\text{purity}(r) = \notag
+\end{equation}
+That their spatial localization is not decreased. We measure spatial localization using Geary's C spatial autocorrelation index, defined as
+\begin{equation}
+C=\frac{N-1}{2 \sum_{ij} W } \frac{\sum_i \sum_j w_{i j}\left(x_i-x_j\right)^2}{\sum_i\left(x_i-\bar{x}\right)^2},\notag
+\end{equation}
+where $N$ is the number of data samples, $W$ is a weighted adjacency matrix indicating the spatial proximities between data points, and $x_i$ is the feature value of sample $i$.
+To compute the adjacency matrix $W$, we utilize the scale $\sigma$ computed in Sec.~\ref{sec:kde_estimation}. For each point we find all its neighbors that are at distance at most $3 \cdot \sigma$. We then compute the probability density function of each of these neigbhors using a Gaussian distribution centred at each point using bandwidth $\sigma$.
 
 If no particular variable value is localized to a specific region of the embedding space, our merging proceedure could merge all the explanatory variables for a variable, leaving a single region encompassing the entire space. This is desirable, as this indicates that this particular variable holds no bearing when trying to explain the embedding, and is discarded from future consideration for generating visual explanations.
 
 An example of the overfragmentation and the subsequent merging proceedure is shown in Fig.~\ref{fig:overfragmentation}).
 
-\begin{figure}[tbp]
+\begin{figure}[tb]
   \centering
   \includegraphics[width=\linewidth]{discretization-merging-1}
   \caption{Applying discretization to the Hillshade 3pm variable results in five bins, which are shown in the left panel. The histogram shows the distribution of values and the red lines indicate the discretization bin edges. The bottom plot shows the embedding, where points are colored according to the discretization bin they fall in. Splitting this variable into five distinct bins leads to overfragmentation. This is evident from the bottom scatterplot, where there is no clear separation between the different colors. However, we can observe that the brighter yellow and green colors appear on the right hand side, while the darker blue and purple colors appear to the left hand side. To reduce the overfragmentation in the embedding space, we apply our dicretization merging technique. The right hand panel shows the same distribution, bin edges, and scatter plot as before, but this time with merged bins. The brighter colors were correctly merged into one bin, and the darker colors into another, creating a clear separation between low and high attribute values in the scatter plot.}
   \label{fig:overfragmentation}
 \end{figure}
-
-We also filter out the features that had a single explanatory feature, as that brings exactly zero information.
-
-This leaves us with a bunch of regions that can be used to generate explanations.
-
 
 \subsection{Contrastive explanations}
 
@@ -273,13 +282,6 @@ To adhere to the principle of ``simple explanations'', we aim to present the use
 
 We want the number of explanatory regions to be manageable. For instance, one region is not particularily informative, while 10 is just too much clutter. We do the Gaussian log-probability.
 
-\begin{figure}[tbp]
-  \centering
-  \includegraphics[width=\linewidth]{iris-bipartite-matching}
-  \caption{The plots in panels (a) (b), and (c) correspond to contrastive explanations for three different variables in the Iris data set. The variables represent \textit{petal length}, \textit{petal width}, and \textit{iris species}, respectively. Notice that each of these three plots contain regions that occupy the same regions of the space. For instance, we would lose almost no information if the regions corresponding to \textit{petal length < 2.46}, \textit{petal width < 0.67}, and \textit{species = `iris setosa'} were merged into a single region. A similar mapping can be found between the other two subregions in each of the three variables. Wherever possible, VECA merges these types of contrastive explanations into a single one, presenting the user with a smaller number of visual explanations, easing the cognitive burden on the end-user.}
-  \label{fig:bipartite_matching}
-\end{figure}
-
 
 \subsection{Descriptive Explanations}
 
@@ -288,10 +290,16 @@ With descriptive explanations, we aim to show interesting combinations of explan
 \subsubsection{Explanation construction}
 
 In descriptive explanations, we are no longer limited to showing explanatory variables from a single input variable, but are free to choose any combination of explanatory variables from any input variable.
-It is common that several explanatory variables appear in similar regions of space, e.g., TODO find example.
-To reduce the number of possible visual explanations, we merge together explanatory variables into a single one when there is sufficient overlap. By default, we require that at least 90\% of the encompassed samples are shared between any two pairs of merged regions. Note that the samples need not necessarily have that particular feature value, it only needs to be encompassed by the region.
+It is common that several explanatory variables appear in similar regions of space. For instance, if Fig.~\ref{fig:bipartite_matching}, the three input variables ``petal length'', ``petal width'', and ``species'' are highly correlated, and occupy roughly the same regions of the space. To reduce the number of possible visual explanations, we merge together these into a single visual explanation. We only do this when there is sufficient overlap between all pairs of regions. By default, we require that at least 90\% of the encompassed samples are shared between any two pairs of merged regions. Note that the samples need not necessarily have that particular feature value, it only needs to be encompassed by the region.
 We also require that the resulting merged cluster has a purity of at least 50\%, i.e., at least 50\% of all samples encompassed within this new region have at least one of the merged variables.
 As an additional requirement, we require that each of the resulting clusters has a Geary's C index of at most 0.5. Note that this step is different from the merging proceedure described in Sec.~\ref{sec:merge_overfragmented}, as we do not limit ourselves to merging adjacent bins, or even explanatory variables derived from the same input variable.
+
+\begin{figure}[thb]
+  \centering
+  \includegraphics[width=\linewidth]{iris-bipartite-matching}
+  \caption{The plots in panels (a) (b), and (c) correspond to contrastive explanations for three different variables in the Iris data set. The variables represent \textit{petal length}, \textit{petal width}, and \textit{iris species}, respectively. Notice that each of these three plots contain regions that occupy the same regions of the space. For instance, we would lose almost no information if the regions corresponding to \textit{petal length < 2.46}, \textit{petal width < 0.67}, and \textit{species = `iris setosa'} were merged into a single region. A similar mapping can be found between the other two subregions in each of the three variables. Wherever possible, VECA merges these types of contrastive explanations into a single one, presenting the user with a smaller number of visual explanations, easing the cognitive burden on the end-user.}
+  \label{fig:bipartite_matching}
+\end{figure}
 
 Having merged overlapping explanatory variables, we next need to find combinations of these resulting regions so that they produce informative visual explanations.
 To avoid cluttering the plot, we want to include variables in each visual explanation so that we have as little overlap as possible. We achieve this by casting this as an graph-independent set problem. We first compute the overlap graph between all explanatory variables, placing an edge between explanatory variables if the overlap between regions exceeds the maximum user-specified threshold, by default 20\% of overlapping samples. Then, the independent sets of this graph are the  find combinations of non-overlapping explanatory variables which do not exceed this prespecified threshold.
@@ -317,20 +325,32 @@ In the following, we present three case studies of increasing complexity. We bei
 
 We walk through the different steps of our analysis on the Iris data set from Anderson~\cite{Anderson1936}. This small data set profiles 150 iris flowers with four continuous variables containing pyhsical measurements of individual flowers (sepal length, sepal width, petal length, petal width) and provides a classification of their species (Iris Setosa, Iris Versicolor, Iris Virginica).
 
-We construct a two-dimensional t-SNE embedding of the data set with parameter values metric=cosine perplexity=30 using the \textsf{openTSNE} library~\cite{Policar2019}.
+We first construct a two-dimensional t-SNE embedding of the data set with parameter values metric=cosine perplexity=30 using the \textsf{openTSNE} library~\cite{Policar2019}. We then explain the resulting embedding using VECA. For this example only, we perform discretization into three bins instead of five, as this feature setting better demonstrates the types of problems one must take into consideration when performing variable merging. The steps involved in the pipeline are outlined in Fig.~\ref{fig:iris_pipeline}.
 
-\begin{figure*}[tbp]
+\begin{figure*}[tb]
   \centering
   \includegraphics[width=\textwidth]{iris_pipeline.pdf}
   \caption{We illustrate the region construction process on the Iris data set.}
   \label{fig:iris_pipeline}
 \end{figure*}
 
+The top row of Fig.~\ref{fig:iris_pipeline} shows a standard approach to explaining embeddings in terms of their original features. The points in the scatter plot are colored according to their feature values. This approach works well for a small number of input features, but quickly grows unwieldly as the number of input features increases. Additionally, the plots are typically ordered according to the original variable order, making it difficult to reason about correlted variables in the embedding space. Finally, the colors correspond to different feature values. How good this is is determined by the color palette used. In general, it is fairly easy to see low and high values of the feature, e.g., the first two panels in the top row of Fig.~\ref{fig:iris_pipeline} show a clear distinction between the left-hand and the right-hand side of the plot in terms of feature values. However, it is difficult to discern anything other than ``low'' and ``high'' values. The right-most panel in the top row of Fig.~\ref{fig:iris_pipeline} shows the categorical target variable. While this plot is very clear, these kinds of plots become increasingly difficult to interpret and become increasingly cluttered as the number of categories increases.
+
+The second row of Fig.~\ref{fig:iris_pipeline} shows the initial explanatory variables for each input variable, grouped by input variable. Notice that the third and fourth panels contain regions that contain a high degree of overlap. For instance, in the third panel, the orange region corresponding to the derived feature \textit{sepal length (cm) > 6.55} overlaps almost entirely with the green region corresponding to \textit{5.53 < sepal length (cm) < 6.55}. These two discretizations could easily be merged into a single discrete interval \textit{sepal length (cm) > 5.53} to unclutter the visualization without much loss of information. Indeed, this is exactly what happens in the next step of the VECA pipeline in the third row of Fig.~\ref{fig:iris_pipeline}, where our post-hoc merging proceedure merges the above mentioned explanatory variables.
+
+The fourth panel in the second row of Fig.~\ref{fig:iris_pipeline} demonstrates a more complex scenario. The blue region corresponding to \textit{sepal width (cm) < 2.85} is localized to the right cluster, and the green region corresponding to \textit{sepal width (cm) > 3.44} is localized to the left cluster. However, the intermediate values contained within the orange region corresponding to 
+\textit{2.85 < sepal width (cm) < 3.44} are present throughout the embedding. We may consider merging the orange region with the green region, producing an explanatory variable corresponding to \textit{sepal width (cm) > 2.85}, however, this may mislead users to think there are only two groups of feature values, with high values distributed along the entire embedding, and low values appearing only in the right-hand cluster. Alternatively, we may instead opt to merge the \textit{sepal width (cm) < 2.85} and \textit{2.85 < sepal width (cm) < 3.44} regions, but this may lead to similar confusion. Alternatively, we may choose to leave the regions as they are, but this may mistakenly give the user the mistaken impression that the left-hand cluster contains only high values of \textit{sepal width (cm)} if they are shown only that single explanatory region. Leaving the regions unmerged would also result in cluttered visualizations. In VECA, we merge all three clusters into a single explanatory variable. This means that the entire variable is described by a single region which encompasses the entire space, and is discarded from any explanations. Other approaches may be possible, but we feel it is better to remove unclear visual explanations than to provide misleading explanations.
+
+The third row of Fig.~\ref{fig:iris_pipeline} shows the explanatory variables after the merging proceedure. Notice that the first, second, and last panels remain the same as in the row above, because the initially proposed regions do not really overlap. The explanatory variables in the third panel were merged into two explanatory variables, while the fourth panel shows an explanatory variable that was merged into one, and will be discareded from future analysis. Note that this variable may have been merged in a different way if a different number of bins was chosen. For instance, if we had chosen five bins, as is the default in VECA, perhaps the orange region would have been further split into a left and right region, and the resulting merged region may have been similar to the one shown in the third panel.
+
+The last row of Fig.~\ref{fig:iris_pipeline} shows all the generated contrastive and explanatory explanations of this embedding. Notice that the first panel in the contrastive explanations display three variables. This is possible as the three variables all contain regions which occupy the same regions of the space. It is evident from the visual explanations that it would be easy to correctly classify iris flowers by species. We would only need to look at petal width and petal length and obtain a high degree of accuracy. As this data set is fairly straightforward, the descriptive explanations do not really reveal anything that the contrastive explanations don't.
+
+
 \subsection{Wine Quality}
 
 The wine quality data set~\cite{Cortez2009} contains 6,497 samples and is described by 12 physicochemical features, including fixed acidity, residual sugar, and alcohol. The goal is to predict the quality of wine. We also know what kind of wine it is, red or white. As before, we generate a two-dimensional t-SNE embedding of the data set using parameter values metric=cosine perplexity=500, exaggeration=2. We then explain the resulting embedding using VECA in terms of the original data features. The top four contrastive explanations and the top four descriptive explanations are shown in Fig.~\ref{fig:wine_explanations}.
 
-\begin{figure*}[tbp]
+\begin{figure*}[tb]
   \centering
   \includegraphics[width=\textwidth]{wine_explanations.pdf}
   \caption{We construct a t-SNE embedding of the wine quality data set and apply VECA to automatically obtain an explanation of the embedding. We plot the top four visual explanations in terms of contrastive value in panels a-d and the top four visual explanations in terms of descriptive value in panels e-h. The contrastive explanations each show only a single variable, but are ranked in such a way as to show the most well-separated and spatially-localized input variables first. The decriptive expalantions depicted in panels e-h are no longer limited to a single input variable, but aim to show maximally-informative combinations of the derived, explanatory variables.}
@@ -339,7 +359,7 @@ The wine quality data set~\cite{Cortez2009} contains 6,497 samples and is descri
 
 For instance, panels a and b show that different values of the ``Wine Type'' and ``Chlorides'' variables appear in distinct regions of the space, while the variables ``Total Sulfur Oxide'' and ``Residual sugar'' in panels c and d being to exhibit a small degree of overlap. We verify this hypothesis in Fig.~\ref{fig:wine_type_separation} by inspecting which samples are contained within each underlying region. The plot validates that there is minimal mixing between samples between red and white wines. The plot also validates that this in-between cluster is ineed somewhat mixed.
 
-\begin{figure}[htb!]
+\begin{figure}[ht]
   \centering
   \includegraphics[width=\linewidth]{wine_type_separation.pdf}
   \caption{We plot each region from Fig.~\ref{fig:wine_explanations}. Panel a highlights the points corresponding to red wine, while panel b highlights the points corresponding to white wine. We see that there is minimal mixing between the two wine types. We also observe the small in-between cluster contains a rough mix of 50\% white wine and 50\% red wine.}
@@ -348,7 +368,7 @@ For instance, panels a and b show that different values of the ``Wine Type'' and
 
 Descriptive visual explanations can also be useful for discovering correlations between explanatory variables. For instance, the blue region in the left had side of panel e contains three explanatory variables: \textit{wine type = 'red'}, \textit{total sulfur dioxide < 60.13}, and \textit{0.06 < chlorides < 0.13}. We can then quickly conclude that most red wines contain lower levels of total sulfur dioxide than white wines and that its levels of chlorides is between 0.06 and 0.13. We can consult the discriminative eplanations to determine whether these levels of chlorides is low or high. Inspecting panel b, we can conclude that this is a middle-range value of chlorides.
 
-Fig.~\ref{fig:wine_explanation}.a indicates that the two types of wines are clearly separated from one another in the embedding. This is particularily interesting, because this feature was not used to construct the embedding. This indicates that there are big differences between the chemical properties of red and white wine. There is also a gray-ish cluster in the upper area between the two large clusters that seems to contain a small region containg white wines. However, a good number of data points are left outside any region. This may indicate that this region si more mixed, and requires further investigation.
+Fig.~\ref{fig:wine_explanations}.a indicates that the two types of wines are clearly separated from one another in the embedding. This is particularily interesting, because this feature was not used to construct the embedding. This indicates that there are big differences between the chemical properties of red and white wine. There is also a gray-ish cluster in the upper area between the two large clusters that seems to contain a small region containg white wines. However, a good number of data points are left outside any region. This may indicate that this region si more mixed, and requires further investigation.
 
 We also demonstrate that our discretization proceedure alleviates the problem of outliers values skew color scales. A common approach for explaining embeddings in terms of their original input features is to simply color each point in the scatter plot in according to its feature value. However, this can made difficult when the feature in question contains outlier values which skew the entire color scale to one side, resulting in a very uneven distribution of colors.
 For instance, Fig.~\ref{fig:wine_discretization}.a shows the distribution of the values of the ``Residual Sugar'' input variable. Notice that histogram is skewed heavily to one side because of a small number of outliers in the right-hand side of the plot. The corresponding scatterplot is also not informative, as the points appear to be more-or-less colored in the same violet color. A common remedy to this problem is to apply a log-transformation, but this is not always effective, and increasive cognitive load on the analyst, as now they must think about variable values in terms of ther log-scale. Fig.~\ref{fig:wine_discretization}.b shows the log-transformed values of the original ``Residual Sugar'' input variable.
@@ -393,7 +413,7 @@ We illustrate model validation by training a deep neural network on the forest c
 
 We generate a t-SNE embedding using the same proceedure as in the previous section. This time, however, the input to our dimensionality reduction algorithm is not the original data features, but the second-last latent dimension. We then use VECA to explain this embedding in terms of the original data features.
 
-\begin{figure}[tbp]
+\begin{figure}[htb]
   \centering
   \includegraphics[width=\linewidth]{covertype_model.pdf}
   \caption{Forest covertype model}
@@ -404,7 +424,7 @@ Inspecting the embedding, we can see that our model has a tough time differentia
 
 The predictive accuracy reported by Blackard et al.~\cite{Blackard1999} to be \~70\% for this data set using neural networks. The misclassification rate shown in the confusion matrix was extracted from the original publication.
 
-\begin{figure}[tbp]
+\begin{figure}[htb]
   \centering
   \includegraphics[width=\linewidth]{covertype_model_contrastive.pdf}
   \caption{We inspect the top-four contrastive layouts of the learned embeddings.}
