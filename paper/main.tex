@@ -159,6 +159,7 @@ Our contributions are as follows:
 
 In this section, we review related work and contextualize it in terms of visual explanations of point-based embeddings. Miller~\cite{Miller2019} argues that ...
 Our aim is to generate visual explanations of point-based embeddings.
+Miller~\cite{Miller2019} suggests that there are three kinds of cognitive processes involved in explanation: explanation generation, explanation selection, and explanation evaluation. We argue that most existing work has focused on the first -- explanation generation -- with the development of numerous methods to understand specific aspects of two-dimensional embeddings. In this work, we aim to automate the first two of these cognitive processes. We first generate a large number of potential explanations, then select the most informative ones to show to the end user. Ultimately, it is up to the end user to evaluate the usefulness of an explanation, and whether it granted insight into the two-dimensional embedding.
 
 While there exists a large body of work focusing on identifying distortions in the generated embeddings, little attention has been devoted to automatically generating explanations for such embeddings. We refer to the reader to Nonato and Aupetit~\cite{Nonato2018} for an overview of embedding distortions and their related methods.
 
@@ -167,6 +168,7 @@ Most existing work develops new methods for augmenting scatterplots to view one 
 Visual modality similar to Clusterplots~\cite{Malkai2021}
 Similar method or a review of these methods is provided in ~\cite{Li2022}.
 These approaches focus on visualizing contours to visualize different clusters or different classes. Multiclass contour visualization.
+Splatterplots~\cite{Mayorga2013}.
 
 The first work aiming to provide complete explanations of arbitrary two-dimensional embeddings is by Da Silva et al.~\cite{DaSilva2015}, where they do the thing with the cube. This work was later extended by Van Driel et al.~\cite{Tian2021} where they XXX, and by Tian et al.~\cite{Tian2021}. Figure out how they do the coloring. They don't enable for overlap between different regions.
 
@@ -174,45 +176,40 @@ While there exists a plethora of interactive tools that can aid in the explanati
 
 \section{Visual Explanations}
 
-In this section, we develop a conceptual framework for the generation and selection of visual explanations.
-Given a data set $D$ and an embedding $Y$, our goal is to generate sets of visual explanations that convey some information about the structure of the embedding. For instance, if there is an apparent cluster in the embedding, what features differentiate it from the remaining data points.
-The data set $D$ can contain both continuous and discrete features. To be able to apply the same treatment to both types of variables, we expand each feature into a collection of \textit{explanatory variables}. An explanatory variable is a binary indicator variable which indicates whether the particular sample has a particular value or range of values. For example, we generate one explanatory variable for each distinct category in a discrete variable. Samples corresponding to that particular feature value are assigned a value of one and zero otherwise. This is simply one-hot encoding. For continuous variables, we apply a similar approach preceeded by discretization.
-Each explanatory variable is associated with a \textit{region} $r$, which represents collections of spatially localized points in the embedding space enriched for that paritcular explanatroy variable.
-Finally, we define a \textit{visual explanation} as a collection of regions or, equivalently, explanatory variables, that conveys some useful information to the end-user about the structure of the embedding.
+In this section, we develop a conceptual framework for the automatic generation of visual explanations. Suppose we are presented with a scatter plot corresponding to a two-dimensional non-linear embedding of a high-dimensional data set. The scatter plot shows an apparent cluster in the two-dimensional embedding. A natural question immediately arises:  \textit{"What makes this cluster different from the remaining data points?"} The goal of this work is to develop an automatic visual approach that can aid the user in answering this question.
+
+Given an arbitrary data set $D$ and its corresponding two-dimensional embedding $Y$, our objective is to generate clear and meaningful visual explanations that convey semantic information about the structure of the embedding. As $D$ can contain both continuous and discrete features, we establish a common representation better suited to generating visual explanations. We expand each input variable into a collection of one or more \textit{explanatory variables}. An explanatory variable is a binary indicator variable indicating group membership, where the groups are derived from the input variables. For instance, a categorical variable with three categories will be expanded into three explanatory variables, each indicating sample membership to a particular category (i.e., one-hot-encoding). For continuous variables, the groups correspond to value ranges (i.e., discretization). This common representation enables a uniform treatment for both variable types. Each explanatory variable is associated with a corresponding \textit{region} $r$, representing collections of spatially localized points in the embedding space where the explanatory variable is enriched. Finally, we define \textit{visual explanations} as collections of regions that convey helpful information about the embedding structure to the end-user.
 
 Our conceptual framework can be split into three distinct phases: (i) region construction, (ii) explanation construction, and (iii) explanation selection. We next describe each of these phases in detail.
 
 \subsection{Region construction}
 
-A region typically corresponds to one or more polygons in the embedding space, each encompassing a set of data points having some particular feature value or range of values.
-This implies that the data points falling outside of the region do not belong to the this same category.
-Ideally, a region would contain all data points with that feature value and exclude all others.
-However, it is easy to see that an optimal solution according to this criteria would lead to overfragmented, complex polygons, which would be difficult to interpret and provide little benefit to the end user.
-Instead, we want to generate easily-understandable and visually-appealing regions, which may not encompass \textit{all} data points perfectly, but would prefer for them to be \textit{generally} accurate.
-
-Several approaches for generating regions that fit this description. For instance, Sohns et al.~\cite{Sohns2022} propose rangesets, which produce collections of alpha-hulls for each input variable. We could also represent regions as density maps using contour plots, as proposed by Li et al.~\cite{Li2022}. In our approach, we opt to use a simple approach based on extracting contours from kernel density estimates.
+Regions serve as the fundamental building block for constructing visual explanations. Regions represent collections of data points in the embedding sharing a common characteristic. Regions can be represented in a myriad of ways. However, one simple approach is to represent each region as a collection of one or more polygons in the embedding space, each encompassing a set of data points. Ideally, a region should contain all data points with that characteristic and exclude all other data points. However, in most real-world embeddings, a clean separation between points with some particular feature value and those without rarely exists. It is easy to see that prioritizing this criterion would lead to overly fragmented, complex polygons in most real-world embeddings, resulting in difficult-to-interpret regions, providing little benefit to the end user. Instead, we prefer simpler, visually-appealing regions that may not perfectly encompass \textit{all} data points but still provide \textit{generally} accurate representations.
 
 \subsection{Explanation construction}
 
-Once we have extracted regions for each of our derived explanatory variables, we would like to show these to the user in an information-rich manner. While we could show individual explanatory variables to the user, this would likely overwhelm the user with a large number of plots. Probably, we want to avoid explanations that are too cluttered i.e., contain too many regions, or, the regions overlap too much. This makes the plot unwieldly and takes a lot of cognitive effort to understand anything from this plot. Intuitively, we want to generate visual explanations that are visually appealing, contain regions that do not or minimally overlap.
+Once we have determined regions for each of our explanatory variables, we would like to show these to the user in a concise and informative manner. While we could show individual explanatory variables to the end user, this would likely overwhelm the user with a large number of plots, requiring the user to inspect each one by one.
+Instead, we combine explanatory variables into a smaller number of visual explanations and rank these according to their information content.
+Visual explanations should follow two general guidelines:
+\begin{enumerate}
+  \item We want to avoid cluttering explanations with too many explanatory variables or displayed regions, as this is difficult to understand, and
+  \item we want to avoid visual explanations where the included regions have a high degree of overlap, which can make it difficult to distinguish between different regions and render the visualizations illegible.
+\end{enumerate}
+Ideally, our visual explanations should be visually appealing, contain a small number of explanatory variables, and include regions with minimal overlap.
 
 \subsection{Explanation selection}
 
-We aim to generate visually appealing, minimally-overlapping collections of regions.
-While the explanation construction process can produce a large number of potential visual explanations, many of these explanations may not be particuarily useful. Additionally, we wish to avoid overwhelming the user with too many visual explanations.
-At the very least, we need a mechanism for ranking visual explanations in some sensible way.
-At this point, we must think about the goal of our visual explanation, i.e., what kind of information are we trying to convey to the user, as this will dictate what kinds of visual explanations will be selected, and which ones will be ranked at the top.
+In order to determine what constitutes a good explanation, it is essential to determine our goals, i.e., what kind of information are we trying to convey to the user. This will be the driving factor in determining the quality of an explanation. Miller~\cite{Miller2019} suggests that explanations can answer three types of questions: \textit{what}, \textit{how}, and \textit{why} questions. In the context of visual explanations, answering \textit{how} questions would be challenging as it requires reasoning about the causal chain leading to a particular sample having a specific feature value, which is out of the scope of this paper. Therefore, we will focus on answering \textit{what} and \textit{why} questions through contrastive and descriptive visual explanations.
 
-We here consider two types of visual explanations: contrastive and descriptive explanations.
+A \textit{contrastive visual explanation} aims to answer the \textit{why} question, \textit{``Why are these samples different from the other samples with regard to a particular variable?''}, or put another way, \textit{``Where do the different variable values occur?''}. To generate explanations of this kind, we need only include all explanatory variables corresponding to a particular input variable.
 
-For contrastive explantaions, we tend to use fewer explanations than if we were asked a "describe this robot" question. (describe this robot, vs, what are the differences between these two robots). Same survey paper (the long one).
+A \textit{descriptive visual explanation} aims to answer the \textit{what} question, \textit{``What makes these samples unique?''}.
+These kinds of explanations can be highly diverse and typically require a larger number of explanatory variables than contrastive explanations, as describing the unique properties of a particular object without an explicit reference point requires more explanatory causes.
 
-We define a \textit{contrastive visual explanation} is a visual explanation, where the contained regions contain all the different possible variable values of a single variable in the original dataset.
-In terms of explicitly stating the foil, the foil here would be \textit{``Where do the different feature values occur?''}
+Explicitly stating the goals of each visual explanation type, we can now set about laying guidelines to what constitutes a good visual explanation. An explanation evaluation mechanism is essential.
+While the explanation construction process generates a large number of potential visual explanations, many of these explanations may not be particularly useful for the information we are trying to convey.
 
-We define a \textit{descriptive visual explanation} is a visual explanation, where the contained regions contain all the different possible variable values of a single variable in the original dataset.
-In terms of explicitly stating the foil, the foil here would be \textit{``what makes this cluster unique? Why is this cluster unique? Because it has this feature. The foil? Why are the other samples not in this cluster?''}
-
+Additionally, we wish to avoid overwhelming the user with too many visual explanations.
 
 \section{Methods}
 
@@ -280,7 +277,7 @@ Contrastive explanations of features aim to show where in the embedding differen
 
 \subsubsection{Explanation construction}
 
-Generating contrastive explanations is straightforward: for each input variable, we simply include all its derived explanatory variables. While the different regions may overlap to some degree, our explanatory variable merging proceedure ensures that regions with significant overlap are merged beforehand.
+Generating contrastive explanations is straightforward: for each input variable, we include all its derived explanatory variables. While the different regions may overlap to some degree, our explanatory variable merging proceedure ensures that regions with significant overlap are merged beforehand.
 
 \subsubsection{Explanation selection}
 
