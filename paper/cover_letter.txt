@@ -1,0 +1,14 @@
+Dear Editor,
+
+I am writing to submit a manuscript titled "Contrastive Region-Based Explanations of Two-Dimensional Embeddings" for your consideration for publication in IEEE VIS: Visualization \& Visual Analytics 2023. This manuscript presents a novel fully-automated approach VECA (Visual Explanations and Contrastive Analysis) to aid in interpreting two-dimensional embeddings. Upon publication, we will also release our Python implementation of VECA on GitHub to the broader data mining community.
+
+We motivate our explanatory approach with insights from social sciences and generate visually appealing, minimally-overlapping collections of regions that convey important information about arbitrary two-dimensional embeddings. In addition to generating visual explanations, we provide a mechanism for ranking visual explanations to avoid overwhelming end users with large numbers of plots.
+
+We evaluate our approach on three case studies, as is often done in past publications at this conference. We demonstrate the utility of our approach for interpreting non-linear embeddings such as those produced by popular methods, such as UMAP and t-SNE. We also provide an example where VECA can provide insight into the inner workings of deep learning models, providing an alternative mechanism for the interpretation of deep learning models.
+
+The manuscript is based on extensive research and experimentation, and we believe it will be of great interest to your readership. We hope our work will contribute to the growing field of visual analytics and explainable artificial intelligence and help bridge the gap between machine learning experts and end-users.
+
+Thank you for considering our submission. We look forward to hearing from you.
+
+Sincerely,
+Pavlin Poličar and Blaž Zupan
