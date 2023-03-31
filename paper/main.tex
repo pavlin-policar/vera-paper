@@ -71,7 +71,7 @@ Our open-source, Python implementation of VECA is freely-available at \url{https
 %% A teaser figure can be included as follows
 \teaser{
   \centering
-  \includegraphics[width=\linewidth]{CypressView}
+  \includegraphics[width=\linewidth]{teaser.pdf}
   \caption{%
   	In the Clouds: Vancouver from Cypress Mountain.
   	Note that the teaser may not be wider than the abstract block.%
@@ -141,19 +141,18 @@ Some approaches from bioinformatics perform clustering on the embedding, then us
 The generation of embeddings is inexpensive, leading to the creation of multiple embeddings using different parameter settings. Examining each of these embeddings can be time-consuming, and different parameter settings may highlight distinct aspects of the data.
 
 % How to create visual explanations has not really been studied very much
-While there are numerous techniques to identify errors in non-linear embeddings, there has been limited work on explaining the meaning of these embeddings.
+While there are numerous techniques to identify errors in non-linear embeddings~\cite{Nonato2018}, there has been limited work on explaining the meaning of these embeddings.
 The goal most commonly is to explain embeddings in terms of their original features, or some additional metadata. This can also be useful for deep-learning model validation, where the visualiztaion is typically created on the learned latent embeddings, but we want to explain it in terms of the original input varialbes.
 There has been some work that focuses on specific plot types to explain embeddings in terms of their original features~\cite{Sohns2022}, however, these still require the user to manually go through all possible visualizations, and figure out what is what.
-The only work aiming to comprehensively, end-to-end visually explain non-linear embeddings is from Van Driel et al.~\cite{}, where bla bla bla.
+The only work aiming to comprehensively, end-to-end visually explain non-linear embeddings is from Da Silva et al.~\cite{DaSilva2015}, which was later extended by Van Driel et al.~\cite{VanDriel2020} and Tian et al.~\cite{Tian2021}, where bla bla bla.
 
 % Our contribution
-We formalize the visualization explanation problem, and split the problem into two distinct phases: (i) explanation proposal, and (ii) explanation selection.
-We present VECA, an automatic, end-to-end Python library that generates visual explanations according to our proposed framework.
-
 Our contributions are as follows:
 \begin{itemize}
-  \item We position the notion of visual explanations into the explanation framework from social sciences laid out by ~\cite{Miller2019}.
-  \item We propose VECA, a end-to-end, scalable Python implementation for the automatic annotation of two-dimensional embeddings.
+  \item Inspired by insights from social sciences~\cite{Miller2019}, we propose a conceptual framework for the generation and selection of visual explanations.
+  \item Building on the conceptual framework, we develop Visual Explanations and Contrastive Analysis (VECA), an automatic, end-to-end, visual explanation approach for the automatic explanation of arbitrary two-dimensional embeddings.
+  \item We demonstrate the utility of VECA on three real-word data sets and show how can be used to quickly understand feature localization in the embedding space.
+  \item We demonstrate how VECA can be used in the context of deep learning, and how it can play a role in understanding model predictions and errors, and how it can be used to generate hypotheses for the types of relationships these opaque deep models may have learned.
 \end{itemize}
 
 \section{Related Work}
@@ -161,40 +160,47 @@ Our contributions are as follows:
 In this section, we review related work and contextualize it in terms of visual explanations of point-based embeddings. Miller~\cite{Miller2019} argues that ...
 Our aim is to generate visual explanations of point-based embeddings.
 
-Little work has been done to automaticaly create visual explanations of embeddings.
-Most work augmenting scatterplots can be categorized as explanation proposal.
-There has been some work that focuses on specific plot types to explain embeddings in terms of their original features~\cite{Sohns2022}, however, these still require the user to manually go through all possible visualizations, and figure out what is what. Out-of-sample points could quickly fall outside the region due to the tight bounds of the visualization. Their work also suffers from scalability issues. They suffer from readability when the number of possible classes is large.
+While there exists a large body of work focusing on identifying distortions in the generated embeddings, little attention has been devoted to automatically generating explanations for such embeddings. We refer to the reader to Nonato and Aupetit~\cite{Nonato2018} for an overview of embedding distortions and their related methods.
+
+Most existing work develops new methods for augmenting scatterplots to view one particular aspect of the undelying embedding. For instance, Sohns et al.~\cite{Sohns2022} develop rangesets, a visualization technique to help the user visualize regions in the embedding, where particular values of ranges of values of a particular feature occurs. Their method, however, still requires the user to manually go through all possible visualizations, and discover which input features are important and which are not. Additionally, their rangesets suffer from readability when the number of possible classes is large. Their work also suffers from scalability issues, which is quadratic in the number of data points.
 
 Visual modality similar to Clusterplots~\cite{Malkai2021}
 Similar method or a review of these methods is provided in ~\cite{Li2022}.
 These approaches focus on visualizing contours to visualize different clusters or different classes. Multiclass contour visualization.
 
-The only work doing both explanation proposal and explanation selection is done by.
-Da Silva~\cite{DaSilva2015} do the thing with the cube. This work is followed up by Tian et al.~\cite{Tian2021}. Figure out how they do the coloring. They don't enable for overlap between different regions.
+The first work aiming to provide complete explanations of arbitrary two-dimensional embeddings is by Da Silva et al.~\cite{DaSilva2015}, where they do the thing with the cube. This work was later extended by Van Driel et al.~\cite{Tian2021} where they XXX, and by Tian et al.~\cite{Tian2021}. Figure out how they do the coloring. They don't enable for overlap between different regions.
 
-Some interactive tools probably have some kind of ranking in them as well, which could be classified as both explanation proposal and selection, however, interactive tools are slow to use and limit the number of embeddings one can examine.
+While there exists a plethora of interactive tools that can aid in the explanation of individual embeddings~\cite{Kandogan2012,Heulot2013,Martins2014,Marcilio2021,Li2023}, adding a user into the looop slows things down and introduces cognitive load to the user. As the manual inspection of embeddings is fairly slow, this can also limit the number of different embeddings that a user is typically willing to inspect in detail. As approaches for generating two-dimensional embeddings have grown more scalable, it is common practice to generate multiple embeddings using different algorithms and parameter values, as each can highlight different aspects of the data.
 
 \section{Visual Explanations}
 
-We define a visual explanation of a point-based embedding to be a collection of regions in the embedding that conveys useful information to the end-user. Each region represents collection of points that have some characteristic property, often a feature value or range of feature values derived from the original data set. A region is represented by a collection of polygons in the two-dimensional embedding that encompass points having the property.
+In this section, we develop a conceptual framework for the generation and selection of visual explanations.
+Given a data set $D$ and an embedding $Y$, our goal is to generate sets of visual explanations that convey some information about the structure of the embedding. For instance, if there is an apparent cluster in the embedding, what features differentiate it from the remaining data points.
+The data set $D$ can contain both continuous and discrete features. To be able to apply the same treatment to both types of variables, we expand each feature into a collection of \textit{explanatory variables}. An explanatory variable is a binary indicator variable which indicates whether the particular sample has a particular value or range of values. For example, we generate one explanatory variable for each distinct category in a discrete variable. Samples corresponding to that particular feature value are assigned a value of one and zero otherwise. This is simply one-hot encoding. For continuous variables, we apply a similar approach preceeded by discretization.
+Each explanatory variable is associated with a \textit{region} $r$, which represents collections of spatially localized points in the embedding space enriched for that paritcular explanatroy variable.
+Finally, we define a \textit{visual explanation} as a collection of regions or, equivalently, explanatory variables, that conveys some useful information to the end-user about the structure of the embedding.
 
-Our approach can be split into three distinct phases: (i) region construction, (ii) explanation construction, and (iii) explanation selection. We begin by first presenting a theoretical framework of our objectives, followed by a detailed description of our implementation of each of these phases.
+Our conceptual framework can be split into three distinct phases: (i) region construction, (ii) explanation construction, and (iii) explanation selection. We next describe each of these phases in detail.
 
 \subsection{Region construction}
 
-Visual explanations are comprised of collections of minimally overlapping regions. A region typically corresponds to one or more polygons in the embedding space, each of which encompass a set of embedding data points. Ideally, the encompassed data points differ from the remaining data points based on some particular attribute value or range of attribute values. For instance, if we construct an embedding using employee demographics, one region may correspond to female employees, while another may correspond to employees above the age of 50. In this case, we would assume that these female employees and older employees each correspond to a distinct cluster in the embedding space, or at least be localized to one spatial region in the embedding.
+A region typically corresponds to one or more polygons in the embedding space, each encompassing a set of data points having some particular feature value or range of values.
+This implies that the data points falling outside of the region do not belong to the this same category.
+Ideally, a region would contain all data points with that feature value and exclude all others.
+However, it is easy to see that an optimal solution according to this criteria would lead to overfragmented, complex polygons, which would be difficult to interpret and provide little benefit to the end user.
+Instead, we want to generate easily-understandable and visually-appealing regions, which may not encompass \textit{all} data points perfectly, but would prefer for them to be \textit{generally} accurate.
 
-There are multiple possiblities for generating regions. For instance, Sohns et al.~\cite{Sohns2022} propose rangesets, which produce collections of alpha-hulls for each input variable. We could also use contour maps to correspond to regions, and apply an approach similar to that in ~\cite{}. In our approach, we opt to use a simple approach based on extracting contours from kernel density estimates.
+Several approaches for generating regions that fit this description. For instance, Sohns et al.~\cite{Sohns2022} propose rangesets, which produce collections of alpha-hulls for each input variable. We could also represent regions as density maps using contour plots, as proposed by Li et al.~\cite{Li2022}. In our approach, we opt to use a simple approach based on extracting contours from kernel density estimates.
 
 \subsection{Explanation construction}
 
-Once we have obtained a collection of regions, we need a way to show these to the user. While we could show individual regions to the user, this would likely overwhelm the user with a large number of visual explanations. Probably, we want to avoid explanations that are too cluttered i.e., contain too many regions, or, the regions overlap too much. This makes the plot unwieldly and takes a lot of cognitive effort to understand anything from this plot. Intuitively, we want to generate visual explanations that are visually appealing, contain regions that do not or minimally overlap.
-
-We define a \textit{visual explanation} to be a collection of minimally-overlapping regions $R$ which convey which variable values are 
+Once we have extracted regions for each of our derived explanatory variables, we would like to show these to the user in an information-rich manner. While we could show individual explanatory variables to the user, this would likely overwhelm the user with a large number of plots. Probably, we want to avoid explanations that are too cluttered i.e., contain too many regions, or, the regions overlap too much. This makes the plot unwieldly and takes a lot of cognitive effort to understand anything from this plot. Intuitively, we want to generate visual explanations that are visually appealing, contain regions that do not or minimally overlap.
 
 \subsection{Explanation selection}
 
-In explanation construction, we think about how we can generate explanations. There may be many possible explanations that are minimally overlapping. However, we don't want to show the user 100 plots. We would at least want to rank the visual explanations in some sensible way, according to the amount of information they convey.
+We aim to generate visually appealing, minimally-overlapping collections of regions.
+While the explanation construction process can produce a large number of potential visual explanations, many of these explanations may not be particuarily useful. Additionally, we wish to avoid overwhelming the user with too many visual explanations.
+At the very least, we need a mechanism for ranking visual explanations in some sensible way.
 At this point, we must think about the goal of our visual explanation, i.e., what kind of information are we trying to convey to the user, as this will dictate what kinds of visual explanations will be selected, and which ones will be ranked at the top.
 
 We here consider two types of visual explanations: contrastive and descriptive explanations.
@@ -210,11 +216,11 @@ In terms of explicitly stating the foil, the foil here would be \textit{``what m
 
 \section{Methods}
 
-In the previous section, we laid out the conceptual framework for visual explanations. In this section, we describe \textit{Visual Explanations and Contrastive Analaysis (VECA)}, our fully-automated approach for generating visual explantations.
+In the previous section, we laid out the conceptual framework for visual explanations. In this section, we describe \textit{Visual Explanations and Contrastive Analaysis (VECA)}, our fully-automated approach for generating visual explantations for arbitrary two-dimensional embeddings.
 
 \subsection{Region construction}
 
-Our approach is as follows. First, we extract all potential explanatory variables from the input data. These can correspond to specific values, sets of values, or ranges of values. The goal is to derive explanatory features that can be useful in understanding the different spatial regions of the embedding. Next, using these explanatory variables, we generate explanatory regions, represented by collections of polygons, which correspond to spatial regions in the space that are enriched with a particular explanatory variable. Our approach can produce overfragmented regions, so a post-hoc merging proceedure is applied. This both reduces the number of possible explanatory regions and improves visual coherence by merging highly-overlapping regions. We describe each of these step in detail.
+Our region construction approach is comprised of extracting contours from a kernel density estimate. We construct regions in the following way. First, we extract all potential explanatory variables from the input data. These can correspond to specific values, sets of values, or ranges of values. The goal is to derive explanatory features that can be useful in understanding the different spatial regions of the embedding. Next, using these explanatory variables, we generate explanatory regions, represented by collections of polygons, which correspond to spatial regions in the space that are enriched with a particular explanatory variable. Our approach can produce overfragmented regions, so a post-hoc merging proceedure is applied. This both reduces the number of possible explanatory regions and improves visual coherence by merging highly-overlapping regions. We describe each of these step in detail.
 
 \subsubsection{Extracting explanatory variables}
 
@@ -238,21 +244,24 @@ For ordinal and continuous variables, we only allow merging neighboring bins, e.
 
 For categorical variables, we apply one-hot encoding, and use the same variable merging scheme as before. For ordinal categorical variables we apply the same merging restriction as before, merging only adjacent bins. E.g, the ordinal values $\{1, 2, 3, 4\}$ could be merged into $\{\{1, 2, 3\}, \{4\}\}$, but not into $\{\{1, 4\}, \{2, 3\}\}$. For nominal categorical variables, we apply no such restriction. E.g., the categorical variable values $\{red, green, blue\}$ could be merged into $\{\{red, green\}, \{blue\}\}$.
 
-More concretely, we to merge two explanatory variables, by default we require that their sample overlap is at least 50\%. 
+More concretely, to merge two explanatory variables, by default we require that their sample overlap is at least 50\%. 
 \begin{equation}
-\text{overlap}(r_1, r_2) = \notag
+\text{overlap}(r_1, r_2) = |r_1 \cap r_2| \notag
 \end{equation}
-where $r_1$ and $r_2$ are the regions in question.
+where $r_1$ and $r_2$ are the regions in question, and $|r_1 \cap r_2|$ denotes the cardinality of their intersection.
 We also require that the merged region improves the overall purity of the regions by at least 5\%. The purity of a region is defined as
 \begin{equation}
-\text{purity}(r) = \notag
+\text{purity}(r) = \frac{1}{|r|} \sum_{i \in r} x_i \notag
 \end{equation}
+where $r$ is the region of interest, $|r|$ is the number of points contained withing the region, and $x_i$ is the binary explanatory variable value.
 That their spatial localization is not decreased. We measure spatial localization using Geary's C spatial autocorrelation index, defined as
 \begin{equation}
 C=\frac{N-1}{2 \sum_{ij} W } \frac{\sum_i \sum_j w_{i j}\left(x_i-x_j\right)^2}{\sum_i\left(x_i-\bar{x}\right)^2},\notag
 \end{equation}
 where $N$ is the number of data samples, $W$ is a weighted adjacency matrix indicating the spatial proximities between data points, and $x_i$ is the feature value of sample $i$.
 To compute the adjacency matrix $W$, we utilize the scale $\sigma$ computed in Sec.~\ref{sec:kde_estimation}. For each point we find all its neighbors that are at distance at most $3 \cdot \sigma$. We then compute the probability density function of each of these neigbhors using a Gaussian distribution centred at each point using bandwidth $\sigma$.
+
+As merging the regions produce new, generally, larger regions, it may well happen that after one round of merging, that new potential regions may overlap sufficiently to be merged. We perform this merging proceedure iteratively until no further merges can be performed.
 
 If no particular variable value is localized to a specific region of the embedding space, our merging proceedure could merge all the explanatory variables for a variable, leaving a single region encompassing the entire space. This is desirable, as this indicates that this particular variable holds no bearing when trying to explain the embedding, and is discarded from future consideration for generating visual explanations.
 
@@ -290,7 +299,7 @@ With descriptive explanations, we aim to show interesting combinations of explan
 \subsubsection{Explanation construction}
 
 In descriptive explanations, we are no longer limited to showing explanatory variables from a single input variable, but are free to choose any combination of explanatory variables from any input variable.
-It is common that several explanatory variables appear in similar regions of space. For instance, if Fig.~\ref{fig:bipartite_matching}, the three input variables ``petal length'', ``petal width'', and ``species'' are highly correlated, and occupy roughly the same regions of the space. To reduce the number of possible visual explanations, we merge together these into a single visual explanation. We only do this when there is sufficient overlap between all pairs of regions. By default, we require that at least 90\% of the encompassed samples are shared between any two pairs of merged regions. Note that the samples need not necessarily have that particular feature value, it only needs to be encompassed by the region.
+It is common that several explanatory variables appear in similar regions of space. For instance, if Fig.~\ref{fig:bipartite_matching}, the three input variables \textit{petal length}, \textit{petal width}, and \textit{species} are highly correlated, and occupy roughly the same regions of the space. To reduce the number of possible visual explanations, we merge together these into a single visual explanation. We only do this when there is sufficient overlap between all pairs of regions. By default, we require that at least 90\% of the encompassed samples are shared between any two pairs of merged regions. Note that the samples need not necessarily have that particular feature value, it only needs to be encompassed by the region.
 We also require that the resulting merged cluster has a purity of at least 50\%, i.e., at least 50\% of all samples encompassed within this new region have at least one of the merged variables.
 As an additional requirement, we require that each of the resulting clusters has a Geary's C index of at most 0.5. Note that this step is different from the merging proceedure described in Sec.~\ref{sec:merge_overfragmented}, as we do not limit ourselves to merging adjacent bins, or even explanatory variables derived from the same input variable.
 
@@ -321,11 +330,13 @@ To achieve this diversity in visual explanations, we develop an iterative visual
 
 In the following, we present three case studies of increasing complexity. We being by running through our analysis on the simple Iris flowers data set~\cite{Anderson1936} which is well-known and easy to understand. We continue with the Wine Quality data set~\cite{Cortez2009}, which contains more input variables, and requires more explanation. We conclude by applying our approach on the large Forest Covertype data set~\cite{Blackard1999}, containing over half a million data points, and demonstrate how VECA can be used to gain insight into what kinds of errors predictive models may make, and also to understand what kinds of relationships between variables deep-learning models may be learning.
 
-\subsection{Iris}
+We use default parameter settings in the VECA Python library unless stated otherwise.
+
+\subsection{Iris Flowers}
 
 We walk through the different steps of our analysis on the Iris data set from Anderson~\cite{Anderson1936}. This small data set profiles 150 iris flowers with four continuous variables containing pyhsical measurements of individual flowers (sepal length, sepal width, petal length, petal width) and provides a classification of their species (Iris Setosa, Iris Versicolor, Iris Virginica).
 
-We first construct a two-dimensional t-SNE embedding of the data set with parameter values metric=cosine perplexity=30 using the \textsf{openTSNE} library~\cite{Policar2019}. We then explain the resulting embedding using VECA. For this example only, we perform discretization into three bins instead of five, as this feature setting better demonstrates the types of problems one must take into consideration when performing variable merging. The steps involved in the pipeline are outlined in Fig.~\ref{fig:iris_pipeline}.
+We first construct a two-dimensional t-SNE embedding of the data set with parameter values metric=cosine, perplexity=30 using the \textsf{openTSNE} library~\cite{Policar2019}. We then explain the resulting embedding using VECA. For this example only, we perform discretization into three bins instead of five, as this feature setting better demonstrates the types of problems one must take into consideration when performing variable merging. The steps involved in the pipeline are outlined in Fig.~\ref{fig:iris_pipeline}.
 
 \begin{figure*}[tb]
   \centering
@@ -348,7 +359,7 @@ The last row of Fig.~\ref{fig:iris_pipeline} shows all the generated contrastive
 
 \subsection{Wine Quality}
 
-The wine quality data set~\cite{Cortez2009} contains 6,497 samples and is described by 12 physicochemical features, including fixed acidity, residual sugar, and alcohol. The goal is to predict the quality of wine. We also know what kind of wine it is, red or white. As before, we generate a two-dimensional t-SNE embedding of the data set using parameter values metric=cosine perplexity=500, exaggeration=2. We then explain the resulting embedding using VECA in terms of the original data features. The top four contrastive explanations and the top four descriptive explanations are shown in Fig.~\ref{fig:wine_explanations}.
+The wine quality data set~\cite{Cortez2009} contains 6,497 samples and is described by 12 physicochemical features, including fixed acidity, residual sugar, and alcohol. The goal is to predict the quality of wine. We also know what kind of wine it is, red or white. As before, we generate a two-dimensional t-SNE embedding of the data set using parameter values metric=cosine, perplexity=500, exaggeration=2. We then explain the resulting embedding using VECA in terms of the original data features. The top four contrastive explanations and the top four descriptive explanations are shown in Fig.~\ref{fig:wine_explanations}.
 
 \begin{figure*}[tb]
   \centering
@@ -357,7 +368,7 @@ The wine quality data set~\cite{Cortez2009} contains 6,497 samples and is descri
   \label{fig:wine_explanations}
 \end{figure*}
 
-For instance, panels a and b show that different values of the ``Wine Type'' and ``Chlorides'' variables appear in distinct regions of the space, while the variables ``Total Sulfur Oxide'' and ``Residual sugar'' in panels c and d being to exhibit a small degree of overlap. We verify this hypothesis in Fig.~\ref{fig:wine_type_separation} by inspecting which samples are contained within each underlying region. The plot validates that there is minimal mixing between samples between red and white wines. The plot also validates that this in-between cluster is ineed somewhat mixed.
+For instance, panels a and b show that different values of the \textit{Wine Type} and \textit{Chlorides} variables appear in distinct regions of the space, while the variables \textit{Total Sulfur Oxide} and \textit{Residual sugar} in panels c and d being to exhibit a small degree of overlap. We verify this hypothesis in Fig.~\ref{fig:wine_type_separation} by inspecting which samples are contained within each underlying region. The plot validates that there is minimal mixing between samples between red and white wines. The plot also validates that this in-between cluster is ineed somewhat mixed.
 
 \begin{figure}[ht]
   \centering
@@ -371,24 +382,24 @@ Descriptive visual explanations can also be useful for discovering correlations 
 Fig.~\ref{fig:wine_explanations}.a indicates that the two types of wines are clearly separated from one another in the embedding. This is particularily interesting, because this feature was not used to construct the embedding. This indicates that there are big differences between the chemical properties of red and white wine. There is also a gray-ish cluster in the upper area between the two large clusters that seems to contain a small region containg white wines. However, a good number of data points are left outside any region. This may indicate that this region si more mixed, and requires further investigation.
 
 We also demonstrate that our discretization proceedure alleviates the problem of outliers values skew color scales. A common approach for explaining embeddings in terms of their original input features is to simply color each point in the scatter plot in according to its feature value. However, this can made difficult when the feature in question contains outlier values which skew the entire color scale to one side, resulting in a very uneven distribution of colors.
-For instance, Fig.~\ref{fig:wine_discretization}.a shows the distribution of the values of the ``Residual Sugar'' input variable. Notice that histogram is skewed heavily to one side because of a small number of outliers in the right-hand side of the plot. The corresponding scatterplot is also not informative, as the points appear to be more-or-less colored in the same violet color. A common remedy to this problem is to apply a log-transformation, but this is not always effective, and increasive cognitive load on the analyst, as now they must think about variable values in terms of ther log-scale. Fig.~\ref{fig:wine_discretization}.b shows the log-transformed values of the original ``Residual Sugar'' input variable.
+For instance, Fig.~\ref{fig:wine_discretization}.a shows the distribution of the values of the \textit{Residual Sugar} input variable. Notice that histogram is skewed heavily to one side because of a small number of outliers in the right-hand side of the plot. The corresponding scatterplot is also not informative, as the points appear to be more-or-less colored in the same violet color. A common remedy to this problem is to apply a log-transformation, but this is not always effective, and increasive cognitive load on the analyst, as now they must think about variable values in terms of ther log-scale. Fig.~\ref{fig:wine_discretization}.b shows the log-transformed values of the original \textit{Residual Sugar} input variable.
 
-\begin{figure}[htb]
+\begin{figure}[ht!]
   \centering
   \includegraphics[width=\linewidth]{wine_discretization.pdf}
-  \caption{We demonstrate the utility of our discretization approach on the `Residual Sugar' variable in the wine quality data set. The top left panel shows the distribution of the variable paired with its corresponding scatter plot. The variable contains a small number of outliers, which extend the range of the color scale. Consequently, the entire plot seems to have little diversity in terms of this variable value. A common remedy to this problem is to log-transform the variable values. We show the effect of this in the top-right panel. This fixes the issue somewhat, but the resulting distribution of colors still isn't entirely clear. The lower two panels show the results of our discretization proceedure without using any data transformations. The initial discretization already remedies problem, as there are only five distinct colors, corresponding with each bin. Our final discretization shown in the bottom right panel nicely segments the variable values into three bins, corresponding to `low', `medium', and `high` concentrations of `Residual Sugar'.}
+  \caption{We compare our approach to the typical approach to explaining embedding with the original input variables using scatter-plot color-coding. We use the \textit{Residual Sugar} variable from the wine quality data set~\cite{Cortez2009} as an example. The top-left panel shows a typical color-coding scheme, where the color scale is skewed as a result of a few outliers. Consequently, the plot is not informative. We apply a log-transform to fix this issue in the top-right panel, but this now requires reasoning about the values in log-scale. The lower panels show our discretization proceedure without any data transformations. Due to discretizaiton, the visualization does not suffer from this problem, while the final discretization in the bottom-right panel additionally merges variable values into three bins corresponding to `low', `medium', and `high` concentrations of `Residual Sugar'.}
   \label{fig:wine_discretization}
 \end{figure}
 
-Applying our discretization approach mitigates this problem. Fig.~\ref{fig:wine_discretization}.c shows that applying any kind of discretization will limit the effects of outlier samples. These often get put into one bin and have minimal negative effect on the coloring of the resulting scatterplot. Notice that the scatterplot in Fig.~\ref{fig:wine_discretization}.c looks similar to that in Fig.~\ref{fig:wine_discretization}.b, however, we are still able to reason about the variable values in terms of their original scales. Applying our merging proceedure merges spatially-overlapping bins together, resulting in a cleaner overall visualization. The scatter plot in Fig.~\ref{fig:wine_discretization}.d shows three distinct bins, where the right hand side of the scatter plot seems to be characterized by higher values of ``Residual Sugar'', which transition to lower values as we move to the left-hand side. Notice that the outlier values were all correcly bundled with the higher values.
+Applying our discretization approach mitigates this problem. Fig.~\ref{fig:wine_discretization}.c shows that applying any kind of discretization will limit the effects of outlier samples. These often get put into one bin and have minimal negative effect on the coloring of the resulting scatterplot. Notice that the scatterplot in Fig.~\ref{fig:wine_discretization}.c looks similar to that in Fig.~\ref{fig:wine_discretization}.b, however, we are still able to reason about the variable values in terms of their original scales. Applying our merging proceedure merges spatially-overlapping bins together, resulting in a cleaner overall visualization. The scatter plot in Fig.~\ref{fig:wine_discretization}.d shows three distinct bins, where the right hand side of the scatter plot seems to be characterized by higher values of \textit{Residual Sugar}, which transition to lower values as we move to the left-hand side. Notice that the outlier values were all correcly bundled with the higher values.
 
 \subsection{Forest Covertype}
 
-We adopt a similar evaluation setting as Sohns et al.~\cite{Sohns2022}.
+We here adopt a similar evaluation setting as Sohns et al.~\cite{Sohns2022}, as it proves instructive and shows how visual explanations can be used to understand deep models and uncover the types of relationships learned between the input variables and target variables.
 
 The forest cover type data set~\cite{Blackard1999} contains 581,012 samples described by 12 features. The dataset is primarily used for supervised learning, where we try to predict the seven different types forest. The features include things like elevation, distance to roadways, soil type.
 
-We generate an embedding of the full data set using the t-SNE dimensionality. As in the previous two examples, we embed the data into two-dimensions using t-SNE parameter values metric=cosine perplexity=500, exaggeration=4. We then explain the resulting embedding using VECA in terms of the original data features. The top six contrastive explanations are shown in Fig.~\ref{fig:covertype_explantions}.
+As in the previous two examples, we generate a two-dimensional t-SNE embedding using parameter values metric=cosine, perplexity=500, and exaggeration=4. We then explain the resulting embedding using VECA in terms of the original data features. The top four contrastive explanations are shown in Fig.~\ref{fig:covertype_explantions}.
 
 \begin{figure}[htb]
   \centering
@@ -397,32 +408,28 @@ We generate an embedding of the full data set using the t-SNE dimensionality. As
   \label{fig:covertype_explantions}
 \end{figure}
 
+Examining the contrastive layouts in Fig.~\ref{fig:covertype_explantions}, we see that the clusters are primmarily grouped by Wilderness Area, i.e., the national park where the samples were collected. This indicates that the trees in these particular national parks are in fact more similar to one another than trees in other national parks. However, this may also be undesired if we want to predict covertypes on new national parks. Fig.~\ref{fig:covertype_explantions}.b-c reveal that \textit{Elevation} and the \textit{Hillshade 3pm} variables also contribute sample similarity.
 
-However, if we create a contrastive visual explanation for the Forest Covertype attribute, we can immediately get a sense of the picture. We notice that the covertypes are basically merged into two groups. This indicates that the feature representation of the samples belonging to these three different forest covertypes are not well separated. And indeed, if we look at the confusion matrix, we see much more predictive error between the forest covertypes within these groups as between them.
-
-Examining the remaining contrastive layouts we see that XX feature is important. It is notable that the main separating factor between the main clusters is the Wilderness area, i.e., the national park where the samples were collected. This indicates that the trees in these particular national parks are in fact more similar to one another than trees in other national parks. However, this may also be undesired if we want to predict covertypes on new national parks. Thus this plot immediately reveals an area where we could overfit.
-
-Examining the descriptive layouts, we see that several features do xxx.
-
+As our primary goal with this data set is prediction of the Forest Covertype, it is inspiring to see that the Cover Type variable appears to be at least somewhat localized in the space. Fig.~\ref{fig:covertype_explantions}.d shows two distinct groups of forest cover types, the orange group corresponding to \textit{Cottonwood/Willow}, \textit{Douglas-fir}, and \textit{Ponderosa Pine}, the blue group to the remaining four cover types. This indicates that any machine learning model we construct will likely have little difficulty separating instances between these two groups of forest types. Differentiating samples from different cover types within these groups may, however, prove more challenging. This is not necessarily the case, as the embedding was constructed using all the available input features, however, the model may determine that some of these input features are not important for the prediction task, and may ignore them outright. In the next section, we do exactly this and learn a deep neural network, and use VECA to investigate the types of relationships the model learns between the input variables and target class.
 
 \subsubsection{Deep Forest Covertype Embeddings}
 
-One common usage of two-dimensional embeddings is model validation. This is particularily useful in deep learning, where we can exmaine a two dimensional representation of the learned latent embeddings, and inspect whether the model has learned to differentiate between the classes of interest. In deep models, the mapping between the learned latent embeddings and the original input varaibles are often too complex to reason about directly. However, it can still make sense to inpect a two-dimensional visualization of the learned embeddings as these can shed light into the types of relationships between input variables that the deep-learning model learned and which input variables might be important for the overall prediction.
+One common usage of two-dimensional embeddings is model validation. This is particularily useful in deep learning, where we can exmaine a two dimensional representation of the learned latent embeddings, and inspect whether the model has learned to differentiate between the classes of interest. In deep models, the mapping between the learned latent embeddings and the original input variables are often too complex to reason about directly. However, it can still make sense to inspect a two-dimensional visualization of the learned embeddings as these can shed light into the types of relationships between input variables that the deep-learning model learned and which input variables might be important for the overall prediction.
 
-We illustrate model validation by training a deep neural network on the forest covertype data set as before. We use the same data split as in the original publication~\cite{Blackard1999}. More concretely, we use two hidden layers with sizes (256, 128) using ReLU activation units and optimize using the Adam optimizer for 2,000 epochs. Our model achieves 48\% predictive accuracy, which is lower than the 70\% predictive accuracy reported by Blackard et al.~\cite{Blackard1999}. However, clearly the model learned something, as a random guess would produce $1/7=\sim14\%$ accuracy. We note that we did not spend any time finding the optimal architecture or fine tuning the model. The goal here is to demonstrate that VECA can be useful in understanding the types of relations deep-learning models learn and what kind of mistakes they are likely to make.
+We illustrate model validation by training a four-layer neural network on the forest covertype data set. We use the same data split as in the original publication~\cite{Blackard1999}. More concretely, we use two hidden layers with sizes (256, 128) using ReLU activation units. We optimize the model using the Adam optimizer for 2,000 epochs. Our final model achieves 48\% predictive accuracy on the seven classes, which is lower than the 70\% predictive accuracy reported by Blackard et al.~\cite{Blackard1999}. We note that we did not spend any time searching for the optimal architecture or tuning hyperparameters. Our goal here is to demonstrate that VECA can be useful tool in understanding the types of relations deep-learning models learn and what kind of mistakes they are likely to make.
 
-We generate a t-SNE embedding using the same proceedure as in the previous section. This time, however, the input to our dimensionality reduction algorithm is not the original data features, but the second-last latent dimension. We then use VECA to explain this embedding in terms of the original data features.
+As before, we generate a two-dimensional t-SNE embedding using the same parameters. This time, however, the input to our dimensionality reduction algorithm is not the original data features, but the latent embedding before the final classification layer in our neural network. We then use VECA to explain this embedding with regard to the original data features.
+
+Our primary variable of interest is the \textit{Cover Type} variable, as this is the variable we are trying to predict. Ideally, the two-dimensional embedding woudl reveal seven clusters, one for each class category, indicating perfect separation between the different classes. However, in most real-world problems, this is not the case. Fig.~\ref{fig:covertype_model}.a shows our the t-SNE embedding of the latent representation, annotated with explanatory variables corresponding to forest Cover Type. The plot indicates no clear clusters, but rather an elongated cluster containing all the data points. The VECA annotations reveal that even though the model was unable to learn clear boundaries between the data classes, it has learned to diffentiate between some groups of Cover Types. For instance, the oragne region corresponding to Cottonwood/Willows, Douglas Firs, and Ponderosa Pines are on the completely opposite end of the embedding than samples corresponding to Krummholz. This indicates that the model should be able to do a good job differentiating between these two classes. We can validate this hypothesis by inspecting the confusion matrix shown in Fig.~\ref{fig:covertype_model}.b. Indeed, the model has made no misclassifications between these two groups of classes. On the other hand, Fig.~\ref{fig:covertype_model}.a indicates that the model may have a hard time differentiating between Krummholz and Spruce/Fir type forest covers. And indeed, inspecting the confusion matrix confirms our suspicion: while our neural network is able to classify Krummholz instances with a high degree of accuracy, the samples that it does misclassify are almost always classified as Splruce/Fir cover types.
 
 \begin{figure}[htb]
   \centering
   \includegraphics[width=\linewidth]{covertype_model.pdf}
-  \caption{Forest covertype model}
+  \caption{Forest covertype model. The abbreviated class names in the confusion matrix correspond to Cottonwood/Willow (CW), Douglas-Fir (DF), Ponderosa Pine (PP), Aspen (AS), Lodgepole Pine (LP), Spruce/Fir (SF), and Krummholz (KR).}
   \label{fig:covertype_model}
 \end{figure}
 
-Inspecting the embedding, we can see that our model has a tough time differentiating between XX classes. We can validate this hypothesis by inspecting the confusion matrix of the model on the test set. Indeed, the confusion matrix verifies that the model makes the same mistakes that the t-SNE plot indicates.
-
-The predictive accuracy reported by Blackard et al.~\cite{Blackard1999} to be \~70\% for this data set using neural networks. The misclassification rate shown in the confusion matrix was extracted from the original publication.
+Having investigated how well the model appears to be able to perform its classification task, we would next be interested in what kinds of relationships the model has learned between the input variables and the target class. While it is possible to inspect the model weights and deduce the feature importances directly, this often requires the use of specialized techniques. Instead, a visual explanation provides a quick and easy way to see what's going on under the hood. We show the top-four contrastive layouts in Fig.~\ref{fig:covertype_model_contrastive}.
 
 \begin{figure}[htb]
   \centering
@@ -431,25 +438,34 @@ The predictive accuracy reported by Blackard et al.~\cite{Blackard1999} to be \~
   \label{fig:covertype_model_contrastive}
 \end{figure}
 
-\section{Discussion}
+Fig.~\ref{fig:covertype_model_contrastive}.a indicates that the model may have learned a relationship between the soil type and the cover type.  This indicates that having a certain soil type is important for identifying Krummholz cover types. Fig.~\ref{fig:covertype_model_contrastive}.b reveal that model has learned a relationship between the elevation and the predicted class. Fig.~\ref{fig:covertype_model_contrastive}.c shows that the wilderness area variable, i.e., the geographic location from which each sample was collected, also correlates with the latent embedding. This could indicate overfitting if, for instance, our goal way to develop a model which could classify forest covertype regardless of geographic location. If our goal, on the other hand, was to classify only instances from these four geographic areas, this may signal that some geographic areas are simply more likely to contain different forest cover types. The visual explanation provides a quick insight into this.
 
-The region construction step of approach could be replaced by alpha-hulls from Sohns et al.~\cite{Sohns2022} or any other one of the embedding enrichment schemes proposed by Nonato et al.~\cite{}. Alpha-hulls may even benefit in terms of purity. However, this could be problematic if the users chooses to insert new data points into existing embeddings. Modern implementations of t-SNE~\cite{Policar2019} and UMAP~\cite{McInnes2018} both enable users to insert out-of-sample data points into existing embeddings, and the tight boundary of alpha hulls might leave some points outside of the ecompassed region.
+Our initial embedding in Fig.~\ref{fig:covertype_explantions} identified the \textit{Hillshade 3pm} input variable as one of the top contrastive variables. However, it seems that this feature was not as important for the prediction task, and was not identified as one of the top-four most important contrastive explanations in Fig.~\ref{fig:covertype_model_contrastive}. On the other hand, the \textit{Soil Type} variable appears at least somewhat useful for the prediction task, while it wasn't as important for explaning the original embedding.
 
-Our approach does not rely on clustering. Add figure.
+We emphasize that these explanations are not definitive, as one would have to inspect the model weights to validate this claim. However, a spatial correlation in the embedding space indicates the model has assigned non-zero weights to these features, and has learned some relationship between the input variable and target class, as otherwise, the attribute would be decorrelated with the embedding space. So, if the variable is spatially localized in some space, it is likely that the model is using it for prediction.
 
-Performance,
+\section{Discussion and Future Work}
 
-Visualization of lots of different classes.
+The region construction step of approach could be replaced by alpha-hulls from Sohns et al.~\cite{Sohns2022} or any other one of the embedding enrichment schemes proposed by Nonato and Aupetit~\cite{Nonato2018}. Alpha-hulls may even benefit in terms of purity. However, this could be problematic if the users chooses to insert new data points into existing embeddings. Modern implementations of t-SNE~\cite{Policar2019} and UMAP~\cite{McInnes2018} both enable users to insert out-of-sample data points into existing embeddings, and the tight boundary of alpha hulls might leave some points outside of the ecompassed region.
 
+Using kernel density estimates to extract regions can also miss smaller clusters of data points. Due to the nature of kernel density estimation, and our choice to extract regions at a prespecified contour level, some small clusters could easily be missed, even if they are compeltely enriched with a single variable value, simply because there are not enough data points in the cluster. Developing alternative techniques for region estimation is a good avenue for future work.
+
+Our approach achieves scalability in the number of data points through sampling. By default, we limit the number of data points to 5,000 and use those to estimate regions and contruct visual explanations. Our approach works quite well even when this number is increased to e.g. 10,000, but the results are largely the same. Our approach is generally not limited by the number of data points, but rather, the number of different variables. For each variable, we perform several computatiation intesive tasks. We first apply K-Means discretization to each variable, then perform kernel density estimates for each variable. We then determine the number of sample data points that fall within each region . Finally, each region undergoes an iterative post-hoc iterative merging process which primarily depends on the number of discretization bins or the number of different categories in the categorical variables. Data sets containing thousands to tens of thousands have become widespread in fields such as bioinformatics, where non-linear dimensionality reduciton methods are routinely used to inspect transcriptomics data. Developing more scalable methods capable of generating visual explanations for data sets containing thousands of variables would be of great interest.
+
+While the focus of our VECA is to create a fully-automated pipeline for generating visual explanations of embeddings, one can easily envision an interactive system where these kinds of visual explanations could be explored in more detail by the user. For instance, a user presented with a descriptive explanation such as the one in Fig.~\ref{fig:wine_explanations}.e may discover the blue region corresponds to red wine, low levels of sulfur dioxide, and certain levels of chlorides. However, they may then wonder where in the plot high levels sulfur dioxide appear, in which case the user would be presented with a contrastive explanation of this variable as in Fig.~\ref{fig:wine_explanations}.c. The user may similarily wonder where exactly the three regions contained within the blue region occur, and may wish to inspect the subregions, as seen in Figs.~\ref{fig:covertype_model_contrastive}.c-f. Alternatively, the user may also be intersted in the purity of the region, and may wish to inspect a plot that highlights exactly which data samples exhibit the particular explanatory variable, and which such samples are missing from the regions, similar to what is shown in Fig.~\ref{fig:wine_type_separation}. Such a user interface could seamlessly be incorporated into existing visual analytics tools such as Orange~\cite{Demvar2013}.
 
 \section{Conclusion}
 
-Our approach is easy to use, and the parameters are easy to understand.
+This paper presents VECA, a visual explanation framework designed to automatically generate visual explanations for two-dimensional embeddings. Explanations are generated in terms of any variables of choice, most commonly, the input variables used to generate the embedding. VECA is able to generate two types of visual explanations: contrastive explanations, which aim to find the most informative input variables, and descriptive variables, which aim to describe as much of the space as possible using different variables or combination of variables.
+Our approach involves a novel discretization scheme based on the spatial proximities between differnt discretization bins in the embedding. VECA generates multiple possible visual explanations. In contrastive explanations, we develop a novel visual explanation ranking scheme, prefering layouts with little overlap and which are as informative as possible. For descriptive explanations, we frame the explanation consturction process as a graph-independent set problem, and develop a novel ranking scheme that prefers diverse and informative visual explanations.
+We demonstrate the utiliy of our approach on three data sets, of increasing complexity. We also demonstrate how VECA can be used to gain an understanding into deep networks, uncover the types of errors these methods are likely to make, and what kinds of relationships they are likely to have learned.
 
-Future work:
-Explanation as conversation is basicaly an interactive interface, where the user can ``converse'' with the GUI to get the answers they seek. This is left to future work.
+We also release our reference, Python implementation of VECA. VECA is available on GitHub and can be installed via PyPI. VECA is easy to use, and we have worked hard to make the parameters easy to understand. 
+
+Overall, our work contributes to the growing field of interpretable machine learning and offers a new perspective on how to explain non-linear embeddings in terms of their original features. It also provides a new exploratory method for describing the behaviour of deep neural networks models.
 
 \section{Code Availability and Reproducibility}
+
 Our open-source, Python implentation is freely-available at \url{https://github.com/pavlin-policar/veca} and is licensed under the BSD-3 license. The materials used in this manuscript are available at \url{https://github.com/pavlin-policar/veca-paper}.
 
 \section{Acknowledgments}
