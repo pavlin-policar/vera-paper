@@ -156,40 +156,7 @@ Several interactive tools have been proposed to facilitate the explanation of in
 
 \section{Visual Explanations}
 
-In this section, we develop a conceptual framework for the automatic generation of visual explanations. As mentioned in Sec.~\ref{sec:related_work}, Miller~\cite{Miller2019} posits that explanations involve three kinds of cognitive processes: explanation generation, explanation selection, and explanation evaluation. In this work, we aim to automate the first and second of these cognitive processes. In the first step, we generate a large number of potential explanations, then select the most salient explanations in the second step to show to the end user. The evaluation step is ultimately left to the end user, as only they can evaluate the usefulness of an explanation for their particular problem.
-
-We motivate our approach with the following scenario: Suppose we are presented with a scatter plot corresponding to a two-dimensional non-linear embedding of a high-dimensional data set. The scatter plot shows an apparent cluster in the two-dimensional embedding. A natural question immediately arises: \textit{"What makes this cluster different from the remaining data points?"} The goal of this work is to develop an automatic visual approach that can aid the user in answering this question.
-
-Given an arbitrary data set $D$ and its corresponding two-dimensional embedding $Y$, our objective is to generate clear and meaningful visual explanations that convey semantic information about the structure of the embedding. As $D$ can contain both continuous and discrete features, we establish a common representation better suited to generating visual explanations. We expand each input variable into a collection of one or more \textit{explanatory variables}. An explanatory variable is a binary indicator variable indicating group membership, where the groups are derived from the input variables. For instance, a categorical variable with three categories will be expanded into three explanatory variables, each indicating sample membership to a particular category (i.e., one-hot-encoding). For continuous variables, the groups correspond to value ranges (i.e., discretization). This common representation enables a uniform treatment for both variable types. Each explanatory variable is associated with a corresponding \textit{region} $r$, representing collections of spatially localized points in the embedding space where the explanatory variable is enriched. Finally, we define \textit{visual explanations} as collections of regions that convey helpful information about the embedding structure to the end-user.
-
-Our conceptual framework can be split into three distinct phases: (i) region construction, (ii) explanation construction, and (iii) explanation selection. We next describe each of these phases in detail.
-
-\subsection{Region construction}
-
-Regions serve as the fundamental building block for constructing visual explanations. Regions represent collections of data points in the embedding sharing a common characteristic. Regions can be represented in a myriad of ways. However, one simple approach is to represent each region as a collection of one or more polygons in the embedding space, each encompassing a set of data points. Ideally, a region should contain all data points with that characteristic and exclude all other data points. However, in most real-world embeddings, a clean separation between points with some particular feature value and those without rarely exists. It is easy to see that prioritizing this criterion would lead to overly fragmented, complex polygons in most real-world embeddings, resulting in difficult-to-interpret regions, providing little benefit to the end user. Instead, we prefer simpler, visually-appealing regions that may not perfectly encompass \textit{all} data points but still provide \textit{generally} accurate representations.
-
-\subsection{Explanation construction}
-
-Once we have determined regions for each of our explanatory variables, we would like to show these to the user in a concise and informative manner. While we could show individual explanatory variables to the end user, this would likely overwhelm the user with a large number of plots, requiring the user to inspect each plot one by one.
-Instead, we combine explanatory variables into a smaller number of visual explanations and rank these according to their information content.
-Visual explanations should follow two general guidelines:
-\begin{enumerate}
-  \item We want to avoid cluttering explanations with too many explanatory variables or displayed regions, as this is difficult to understand, and
-  \item we want to avoid visual explanations where the included regions have a high degree of overlap, which can make it difficult to distinguish between different regions and render the visualizations illegible.
-\end{enumerate}
-Ideally, our visual explanations should be visually appealing, contain a small number of explanatory variables, and include regions with minimal overlap.
-
-\subsection{Explanation selection}
-
-In order to determine what constitutes a good explanation, it is essential to determine our goals, i.e., what kind of information are we trying to convey to the user. This will be the driving factor in determining the quality of an explanation. Miller~\cite{Miller2019} suggests that explanations can answer three types of questions: \textit{what}, \textit{how}, and \textit{why} questions. In the context of visual explanations, answering \textit{how} questions would be challenging as it requires reasoning about the causal chain leading to a particular sample having a specific feature value, which is out of the scope of this paper. Therefore, we will focus on answering \textit{what} and \textit{why} questions through contrastive and descriptive visual explanations.
-
-A \textit{contrastive visual explanation} aims to answer the \textit{why} question, \textit{``Why are these samples different from the other samples with regard to a particular variable?''}, or put another way, \textit{``Where do the different variable values occur?''}. To generate explanations of this kind, we need only include all explanatory variables corresponding to a particular input variable.
-
-A \textit{descriptive visual explanation} aims to answer the \textit{what} question, \textit{``What makes these samples unique?''}.
-These kinds of explanations can be highly diverse and typically require a larger number of explanatory variables than contrastive explanations, as describing the unique properties of a particular object without an explicit reference point requires more explanatory causes.
-
-Explicitly stating the goals of each visual explanation type, we can now set about laying guidelines to what constitutes a good visual explanation. An explanation evaluation mechanism is essential.
-While the explanation construction process generates a large number of potential visual explanations, many of these explanations may not be particularly useful for the information we are trying to convey.
+To determine what qualifies as a good explanation, it is crucial to define our goals, which entails identifying the type of information we wish to convey to the user. This objective will serve as the guiding factor in assessing the quality of an explanation.
 
 %Additionally, we wish to avoid overwhelming the user with too many visual explanations.
 
