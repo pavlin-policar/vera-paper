@@ -163,11 +163,9 @@ While there exists a plethora of interactive tools that can aid in the explanati
 
 \section{Visual Explanations}
 
-In this section, we develop a conceptual framework for the automatic generation of visual explanations.
-As mentioned in Sec.~\ref{sec:related_work}, Miller~\cite{Miller2019} posits that explanations involve three kinds of cognitive processes: explanation generation, explanation selection, and explanation evaluation.
-In this work, we aim to automate the first and second of these cognitive processes. In the first step, we generate a large number of potential explanations, then select the most salient explanations in the second step to show to the end user. The evaluation step is ultimately left to the end user, as only they can evaluate the usefulness of an explanation for their particular problem.
+In this section, we develop a conceptual framework for the automatic generation of visual explanations. As mentioned in Sec.~\ref{sec:related_work}, Miller~\cite{Miller2019} posits that explanations involve three kinds of cognitive processes: explanation generation, explanation selection, and explanation evaluation. In this work, we aim to automate the first and second of these cognitive processes. In the first step, we generate a large number of potential explanations, then select the most salient explanations in the second step to show to the end user. The evaluation step is ultimately left to the end user, as only they can evaluate the usefulness of an explanation for their particular problem.
 
-We motivate our approach as follows: Suppose we are presented with a scatter plot corresponding to a two-dimensional non-linear embedding of a high-dimensional data set. The scatter plot shows an apparent cluster in the two-dimensional embedding. A natural question immediately arises:  \textit{"What makes this cluster different from the remaining data points?"} The goal of this work is to develop an automatic visual approach that can aid the user in answering this question.
+We motivate our approach with the following scenario: Suppose we are presented with a scatter plot corresponding to a two-dimensional non-linear embedding of a high-dimensional data set. The scatter plot shows an apparent cluster in the two-dimensional embedding. A natural question immediately arises: \textit{"What makes this cluster different from the remaining data points?"} The goal of this work is to develop an automatic visual approach that can aid the user in answering this question.
 
 Given an arbitrary data set $D$ and its corresponding two-dimensional embedding $Y$, our objective is to generate clear and meaningful visual explanations that convey semantic information about the structure of the embedding. As $D$ can contain both continuous and discrete features, we establish a common representation better suited to generating visual explanations. We expand each input variable into a collection of one or more \textit{explanatory variables}. An explanatory variable is a binary indicator variable indicating group membership, where the groups are derived from the input variables. For instance, a categorical variable with three categories will be expanded into three explanatory variables, each indicating sample membership to a particular category (i.e., one-hot-encoding). For continuous variables, the groups correspond to value ranges (i.e., discretization). This common representation enables a uniform treatment for both variable types. Each explanatory variable is associated with a corresponding \textit{region} $r$, representing collections of spatially localized points in the embedding space where the explanatory variable is enriched. Finally, we define \textit{visual explanations} as collections of regions that convey helpful information about the embedding structure to the end-user.
 
@@ -179,7 +177,7 @@ Regions serve as the fundamental building block for constructing visual explanat
 
 \subsection{Explanation construction}
 
-Once we have determined regions for each of our explanatory variables, we would like to show these to the user in a concise and informative manner. While we could show individual explanatory variables to the end user, this would likely overwhelm the user with a large number of plots, requiring the user to inspect each one by one.
+Once we have determined regions for each of our explanatory variables, we would like to show these to the user in a concise and informative manner. While we could show individual explanatory variables to the end user, this would likely overwhelm the user with a large number of plots, requiring the user to inspect each plot one by one.
 Instead, we combine explanatory variables into a smaller number of visual explanations and rank these according to their information content.
 Visual explanations should follow two general guidelines:
 \begin{enumerate}
@@ -200,7 +198,7 @@ These kinds of explanations can be highly diverse and typically require a larger
 Explicitly stating the goals of each visual explanation type, we can now set about laying guidelines to what constitutes a good visual explanation. An explanation evaluation mechanism is essential.
 While the explanation construction process generates a large number of potential visual explanations, many of these explanations may not be particularly useful for the information we are trying to convey.
 
-Additionally, we wish to avoid overwhelming the user with too many visual explanations.
+%Additionally, we wish to avoid overwhelming the user with too many visual explanations.
 
 \section{Methods}
 
@@ -208,20 +206,20 @@ In the previous section, we laid out the conceptual framework for visual explana
 
 \subsection{Region construction}
 
-Our region construction approach is comprised of extracting contours from a kernel density estimate. We construct regions in the following way. First, we extract all potential explanatory variables from the input data. These can correspond to specific values, sets of values, or ranges of values. The goal is to derive explanatory features that can be useful in understanding the different spatial regions of the embedding. Next, using these explanatory variables, we generate explanatory regions, represented by collections of polygons, which correspond to spatial regions in the space that are enriched with a particular explanatory variable. Our approach can produce overfragmented regions, so a post-hoc merging proceedure is applied. This both reduces the number of possible explanatory regions and improves visual coherence by merging highly-overlapping regions. We describe each of these step in detail.
+Our region construction approach is comprised of extracting contours from a kernel density estimate computed on each explanatory variable. First, we generate all potentially informative explanatory variables from the input variables. These can correspond to specific values, sets of values, or ranges of values. Next, using these explanatory variables, we generate explanatory regions, represented by collections of polygons, which correspond to spatial regions in the embedding space enriched with a particular explanatory variable. Our approach can produce overfragmented regions, so we develop a post-hoc merging proceedure. This both reduces the number of possible explanatory regions and improves visual coherence by merging highly-overlapping regions. We describe each of these step in detail in the following sections.
 
 \subsubsection{Extracting explanatory variables}
 
-The input data set can contain both discrete and continuous variables. Since we want to explain the embedding in terms of the different values or ranges of values of the input variables, we expand each input variable into a collection of explanatory variables. For continuous variables, we use $K$-Means quantization to split the values into $K$ discrete intervals. By default, we split into 5 bins, corresponding to the typical five-point scale: ``very low'', ``low'', ``medium'', ``high'', and ``very high''. Dicrete varaibles are one-hot encoded, resulting in $K$ different explanatory indicator variables, each corresponding to a particular categorical value of the input variable.
+The input data set can contain both discrete and continuous variables. Since we want to explain the embedding in terms of the different values or ranges of values of the input variables, we expand each input variable into a collection of explanatory variables. For continuous variables, we use $K$-Means quantization to split the values into $K$ discrete explanatory variables. By default, we split into 5 bins, corresponding to the typical five-point scale: ``very low'', ``low'', ``medium'', ``high'', and ``very high''. Dicrete varaibles are one-hot encoded, resulting in $K$ different explanatory indicator variables, each corresponding to a particular categorical value of the input variable.
 
 \subsubsection{Extracting explanatory regions}
 \label{sec:kde_estimation}
 
-After extracting explanatory variables, we determine the regions of the space where these explanatory variables are enriched.
+Having extracted our explanatory variables, we next determine the regions of the space where these explanatory variables are enriched.
 
-The first step in our approach is to identify the scale of the embedding. Different embedding algorithms produce different embeddings that can span different scales, e.g., one embedding may span from -5 to 5 along its dimensions, while another may span from from -50 to 50. Additionally, using the same scale may not make sense for data sets of different sizes. For instance, in a dataset with 50 samples, we are likely to be interested in groups of 10-20 points, while in a dataset containing 2 million samples, these small groups will be of less interest and could be a result of noise. To determine the scale $\sigma$ of each embedding, we first determine the scale of the groups we are interested in. We select $k=\sqrt{N}$, as this is commonly used in KNN classification. We then compute the median distance of each points's $k$-th nearest neighbor and use that as the scale of the embedding.
+The first step in our approach is to identify the scale of the embedding. Different embedding algorithms produce embeddings that can span across different scales, e.g., one embedding may span from -5 to 5 along its dimensions, while another may span from from -50 to 50. Additionally, using a single scale may not make sense for data sets containing different numbers of samples. For instance, in a dataset with 50 samples, we are likely to be interested in groups of 10-20 points, while in a dataset containing 2 million samples, these small groups will be of less interest and could be a result of noise. To determine the scale $\sigma$ of each embedding, we first determine the scale of the groups we are interested in. We select $k=\sqrt{N}$, as this is commonly used in KNN classification. We then compute the median distance of each points's $k$-th nearest neighbor and use that as the scale of the embedding.
 
-Next, for each binary explanatory variable, we obtain its kernel density estimate $D$ using a Gaussian kernel with bandwidth $\sigma$. Next, we extract the contours of the density estimate at a user-defined level, typically at $0.25 \cdot \max D$. Note that because the density estimate may be multimodal, e.g., if an explantory variable is enriched in different regions of the space, we may obtain more than one contour. These contours represent the regions which we use in subsequent steps of our analysis and correspond to spatial regions of the space in which each particular explanatory variable is enriched.
+Next, for each explanatory variable, we obtain its kernel density estimate $D$ using a Gaussian kernel with bandwidth $\sigma$. Next, we extract the contours of the density estimate at a user-defined level, typically at $0.25 \cdot \max D$. Note that because the density estimate may be multimodal, e.g., if an explantory variable is enriched in different regions of the space, we may obtain more than one contour. These contours represent the regions which we use in subsequent steps of our analysis and correspond to spatial regions of the space in which each particular explanatory variable is enriched.
 
 \subsubsection{Post-hoc explanatory variable merging}
 \label{sec:merge_overfragmented}
@@ -249,9 +247,9 @@ We also require that the merged region does not decrease the spatial localizatio
 C=\frac{N-1}{2 \sum_{ij} W } \frac{\sum_i \sum_j w_{i j}\left(x_i-x_j\right)^2}{\sum_i\left(x_i-\bar{x}\right)^2},\notag
 \end{equation}
 where $N$ is the number of data samples, $W$ is a weighted adjacency matrix indicating the spatial proximities between data points, and $x_i$ is the feature value of sample $i$.
-To compute the adjacency matrix $W$, we utilize the scale $\sigma$ computed in Sec.~\ref{sec:kde_estimation}. For each point, we find all its neighboring data points at a distance of at most $3 \cdot \sigma$. We then compute the probability density function of each of these neighbors using a Gaussian distribution centered at each point using bandwidth $\sigma$.
+We compute the adjacency matrix $W$ by finding all nearest neighbors at a distance of at most $3 \cdot \sigma$ and evaluate a Gaussian probability density function centered on each point using the same scale $\sigma$ from Sec.~\ref{sec:kde_estimation}.
 
-Merging the regions results in new, larger regions, it may well happen that after one round of merging, that new potential regions may overlap sufficiently to be merged. We perform this merging proceedure iteratively until no further merges can be performed. An example of the overfragmentation and the subsequent merging proceedure is shown in Fig.~\ref{fig:overfragmentation}).
+Having merged our regions results in new, larger regions, these may now also overlap sufficiently to be merged. Therefore we perform this merging proceedure iteratively until no further merges can be performed. An example of the overfragmentation and the subsequent merging proceedure is shown in Fig.~\ref{fig:overfragmentation}).
 
 \begin{figure}[tb]
   \centering
@@ -277,12 +275,12 @@ Intuitively, a variable whose values are localized in disjoint regions of the sp
 
 To adhere to the principle of ``simple explanations'', we aim to present the user with as few plots as possible. We achieve this by trying to merge regions with sufficient overlap and bipartite mapping between pairs of variables where the edges in the graph are created when there is sufficient overlap between the two regions. By default we require an overlap of at least 95\% of samples in both regions. This can also by used as a visual proxy for identifying feature correlations, in some cases, even non-linear ones.
 
-We want the number of explanatory regions to be manageable. For instance, one region is not particularily informative, while 10 is just too much clutter. We do the Gaussian log-probability.
+As plots containing larger numbers of explanatory variables tend to be more difficult to understand, we prefer visual explanations containing a smaller number of explanatory variables e.g., between 2-5. To achieve this, we impose a Gaussian prior on the number of contained explanatory variables with $\mu=3$ and $\sigma^2=2$.
 
 
 \subsection{Descriptive Explanations}
 
-With descriptive explanations, we aim to show interesting combinations of explanatory variables such that the resulting plots are as informative as possible. This can include interesting combinations of input variables, and can lead us to uncover interesting relationships between specific variable values.
+With descriptive explanations, we aim to show interesting combinations of explanatory variables such that the resulting plots are as informative as possible. This can include interesting combinations of input variables, which can lead us to uncover interesting relationships between specific variable values.
 
 \subsubsection{Explanation construction}
 
