@@ -1,0 +1,285 @@
+\documentclass{article}
+
+
+\usepackage[T1]{fontenc}
+\usepackage{natbib}
+\usepackage{todonotes}
+\usepackage{gensymb}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage[top=1in,bottom=1in,left=1in,right=1in]{geometry}
+\usepackage{alltt}
+\usepackage{framed}
+\usepackage{xcolor}
+\usepackage{comment}
+\usepackage{graphicx}
+
+\usepackage{xr}[]
+\externaldocument{main}
+\usepackage{url}
+
+\renewcommand{\thetable}{\Alph{table}}
+\renewcommand{\thefigure}{\Alph{figure}}
+
+\newcommand{\beq}{\begin{equation}}
+\newcommand{\eeq}{\end{equation}}
+\newcommand{\beqs}{\begin{equation}}
+\newcommand{\eeqs}{\end{equation}}
+\newcommand{\mx}[1]{\ensuremath{\boldsymbol{\mathrm{{#1}}}}}   % Simple matrix format.
+
+
+% \newcommand{\review}[1]{\noindent{{\textbf{\textit{#1}}}}\vspace{3mm}}
+% \definecolor{colframe}{rgb}{0.01,0.199,0.1}
+
+\newcounter{rtaskno}
+\newcommand{\rtask}[1]{\refstepcounter{rtaskno}\label{#1}}
+
+\newcommand{\reviewc}[2]{\begin{leftbar}\noindent\rtask{#1}\ref{#1}. #2\end{leftbar}}
+\newcommand{\review}[1]{\begin{leftbar}\noindent #1\end{leftbar}}
+\newcommand{\answer}[1]{\noindent #1\\[0mm]}
+\newcommand{\copyquote}[1]{\vspace{2mm} {\color{blue} #1}\vspace{2mm}}
+
+\newlength{\leftbarwidth}
+\setlength{\leftbarwidth}{3pt}
+\newlength{\leftbarsep}
+\setlength{\leftbarsep}{10pt}
+\renewenvironment{leftbar}{%
+    \def\FrameCommand{{\color{black}{\vrule width \leftbarwidth\relax\hspace {\leftbarsep}}}}%
+    \MakeFramed {\advance \hsize -\width \FrameRestore }%
+}{\endMakeFramed}
+
+
+% \usepackage[colorlinks=True,citecolor=black]{hyperref}
+
+\begin{document}
+
+
+\noindent{\bf Poli\v{c}ar and Zupan: 
+\\
+Visual Explanations of Two-Dimensional Embeddings}
+
+\vspace{5mm}
+\noindent {\bf RESPONSE TO PAST REVIEWERS}
+
+\vspace{5mm}
+
+
+\noindent Dear Conference Chair and the Reviewers, \\
+ 
+\vspace{3mm}
+
+\noindent We would like to submit our manuscript titled ``\textit{Visual Explanations of Two-Dimensional Embeddings}'' to be considered for publication at the ``\textit{IEEE VIS 2024}'' conference.
+We had initially submitted this manuscript to this same conference last year, however, the reviewers pointed out some valid concerns, which we would like to address here. We would like to thank those reviewers for their valuable, detailed feedback, which helped us to improve the manuscript, and for allowing us to submit a revised version in this year's iteration of the ``\textit{IEEE VIS}'' conference.
+
+Below we provide detailed, point-by-point responses to the reviewer's comments and concerns. Due to the major revisions in the manuscript, we omit comments which are no longer relevant.
+
+\vspace{3mm}
+
+\noindent Kind regards,
+\vspace{3mm}
+
+\noindent Pavlin G. Poli\v{c}ar,
+Bla\v{z} Zupan \\ 
+\noindent Ljubljana, \today
+
+\vspace{10mm}
+
+
+\subsection*{Reviewer 1}
+
+\review{VECA provides explanations for two-dimensional embeddings using explanation
+variables. Their approach includes three steps, namely region construction,
+explanation construction, and explanation selection. While there are many
+parameter settings door the approach, the paper makes strong technical
+contributions. The approach works for any two-dimensional embedding, albeit I
+assume there are some limitations in terms of what data can be used in
+explanations. Furthermore the authors release their algorithm as open source code
+which makes the approach applicable. The paper is generally well written.
+
+While I recommend the acceptance of this paper, there are still some open
+questions and areas of improvement before publication:}
+
+\reviewc{r1q1}{My main question is how this can be applied to data where  explanatory variables cannot be extracted as easily, for example for image or audio data without metadata?}
+
+\answer{}
+
+
+\reviewc{r1q2}{Also, what happens if the space of input variables gets very large? Your use cases focus on rather limited data sets or only show a subset of the extracted explanations. I would suggest adding more complete examples to the supplementary material and to describe these scenarios in the paper.}
+
+\answer{}
+
+
+\reviewc{r1q3}{Your explanations seem to be designed mainly for good visual understandability. Do you sacrifice explanation quality for that? How do you make a tradeoff here? Would there be a way to evaluate explanation quality quantitatively?}
+
+\answer{}
+
+
+\reviewc{r1q4}{Your approach could be evaluated quantitatively in a user study. Why do you
+think a user study is not necessary in this case?}
+
+\answer{}
+
+
+\reviewc{r1q5}{Binning of continuous variables into 5 buckets: What if the data is very similar (would require less buckets) or very diverse (would require more buckets)?}
+
+\answer{}
+
+
+\reviewc{r1q6}{Fig 2: Why is this central separation considered good?}
+
+\answer{}
+
+
+\reviewc{r1q7}{The explanation in 4.2 could be more detailed to make it easier to understand.}
+
+\answer{}
+
+
+\reviewc{r1q8}{You mention making it easy to run this, do you recommend defaults for the many variables of your technique? How did you select these?}
+
+\answer{}
+
+
+\reviewc{r1q9}{5.1 and 5.2: Take always or conclusions for the use cases would be understand the value of the explanations.}
+
+\answer{}
+
+
+\subsection*{Reviewer 2}
+
+\review{
+The presented draft aims at to generate and add explanations in the 2D embedding for "what" and "why" questions about the data in order to ease the analyst's understanding and emphasize regions with a “strong” contrast with visual metaphors to further support to recognize data insights. They denoted their scheme as "Visual Explanations and Contrastive Analysis (VECA)".
+
+For this, the authors propose to link explanatory variables to specific regions in screen space, which a group of data represents. These regions themselves are modeled as discrete space elements, using KDE to integrate screen space properties for a specific exploratory variable. The approach can be applied to all flavors of 2D embeddings (UMAP, tSNE,...).
+
+In my opinion, the approach addresses a key issue in our community. In particular, the analysis of nD data is challenging for IT professionals and increasingly for non-IT professionals (geologists, biologists,...).
+
+In the current state of development of the work, however, I still have concerns about it, which should be addressed before the work is ready for publication.
+}
+
+\subsubsection*{Distortion Effects}
+
+\reviewc{r2q1}{
+One of the main problems of embeddings are distortion effects of the data that occur within the embedding. Distortion effects here means that there may be properties in the embeds caused by the data, but there are also properties which are caused by the embedding process itself ([1,2]). These embedding artifacts/distortions, which can be encoded by the position of the data in the embedding, should not be attempted to be explained because they mislead the analyst.
+
+However, the (contrast) methods presented here do not differentiate between areas that are "correctly mapped". (related to a specific property of the data) and projection artifacts (i.e. patterns that exist due to the projection process but are not an expression of the data). To what extent do projection artifacts falsify the results of the analysis for the analyst when using their method of contrast enhancement?}
+
+\answer{}
+   
+\subsubsection*{Transfer functions}
+
+\reviewc{r2q2}{The use of color selection and the like largely overlap with methods for designing transfer functions ([3]). This should be discussed in the work.}
+
+
+\answer{}
+\subsubsection*{Clustering}
+
+\reviewc{r2q3}{"We use k-Means quantization": K-Mean only captures compact clusters and has a number of disadvantages (https://stats.stackexchange.com/questions/133656/how-to-understand-the- drawbacks-of-k-means). For example, non-compact structures that are semantically related nonetheless cannot be captured in this way. How does this affect explainability?}
+
+\answer{}
+
+
+\subsubsection*{Novelty}
+
+\reviewc{r2q4}{
+The approach presented here to find high-contrast regions in embeddings is very similar to the splatter plot approach [0] to finding high-contrast regions in embeddings (down to KDE use).
+
+Therefore, the paper still has to go to great lengths to differentiate itself from such and similar methods. The novelty value is currently unclear to me.
+}
+
+\answer{}
+
+\subsubsection*{Related Work}
+
+
+\reviewc{r2q5}{In addition to the methods already mentioned, which I miss in Related Work, there are also other approaches to visually add annotations to embeddings: The Flow Based Scatter Plots ([4]) are named as an example. In this regard, the RW still has to be reworked.}
+
+\answer{}
+   
+\subsubsection*{Summary}
+
+\review{Because a large number of related papers are missing, I cannot assess the novelty of the results and do not fully trust the classification of the procedure through the discussion in the paper itself. That doesn't mean they aren't correct; but due to the lack of literature work I cannot assume that this is ensured. This aspect must first be reworked before this work (which I like very much in terms of content) can be accepted.}
+
+
+\subsection*{Reviewer 3}
+
+\review{ This work presents a visual explanation technique for 2D embeddings. It takes 2D t-SNE or UMAP embedding as input. It generates overlaying on the embedding to 1) highlight visual clusters in the 2D space, and 2) provide information, i.e., “explanation” of how clusters differ from each other.}
+
+\subsubsection*{Positive}
+
+\review{The paper is easy to follow and the problem is well-motivated. Understanding how and why visual clusters form in the embedding space is often the first analysis objective for users of dimensionality reduction methods. And there is some previous work in this space already, e.g., utilizing a decision tree to help answer what separates the different visual clusters [1], which I believe obtains a similar explanation as the proposed method to some degree. Though not entirely novel, the proposed idea is still very interesting, and the initial result looks promising.}
+
+\subsubsection*{Negative}
+
+\reviewc{r3q1}{I think one of the major issues with the proposed method is the lack of proper visual encoding, the plot as of now is hard to read, i.e., the text overlapped with the underlying plots, which make many of the result hard to read. At a minimum, the method should figure out a way to correctly label the cluster without severe overlapping. Moreover, I felt there is a lot of missing opportunities for additional features and visual interaction design. For example, what if the user needs to understand the key differences between specific pairs of clusters in the embedding, the tool as it stands can not support these types of simple queries and interactions.}
+
+\answer{}
+
+
+\reviewc{r3q2}{The other major issue I could see is an assessment of how effective the explanation actually is when compared to some standard visual encoding, e.g., color coding of feature dimension in the scatterplot. The result does not appear to be particularly convincing in this regard, e.g., Fig. 8 (d) essentially just shows a bunch of clusters only differentiated by the “elevation” dimension. For this use case, would it be much better just to color encode the elevation in the plot, which gives a continuous and occlusion-free view of the key underlying information? Without a proper baseline and a direct comparison, the advantages and limitations of the proposed approach can easily be determined.
+}
+
+\answer{}
+
+
+\reviewc{r3q3}{
+On the minor points, the introduction needs to clarify words such as “contrastive”
+and “end-to-end”, as they often imply certain specific techniques in machine
+learning, which do not seem to apply here, i.e., contrastive may create confusion
+with contrastive learning [2]. Additionally, the provided Git link is not working.
+}
+
+\answer{}
+
+
+\review{To sum up, I believe this work presents interesting and promising research,
+however, there are a few important issues that need to be addressed (which require
+significant changes that is likely not possible within the conference cycle)
+before it reaches a publishable state.}
+
+
+\subsection*{Reviewer 4}
+
+\subsubsection*{Positives}
+\review{
+\begin{itemize}
+\item It proposes VECA (Visual Explanations and Contrastive Analysis), an embedding-annotation approach that generates visual explanations for any 2D embedding.
+
+\item It demonstrates the utility of VECA on three real-world data sets and shows its understanding feature localization in the embedding space.
+\end{itemize}
+}
+
+\subsubsection*{Negatives (and Suggestions)}
+
+\reviewc{r4q1}{The related work section is not well organized. A categorized introduction for different groups of related work will be more helpful.}
+
+\answer{}
+
+
+\reviewc{r4q2}{In the proposed framework there are many variables and parameters, such as ordinal values, bin size, Gaussian kernel parameters. It is not sure how generalizable these variable or parameter settings are in different datasets?}
+
+\answer{}
+
+
+\reviewc{r4q3}{The entire procedure is a bit empirical. The automation of the proposed method is unclear.}
+
+\answer{}
+
+
+\reviewc{r4q4}{In their design (along with case study), can users adjust the parameter settings or interact with different steps of analysis in real time?}
+
+\answer{}
+
+
+\reviewc{r4q5}{Since it is a data analytic/visualization task, there are only three datasets
+are used for evaluation. It is better to test on more (complicated) datasets.}
+
+\answer{}
+
+
+\review{Justification:
+This paper presents a visual explanation framework (VECA) designed to generate visual explanations for 2D embeddings. VECA can generate two visual explanations: contrastive explanations and descriptive variables. However, there are some concerns of this work: (1) the generalizability and automation of this method need to be clarified; (2) more (complicated) datasets need to be added.
+}
+
+\end{document}
