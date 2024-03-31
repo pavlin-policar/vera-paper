@@ -149,6 +149,13 @@ $(MAINTEXFILE) : $(SUBTEXFILES) $(BIBFILES)
 	$< main.pdf
 #                               $(PDFLATEX) $<
 
+resp:
+	pdflatex response_to_reviewers
+	bibtex response_to_reviewers
+	pdflatex response_to_reviewers
+	bibtex response_to_reviewers
+	pdflatex response_to_reviewers
+
 # cleans anything that can be re-generated automatically, plus emacs backups
 clean: 
 				rm -f *.aux *.log *.bbl *.blg *.brf *.cb *.ind *.idx *.ilg	\
