@@ -88,7 +88,7 @@ Bla\v{z} Zupan \\
 
 \subsection*{Reviewer 1}
 
-\review{VECA provides explanations for two-dimensional embeddings using explanation
+\review{VERA provides explanations for two-dimensional embeddings using explanation
 variables. Their approach includes three steps, namely region construction,
 explanation construction, and explanation selection. While there are many
 parameter settings door the approach, the paper makes strong technical
@@ -100,56 +100,38 @@ which makes the approach applicable. The paper is generally well written.
 While I recommend the acceptance of this paper, there are still some open
 questions and areas of improvement before publication:}
 
-\reviewc{r1q1}{My main question is how this can be applied to data where  explanatory variables cannot be extracted as easily, for example for image or audio data without metadata?}
+\reviewc{r1q1}{My main question is how this can be applied to data where  explanatory variables cannot be extracted as easily, for example for image or audio data without metadata?
 
+Also, what happens if the space of input variables gets very large? Your use cases focus on rather limited data sets or only show a subset of the extracted explanations. I would suggest adding more complete examples to the supplementary material and to describe these scenarios in the paper.}
+
+\answer{Both of these are vitally important questions, however, in its current design VERA is most useful when provided with a relatively small number of features with human-understandable, semantic meaning. We dedicate two paragraph discussing both of these limitations in \textit{Limitations and Future Work} section.}
+
+
+\reviewc{r1q2}{Your explanations seem to be designed mainly for good visual understandability. Do you sacrifice explanation quality for that? How do you make a tradeoff here? Would there be a way to evaluate explanation quality quantitatively?}
+
+\todo{Blaz (ce lahko)}
 \answer{}
 
 
-\reviewc{r1q2}{Also, what happens if the space of input variables gets very large? Your use cases focus on rather limited data sets or only show a subset of the extracted explanations. I would suggest adding more complete examples to the supplementary material and to describe these scenarios in the paper.}
+\reviewc{r1q3}{Your approach could be evaluated quantitatively in a user study. Why do you think a user study is not necessary in this case?}
 
-\answer{}
-
-
-\reviewc{r1q3}{Your explanations seem to be designed mainly for good visual understandability. Do you sacrifice explanation quality for that? How do you make a tradeoff here? Would there be a way to evaluate explanation quality quantitatively?}
-
-\answer{}
+\answer{We thank the reviewer for their suggestion. We have conducted a comparative user study which confirms the utility of our approach. The study design and results are discussed in Section 5.}
 
 
-\reviewc{r1q4}{Your approach could be evaluated quantitatively in a user study. Why do you
-think a user study is not necessary in this case?}
+\reviewc{r1q4}{Binning of continuous variables into 5 buckets: What if the data is very similar (would require less buckets) or very diverse (would require more buckets)?}
 
-\answer{}
-
-
-\reviewc{r1q5}{Binning of continuous variables into 5 buckets: What if the data is very similar (would require less buckets) or very diverse (would require more buckets)?}
-
-\answer{}
+\answer{We would like to clarify that we set the default discretization to 5 buckets purely because most users are familiar with the typical five-point scale. This initial choice is often irrelevant, as the post-hoc merging procedure described in Section 3.1.3 merges spatially overlapping regions corresponding to buckets. The user is also free to set a higher or lower number of initial buckets. In our experiments, we have found the results to be fairly robust to this parameter setting. To clear up any potential confusion in the manuscript, we have rewritten the \textit{Region Construction} section and have added a graphical depiction of the region construction process in Figure 3.}
 
 
-\reviewc{r1q6}{Fig 2: Why is this central separation considered good?}
+\reviewc{r1q7}{You mention making it easy to run this, do you recommend defaults for the many variables of your technique? How did you select these?}
 
-\answer{}
-
-
-\reviewc{r1q7}{The explanation in 4.2 could be more detailed to make it easier to understand.}
-
-\answer{}
-
-
-\reviewc{r1q8}{You mention making it easy to run this, do you recommend defaults for the many variables of your technique? How did you select these?}
-
-\answer{}
-
-
-\reviewc{r1q9}{5.1 and 5.2: Take always or conclusions for the use cases would be understand the value of the explanations.}
-
-\answer{}
+\answer{We will release our Python version of VERA on GitHub and will make the package available on PyPI upon publication. We would like to refrain from discussing particular parameter defaults as much as possible in the manuscript, but these are discussed at length in the accompanying documentation. However, in our extensive testing, we have found the resulting visual explanations to be fairly robust to different parameter values.}
 
 
 \subsection*{Reviewer 2}
 
 \review{
-The presented draft aims at to generate and add explanations in the 2D embedding for "what" and "why" questions about the data in order to ease the analyst's understanding and emphasize regions with a “strong” contrast with visual metaphors to further support to recognize data insights. They denoted their scheme as "Visual Explanations and Contrastive Analysis (VECA)".
+The presented draft aims at to generate and add explanations in the 2D embedding for "what" and "why" questions about the data in order to ease the analyst's understanding and emphasize regions with a “strong” contrast with visual metaphors to further support to recognize data insights. They denoted their scheme as "Visual Explanations via Region Annotation (VERA)".
 
 For this, the authors propose to link explanatory variables to specific regions in screen space, which a group of data represents. These regions themselves are modeled as discrete space elements, using KDE to integrate screen space properties for a specific exploratory variable. The approach can be applied to all flavors of 2D embeddings (UMAP, tSNE,...).
 
@@ -165,19 +147,28 @@ One of the main problems of embeddings are distortion effects of the data that o
 
 However, the (contrast) methods presented here do not differentiate between areas that are "correctly mapped". (related to a specific property of the data) and projection artifacts (i.e. patterns that exist due to the projection process but are not an expression of the data). To what extent do projection artifacts falsify the results of the analysis for the analyst when using their method of contrast enhancement?}
 
+\todo{pavlin}
+
 \answer{}
    
 \subsubsection*{Transfer functions}
 
 \reviewc{r2q2}{The use of color selection and the like largely overlap with methods for designing transfer functions ([3]). This should be discussed in the work.}
 
+\todo{Check that this, in fact, has something to do with color mixing.}
 
-\answer{}
+\answer{We would like to thank the reviewer for pointing us to mentioned literature, however, we feel this is not applicable in the context of this manuscript. More concretely, the literature deals with displaying overlapping visual elements, however, in our approach, we include metrics and guardrails to specifically prevent such overlap from occurring. While some overlap does inevitably occur, we have found the default alpha blending to work sufficiently well.
+
+However, we will soon begin the development of an interactive variant of VERA, in which case more ovelap could occur, and the referenced literature will be very important for addressing the problem of overdraw.}
+
+
 \subsubsection*{Clustering}
 
 \reviewc{r2q3}{"We use k-Means quantization": K-Mean only captures compact clusters and has a number of disadvantages (https://stats.stackexchange.com/questions/133656/how-to-understand-the- drawbacks-of-k-means). For example, non-compact structures that are semantically related nonetheless cannot be captured in this way. How does this affect explainability?}
 
-\answer{}
+\answer{This comment seems to indicate that k-means clustering is applied in the two-dimensional embedding. This is not the case: we apply k-means quantization to the column vector of values of each high-dimensional feature independently from one another and the embedding. This is done in order to obtain an initial, sensible grouping of feature values. As discussed in Point~\ref{r1q4}, this initial grouping is then refined based on the spatial localization of the feature values.
+
+We apologize for the confusion, and have rewritten the \textit{Region Construction} section in the manuscript and added a graphical depiction of the region construction process in Figure 3.}
 
 
 \subsubsection*{Novelty}
@@ -185,17 +176,25 @@ However, the (contrast) methods presented here do not differentiate between area
 \reviewc{r2q4}{
 The approach presented here to find high-contrast regions in embeddings is very similar to the splatter plot approach [0] to finding high-contrast regions in embeddings (down to KDE use).
 
-Therefore, the paper still has to go to great lengths to differentiate itself from such and similar methods. The novelty value is currently unclear to me.
-}
+Therefore, the paper still has to go to great lengths to differentiate itself from such and similar methods. The novelty value is currently unclear to me.}
 
-\answer{}
+\answer{The reviewer is correct in that some stages of the region construction process in VERA are, indeed, very similar to the approach taken in splatterplots. As in splatterplots, we obtain region representations of variables by extracting a single contour from the kernel density estimate of feature values.
+However, it is important to note that splatterplots and VERA aim to solve two different sets of problems.
+Splatterplots offer an attractive alternative visual modality to scatterplots and are an effective tool for visualizing large amounts of data. Additionally, multiple splatter plots can be drawn in a single plot to indicate different categorical variables.
+VERA, on the other hand, aims to tackle a different problem: the automatic generation of explanations of two-dimensional embeddings. The region extraction step, which is similar to splatterplots, is but a small piece of our proposed procedure.
+
+Differently from splatterplots, our region construction process automatically performs discretization prior to extracting regions. After regions have been extracted, our post-hoc merging procedure merges the extracted regions based on spatial and semantic constraints.
+The extracted regions serve as the initial building blocks for our approach, and are then used in the automatic generation of visual explanations.
+
+To clear up any potential confusion, we have revised the \textit{Introduction} and \textit{Related Work} sections to better motivate and contextualize our approach. We do not include a discussion on the differences between VERA and splatterplots, as these approaches aim to solve different problems.
+We have, however, indicated that a part of our region construction procedure is similar to splatterplots and have added the corresponding citation.}
 
 \subsubsection*{Related Work}
 
 
-\reviewc{r2q5}{In addition to the methods already mentioned, which I miss in Related Work, there are also other approaches to visually add annotations to embeddings: The Flow Based Scatter Plots ([4]) are named as an example. In this regard, the RW still has to be reworked.}
+\reviewc{r2q5}{In addition to the methods already mentioned, which I miss in Related Work, there are also other approaches to visually add annotations to embeddings: The Flow Based Scatter Plots ([4]) are named as an example. In this regard, the Related Work still has to be reworked.}
 
-\answer{}
+\answer{We would like to thank the reviewer for the referenced literature and pointing to key missing literature. We have conducted an extensive literature review, and have reworked the related work section. We now include all relevant literature, focusing primarily on approaches aimed at explaining two-dimensional embeddings.}
    
 \subsubsection*{Summary}
 
@@ -214,29 +213,24 @@ Therefore, the paper still has to go to great lengths to differentiate itself fr
 
 \reviewc{r3q1}{I think one of the major issues with the proposed method is the lack of proper visual encoding, the plot as of now is hard to read, i.e., the text overlapped with the underlying plots, which make many of the result hard to read. At a minimum, the method should figure out a way to correctly label the cluster without severe overlapping. Moreover, I felt there is a lot of missing opportunities for additional features and visual interaction design. For example, what if the user needs to understand the key differences between specific pairs of clusters in the embedding, the tool as it stands can not support these types of simple queries and interactions.}
 
-\answer{}
-
-
-\reviewc{r3q2}{The other major issue I could see is an assessment of how effective the explanation actually is when compared to some standard visual encoding, e.g., color coding of feature dimension in the scatterplot. The result does not appear to be particularly convincing in this regard, e.g., Fig. 8 (d) essentially just shows a bunch of clusters only differentiated by the “elevation” dimension. For this use case, would it be much better just to color encode the elevation in the plot, which gives a continuous and occlusion-free view of the key underlying information? Without a proper baseline and a direct comparison, the advantages and limitations of the proposed approach can easily be determined.
-}
+\todo{Pavlin: label drawing is solved}
 
 \answer{}
 
 
-\reviewc{r3q3}{
-On the minor points, the introduction needs to clarify words such as “contrastive”
-and “end-to-end”, as they often imply certain specific techniques in machine
-learning, which do not seem to apply here, i.e., contrastive may create confusion
-with contrastive learning [2]. Additionally, the provided Git link is not working.
-}
+\reviewc{r3q2}{The other major issue I could see is an assessment of how effective the explanation actually is when compared to some standard visual encoding, e.g., color coding of feature dimension in the scatterplot. The result does not appear to be particularly convincing in this regard, e.g., Fig. 8 (d) essentially just shows a bunch of clusters only differentiated by the “elevation” dimension. For this use case, would it be much better just to color encode the elevation in the plot, which gives a continuous and occlusion-free view of the key underlying information? Without a proper baseline and a direct comparison, the advantages and limitations of the proposed approach can easily be determined.}
 
-\answer{}
+\answer{We agree that the assessment of our approach is of vital importance. Therefore, as discussed in Point~\ref{r1q3}, we have conducted a comparative user study, which validates the efficacy of our approach.
+
+We would like to note for future reviewers that the referenced figure no longer appears in the manuscript.}
 
 
-\review{To sum up, I believe this work presents interesting and promising research,
-however, there are a few important issues that need to be addressed (which require
-significant changes that is likely not possible within the conference cycle)
-before it reaches a publishable state.}
+\reviewc{r3q3}{On the minor points, the introduction needs to clarify words such as “contrastive” and “end-to-end”, as they often imply certain specific techniques in machine learning, which do not seem to apply here, i.e., contrastive may create confusion with contrastive learning [2]. Additionally, the provided Git link is not working.}
+
+\answer{Agreed. We have removed the often overused phrase ``end-to-end'' and have clarified the word contrastive in the \textit{Related Work}, where it is first mentioned. The Github link points to a currently private Github repository, which will be made public upon publication.}
+
+
+\review{To sum up, I believe this work presents interesting and promising research, however, there are a few important issues that need to be addressed (which require significant changes that is likely not possible within the conference cycle) before it reaches a publishable state.}
 
 
 \subsection*{Reviewer 4}
@@ -244,9 +238,9 @@ before it reaches a publishable state.}
 \subsubsection*{Positives}
 \review{
 \begin{itemize}
-\item It proposes VECA (Visual Explanations and Contrastive Analysis), an embedding-annotation approach that generates visual explanations for any 2D embedding.
+\item It proposes VERA (Visual Explanations via Region Annotation), an embedding-annotation approach that generates visual explanations for any 2D embedding.
 
-\item It demonstrates the utility of VECA on three real-world data sets and shows its understanding feature localization in the embedding space.
+\item It demonstrates the utility of VERA on three real-world data sets and shows its understanding feature localization in the embedding space.
 \end{itemize}
 }
 
@@ -254,32 +248,34 @@ before it reaches a publishable state.}
 
 \reviewc{r4q1}{The related work section is not well organized. A categorized introduction for different groups of related work will be more helpful.}
 
-\answer{}
+\answer{Agreed. As discussed in Point~\ref{r2q5}, we have revised the \textit{Related Work} section.}
 
 
 \reviewc{r4q2}{In the proposed framework there are many variables and parameters, such as ordinal values, bin size, Gaussian kernel parameters. It is not sure how generalizable these variable or parameter settings are in different datasets?}
 
-\answer{}
+\answer{As discussed in Point~\ref{r1q7}, we would like to refrain from discussing particular parameter values in the manuscript. However, a thorough discussion of parameter values, their effects on the results, and our recommendations are included in the accompanying documentation, to be released upon publication.}
 
 
 \reviewc{r4q3}{The entire procedure is a bit empirical. The automation of the proposed method is unclear.}
+
+\todo{BLAZ: Kaj to pomeni? Ali pravi, da je bil clanek slabo napisan? Ali zeli teoreticne dokaze, zakaj je to dobro? Ali pravi, da nismo naredili dobre evalvacije, ker smo imeli samo tri case study-je?}
 
 \answer{}
 
 
 \reviewc{r4q4}{In their design (along with case study), can users adjust the parameter settings or interact with different steps of analysis in real time?}
 
-\answer{}
+\todo{Pavlin}
+
+\answer{We designed VERA to be a static approach.}
 
 
-\reviewc{r4q5}{Since it is a data analytic/visualization task, there are only three datasets
-are used for evaluation. It is better to test on more (complicated) datasets.}
+\reviewc{r4q5}{Since it is a data analytic/visualization task, there are only three datasets are used for evaluation. It is better to test on more (complicated) datasets.}
 
-\answer{}
+\answer{We agree with this assessment. To confirm the usefulness of our approach, we have conducted a comparative user study, which is described in detail in Section 5. Unfortunately, however, due to strict page limits, we now have space to include only a single user scenario in the manuscript. More usage examples will be provided in the package documentation.}
 
 
 \review{Justification:
-This paper presents a visual explanation framework (VECA) designed to generate visual explanations for 2D embeddings. VECA can generate two visual explanations: contrastive explanations and descriptive variables. However, there are some concerns of this work: (1) the generalizability and automation of this method need to be clarified; (2) more (complicated) datasets need to be added.
-}
+This paper presents a visual explanation framework (VERA) designed to generate visual explanations for 2D embeddings. VERA can generate two visual explanations: contrastive explanations and descriptive variables. However, there are some concerns of this work: (1) the generalizability and automation of this method need to be clarified; (2) more (complicated) datasets need to be added.}
 
 \end{document}
