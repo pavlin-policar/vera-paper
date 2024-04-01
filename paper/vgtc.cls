@@ -320,7 +320,7 @@
   \hypersetup{
     pdfpagemode=UseNone,
     pdftitle={\@title},
-    pdfauthor={\@author},
+    pdfauthor={\iftoggle{vgtc@review}{anonymous authors}{\@author}},
     pdfsubject={VGTC Special Issue Paper for TVCG},
     pdfkeywords={\vgtc@keywords},
     pageanchor=true,
@@ -339,7 +339,8 @@
     citecolor=NavyBlue,
     anchorcolor=black,      % changing this colors te teaser caption using dvips
     nesting=true,
-    linktocpage}
+    linktocpage,
+    pdfdisplaydoctitle}
   \ifpdf%                   % if we use pdflatex
   \else%                    % else we use pure latex
     \renewcommand{\pdfbookmark}[3][]{}
@@ -391,8 +392,9 @@
   \WarningFilter{caption}{The option `hypcap=true' will be ignored for this}
   \RequirePackage{caption}
   \RequirePackage[aboveskip=4pt, belowskip=4pt]{subcaption}                % for subfigures
-  \captionsetup{subrefformat=parens}
+  \captionsetup{subrefformat=parens,font={scriptsize,sf}}
   \newcommand{\subfigsCaption}[1]{\vspace{-.9em}\caption{#1}}
+  
 }
 
 
