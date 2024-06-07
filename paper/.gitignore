@@ -4,5 +4,7 @@
 *.log
 *.brf
 *.out
-*.pdf
-!figures/*.pdf
+*.fdb_latexmk
+*.dvi
+*.fls
+main.pdf
