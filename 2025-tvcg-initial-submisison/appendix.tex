@@ -1,0 +1,30 @@
+\documentclass[10pt]{article}
+
+\usepackage{graphicx}
+\usepackage[margin=1in]{geometry}
+\usepackage{parskip}
+\usepackage{xr}
+
+\externaldocument{main}
+
+\begin{document}
+
+\appendix
+\section{Label Placement}
+\label{sec:label-placement}
+
+While VERA exracts semantically meaningful visual explanations, there remains the practical apsect of how to visualize these visual explanations on-screen. A key challenge in this is how to position region labels, so that each region polygon is accompanied by a textual description of what the region represents.
+Label placement has been a well-studies problem, with several approaches being proposed over the years. However, these algorithms typically deal with annotating specific points on a scatter plot and are not directly applicable to our task here.
+However, extending any one of these is straightforward to our particular task.
+
+\noindent \textbf{Label Placement Algorithm.} We here describe a force-directed label placement algorithm we designed for VERA. A good label positioning for a VERA explanation must necessarily fulfill the following conditions:
+\begin{itemize}
+  \item Labels must be inside the axes bounding box and must not overflow.
+  \item Labels must not overlap one another as overlapping text is often completely illegible.
+  \item Labels should not overlap with the regions, since labels may be illegible.
+  \item Labels should be positioned closely to their associated region.
+\end{itemize}
+
+\noindent \textbf{Drawbacks and Limitations.} We here describe the algorithm.
+
+\end{document}
