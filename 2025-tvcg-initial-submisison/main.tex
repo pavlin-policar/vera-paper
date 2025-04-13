@@ -19,7 +19,7 @@
 \title{VERA: Generating Visual Explanations of Two-Dimensional Embeddings via Region Annotation}
 
 \author{Pavlin G. Poli\v{c}ar, Bla\v{z} Zupan
-        % <-this % stops a space
+% <-this % stops a space
 \thanks{P. G. Poli\v{c}ar is with the Faculty of Computer and Information Science, University of Ljubljana.}% <-this % stops a space
 \thanks{B. Zupan is with the Faculty of Computer and Information Science, University of Ljubljana and the Baylor College of Medicine.}}
 
@@ -72,49 +72,63 @@ VERA is specifically designed to automatically generate multiple static visual e
 \section{Related Work}
 \label{sec:related_work}
 
-%Alongside the development of novel dimensionality reduction approaches for visualization~\cite{Kruskal1978,Maaten2008,McInnes2018}, numerous visualization tools have also been developed to aid in understanding and establishing trust in the resulting embeddings.
-Alongside the development of novel dimensionality reduction approaches for the visualization of high-dimensional data~\cite{Kruskal1978,Maaten2008,McInnes2018}, numerous tools have been developed to aid in the assessing the quality of embeddings~\cite{Schreck2010,Seifert2010,Aupetit2007,LespinatsAupetit2011,Martins2014,Heulot2013,Stahnke2016,NonatoAupetit2019}, understanding the resulting visual structures~\cite{}, and comparing different embeddings between one another~\cite{Arendt2020,Sivaraman2022,Boggust2022}. While each important in their own right, we here limit ourselves to a review of tools aimed to help practitioners interpret and understand the produced embeddings.
+Alongside the development of novel dimensionality reduction approaches for the visualization of high-dimensional data~\cite{Kruskal1978,Maaten2008,McInnes2018}, numerous tools have been developed to aid in assessing the quality of the obtained embeddings~\cite{Martins2014,Stahnke2016,NonatoAupetit2019}, interpreting the resulting visual structures~\cite{ChengMueller2016,Marcilio2021,Fujiwara2020}, and comparing multiple embeddings~\cite{Arendt2020,Sivaraman2022,Boggust2022}.
 
-% One prominent avenue of research has focused on identifying distortions in embeddings, which are inevitably introduced during any dimensionality reduction process~\cite{NonatoAupetit2019}. Visual approaches range from visualizing local measures of stress~\cite{Schreck2010,Seifert2010} and neighborhood preservation metrics~\cite{Aupetit2007,LespinatsAupetit2011,Martins2014}, to interactive tools aimed at identifying and correcting distortions~\cite{Heulot2013,Stahnke2016}.
-% Nonato and Aupetit~\cite{NonatoAupetit2019} provide an excellent overview of embedding distortions and their associated methods.
-% While these methods are invaluable for assessing the trustworthiness and reliability of the produced embeddings, they offer little assistance in helping analysts understand the content and the uncovered patterns.
+Most embedding interpretation approaches aim to relate the obtained embedding to the original, high-dimensional features.
+General-purpose techniques implicitly assume that the original features are, to some degree, semantically meaningful and human-interpretable.
+In domains where this is not the case -- such as raw image pixels, word counts, or deep latent representations -- domain-specific solutions are often required, as in the case for text~\cite{Heimerl2016,WangHohmanChau2023} and images~\cite{Liu2019,Ye2024}.
 
-To aid in the interpretation of two-dimensional embeddings, existing research focuses on developing methods that relate different regions of the embedding space to particular high-dimensional feature values.
-While several approaches have proposed modifying non-linear dimensionality reduction algorithms to enhance interpretability~\cite{Couplet2023,Scicluna2023}, we here focus on techniques that aim to visually explain the different regions of the embedding.
+General-purpose interpretation techniques can be broadly divided into global and local approaches.
+Global approaches typically aim to express the embedding axes as linear combinations of the original features~\cite{Broeksema2013,Coimbra2016}.
+While effective for linear projections, most modern dimensionality reduction techniques rely on highly non-linear transformations of the original feature space, making global approaches unsuitable for interpreting these embeddings.
+Local approaches instead aim to explain local visual patterns such as clusters, transitions, and outliers and relate them to particular combinations of high-dimensional feature values.
+These methods typically enrich the resulting two-dimensional scatter plot with additional graphical elements or overlays~\cite{Joia2015,ChengMueller2016,Tian2021} or provide an interactive interface through which users can navigate and explore the embedding space~\cite{Kandogan2012,Stahnke2016,Bibal2021}. Broadly speaking, local approaches can be categorized into two types: descriptive approaches and contrastive approaches.
 
-Several approaches aim to explain embeddings globally, typically by expressing the embedding dimensions as linear combinations of the original features~\cite{Broeksema2013,Coimbra2016}.
-While global approaches work well for linear projections, many modern dimensionality reduction techniques rely on highly non-linear transformations of the original feature space, making these approaches inapplicable to embeddings produced by these methods.
-Local approaches instead focus on explaining local visual patterns such as clusters, transitions, and outliers in the embedding space.
-These methods typically enrich the resulting two-dimensional scatter plot with additional graphical elements~\cite{Joia2015,ChengMueller2016,Tian2021} or provide an interactive interface through which users can navigate and explore the embedding space~\cite{Kandogan2012,Stahnke2016,Bibal2021}.
+Descriptive approaches typically identify regions of the embedding space, most commonly clusters, and determine which combinations of high-dimensional feature values are characteristic of the samples contained within each cluster.
+Researchers have proposed several strategies to identify such feature combinations.
+For instance, Joia \etal~\cite{Joia2015} identify salient features by examining the SVD loadings associated with each visual cluster.
+Da Silva \etal~\cite{DaSilva2015} and subsequent extensions by Van Driel \etal~\cite{VanDriel2020} and Tian \etal~\cite{Tian2021} adopt a variance-based approach, identifying features that exhibit locally low variance within different embedding regions.
+A similar interactive, variance-based approach was also proposed by Pagliosa \etal~\cite{Pagliosa2016}.
+Alternatively, some methods embed both samples and features into a shared embedding space, enabling the identification of characteristic features based on their proximity to samples in the embedding space.
+For instance, Broeksema \etal~\cite{Broeksema2013} use Multiple Correspondence Analysis (MCA) to jointly embed samples and features, then identify characteristic regions using Voronoi tessellations. 
+Cheng and Mueller~\cite{ChengMueller2016} developed a conceptually similar approach using MDS for joint embedding and kernel density estimation for region definition.
 
-% Descriptive explanations
-Local approaches typically identify regions of the embedding space, most commonly clusters, and determine which feature values are characteristic of the data points contained within each cluster.
-Several strategies have been developed to identify the most salient features of a particular cluster.
-Joia \etal~\cite{Joia2015} developed an SVD-based approach to identify characteristic features in visual clusters.
-Da Silva \etal~\cite{DaSilva2015} and subsequent extensions by Van Driel \etal~\cite{VanDriel2020} and Tian \etal~\cite{Tian2021} identify low-variance features across different regions of the embedding.
-Pagliosa \etal~\cite{Pagliosa2016} developed and applied a similar, interactive, variance-based approach to visual clusters.
-Other approaches jointly embed samples and features into the same embedding space.
-For instance, Broeksema \etal~\cite{Broeksema2013} use multiple correspondence analysis to embed both samples and features into a single embedding space and use Voronoi tessellations to define regions of characteristic feature values in the embedding space.
-Cheng and Mueller~\cite{ChengMueller2016} developed a similar, MDS-based approach in which features are positioned near samples with high values of that particular feature. In their approach, regions are defined using kernel density estimates.
+While descriptive approaches help explain \textit{what} particular regions correspond to, contrastive approaches aim to explain how a given region \textit{differs} from other regions. In a recent survey of sociological literature, Miller~\cite{Miller2019} highlighted that humans prefer explanations of this kind and concluded that explanations in artificial intelligence should account for this preference.
+Contrastive approaches generally aim to identify combinations of feature values that distinguish one region from another, and a variety of techniques have been proposed to this end.
+Several approaches combine well-established statistical tools -- such as feature distribution plots~\cite{Stahnke2016,Eckelt2022}, statistical tests~\cite{Marcilio2021}, decision trees~\cite{Bibal2021}, and Shapley values~\cite{MarcilioEler2021} -- with intuitive, interactive user interfaces.
+Others propose custom solutions; for example, Fujiwara \etal~\cite{Fujiwara2020} propose a contrastive variant of PCA, while Kandogan~\cite{Kandogan2012} combines several hand-crafted metrics.
 
-% Contrastive explanations
-While identifying characteristic features for particular regions can help identify \textit{what} a particular region corresponds to, people generally tend to prefer contrastive explanations that describe the differences between regions~\cite{Miller2019}.
-Several approaches have been developed to generate contrastive explanations, often highlighting the differences between visual clusters in the embedding space.
-Kandogan~\cite{Kandogan2012} uses a combination of metrics to identify features that distinguish between clusters in the embedding.
-Fujiwara \etal~\cite{Fujiwara2020} identifies discriminative features using a contrastive variant of PCA.
-Marcilio \etal~\cite{Marcilio2021} use t-tests to identify characteristic features for each cluster, while Bibal \etal~\cite{Bibal2021} uses decision trees to identify discriminative features between clusters.
-Marcilio and Eler~\cite{MarcilioEler2021}, on the other hand, use Shapley values to explain clusters in the embedding.
-Importantly, all of these methods require some degree of user interaction, either manual cluster selection or manual interactive inspection of the identified features.
+Despite the plethora of existing approaches, existing interpretation approaches share several important limitations. Many require a high degree of user interaction -- such as defining clusters, selecting samples of interest, or interactive visual inspection -- which can be time-consuming and cumbersome, especially when analysts simply want a high-level overview of the structures identified in the embedding. This is particularly cumbersome when comparing multiple embeddings.
+While comprehensive interactive tools allow analysts to explore the embedding at various levels of granularity and drill into interesting patterns, they are often excessive when the analyst simply wants to obtain a quick, high-level overview of the structures revealed in the embedding.
+Other approaches are limited to providing a single explanation, often focusing on the one most salient combination of feature values while neglecting others, potentially interesting but less potent combinations.
+Several approaches are tightly coupled to specific dimensionality reduction techniques, reducing their general applicability across methods. Finally, many rely on clustering to define regions of interest, which risks overlooking continuous structures in the embedding space—such as gradual transitions or trajectories—that do not conform to discrete cluster boundaries.
 
-Interactive interfaces have been developed to facilitate the exploration of two-dimensional embeddings~\cite{Stahnke2016,Chatzimparmpas2020,Eckelt2022,WangHohmanChau2023}.
-Many of these tools are limited to a single dimensionality reduction algorithm~\cite{Broeksema2013,Chatzimparmpas2020,Bibal2020}, which limits their general applicability.
-In addition, interactive tools require user input by design. While they often provide helpful functionality to facilitate common data exploration tasks, they ultimately still require some degree of user interaction, which can be time consuming and cognitively demanding.
+To address the challenges highlighted above, we propose VERA, an automatic approach for generating static visual explanations of arbitrary two-dimensional embeddings.
+VERA generates multiple contrastive and descriptive explanations of a given embedding, allowing analysts to get a quick, high-level overview of the obtained embedding without loading embeddings into full-fledged graphical interfaces.
+Unlike most existing methods, VERA does not rely on identifying discrete clusters in the embedding space, and can identify and annotate arbitrary visual structures in the embedding space.
+
+%Importantly, all of these methods require some degree of user interaction, either manual cluster selection or manual interactive inspection of the identified features.
+
+
+% While identifying characteristic features can help explain \textit{what} a particular region corresponds to, people generally prefer explanations that highlight differences between regions~\cite{Miller2019}.
+% Several approaches have been developed to generate contrastive explanations, often highlighting the differences between visual clusters in the embedding space.
+% Kandogan~\cite{Kandogan2012} uses a combination of metrics to identify features that distinguish between clusters in the embedding.
+% Fujiwara \etal~\cite{Fujiwara2020} identifies discriminative features using a contrastive variant of PCA.
+% Marcilio \etal~\cite{Marcilio2021} use t-tests to identify characteristic features for each cluster, while Bibal \etal~\cite{Bibal2021} uses decision trees to identify discriminative features between clusters.
+% Marcilio and Eler~\cite{MarcilioEler2021}, on the other hand, use Shapley values to explain clusters in the embedding.
+% Importantly, all of these methods require some degree of user interaction, either manual cluster selection or manual interactive inspection of the identified features.
+
+%Interactive interfaces have been developed to facilitate the exploration of two-dimensional embeddings~\cite{Stahnke2016,Chatzimparmpas2020,Eckelt2022,WangHohmanChau2023}.
+%Many of these tools are limited to a single dimensionality reduction algorithm~\cite{Broeksema2013,Chatzimparmpas2020,Bibal2020}, which limits their general applicability.
+%In addition, interactive tools require user input by design. While they often provide helpful functionality to facilitate common data exploration tasks, they ultimately still require some degree of user interaction, which can be time consuming and cognitively demanding.
+
+%While some authors have proposed modifying dimensionality reduction algorithms to make them more interpretable~\cite{Couplet2023,Scicluna2023}, most approaches explain the obtained embedding post-hoc. Post-hoc approaches have the benefit that they can be applied to any dimensionality reduction algorithm.
 
 % Summary paragraph
-In this manuscript, we propose VERA, a fully automatic approach for generating static visual explanations of arbitrary two-dimensional embeddings.
-VERA generates local explanations that associate different regions of the embedding space with particular high-dimensional feature values.
-Unlike most existing methods, VERA does not rely on identifying clusters in the embedding space, and can identify regions that span clusters or identify subregions of clusters.
-Drawing on insights from the social sciences, we design VERA to generate contrastive explanations, ensuring that the explanations generated are informative, relevant, and satisfying.
+% In this manuscript, we propose VERA, a fully automatic approach for generating static visual explanations of arbitrary two-dimensional embeddings.
+% VERA generates local explanations that associate different regions of the embedding space with particular high-dimensional feature values.
+% Unlike most existing methods, VERA does not rely on identifying clusters in the embedding space, and can identify regions that span clusters or identify subregions of clusters.
+% Drawing on insights from the social sciences, we design VERA to generate contrastive explanations, ensuring that the explanations generated are informative, relevant, and satisfying.
 
 \section{Methods}
 
@@ -354,14 +368,16 @@ To evaluate the effectiveness of our approach, we conducted a comparative user s
 
 \subsection{Study Design}
 
-We choose the Orange data mining toolkit~\cite{Demsar2013} as our interactive tool of choice because of its ease of use and focus on visual data exploration. Orange includes many standard visualization tools for exploring two-dimensional nonlinear embeddings, including scatter plots and box plots. A typical workflow in Orange might include loading data, data embedding in scatter visualisation, selecting groups of points, and comparing their feature distributions to the remaining data points in a box plot.
+We select the Orange data mining toolkit~\cite{Demsar2013} as our interactive tool of choice because of its ease of use and focus on visual data exploration.
+While not explicitly designed for interpreting embeddings, Orange includes many standard visualization tools for exploring two-dimensional embeddings. Many related approaches based on feature distribution plots~\cite{Stahnke2016,Eckelt2022} and disciminative models~\cite{Bibal2021,Marcilio2021} can be easily reproduced in Orange using only a handful of widgets.
+%A typical workflow for interpreting a specific cluster might involve loading data, embedding and visualizing it in scatter plot, selecting groups of points, and comparing their feature distributions to the remaining samples using a box plot.
 
 We prepare two sets of three real-world data sets each, with varying complexity.
 The first data set group $D_1$ comprises the Iris~\cite{Anderson1936}, Employee Attrition~\cite{IbmEmployeeAttrition}, and Raisin~\cite{RaisinDataset} data sets. The second data set group $D_2$ includes the Penguins~\cite{Horst2020}, Titanic~\cite{Dawson1995}, and Wine Quality~\cite{Cortez2009} data sets. For each data set, participants were asked to answer a series of typical questions during the exploration of two-dimensional embeddings, e.g., ``What makes this cluster different from the remaining clusters?'', ``What characterizes the samples in this cluster?'', and ``Do you notice any trend along this region?''.
 
 We recruited 57 bachelor's students enrolled in the Introduction to Machine Learning course at the Faculty of Computer and Information Science at the University of Ljubljana.
 Prior to the study, the participants had some familiarity with Orange but were not familiar with VERA explanations. Before conducting the study, we provided a short tutorial on both Orange and VERA explanations.
-We randomly assigned participants to one of two user groups. The first group $G_1$ first used Orange to answer questions related data sets $D_1$, then used VERA explanations for questions relating to data sets in $D_2$. Conversely, the second group $G_2$ first used VERA to answer questions relating to $D_1$, then used Orange to answer questions relating to the data sets in $D_2$. On average, students answered $29.2$ of the $32$ questions ($\text{SE}=0.56$), amounting to a total of $1,666$ responses.
+We randomly assigned participants to one of two user groups. The first group $G_1$ first used Orange to answer questions related data sets $D_1$, then used VERA explanations for questions relating to data sets in $D_2$. Conversely, the second group $G_2$ first used VERA to answer questions relating to $D_1$, then used Orange to answer questions relating to the data sets in $D_2$. On average, students answered $29.2$ of the $32$ questions ($\text{SD}= 4.3$, $\text{SE}=0.56$), amounting to a total of $1,666$ responses.
 
 To asses the participant's response time and accuracy, we timed how long it took each participant to answer each question related to a particular data set group and determined whether they answered the questions correctly. Upon completing both data set groups, we asked participants to answer a final questionnaire in which they could provide feedback related to the two tools.
 
