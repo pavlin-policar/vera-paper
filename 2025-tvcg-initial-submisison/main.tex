@@ -112,194 +112,163 @@ To address the challenges highlighted above, we propose VERA, an automatic appro
 VERA generates multiple contrastive and descriptive explanations of a given embedding, allowing analysts to get a quick, high-level overview of the obtained embedding without the need to actively explore embeddings in full-fledged graphical interfaces.
 Unlike most existing methods, VERA does not rely on identifying discrete clusters in the embedding space, and can identify and annotate arbitrary visual structures in the embedding space.
 
-%Importantly, all of these methods require some degree of user interaction, either manual cluster selection or manual interactive inspection of the identified features.
-
-
-% While identifying characteristic features can help explain \textit{what} a particular region corresponds to, people generally prefer explanations that highlight differences between regions~\cite{Miller2019}.
-% Several approaches have been developed to generate contrastive explanations, often highlighting the differences between visual clusters in the embedding space.
-% Kandogan~\cite{Kandogan2012} uses a combination of metrics to identify features that distinguish between clusters in the embedding.
-% Fujiwara \etal~\cite{Fujiwara2020} identifies discriminative features using a contrastive variant of PCA.
-% Marcilio \etal~\cite{Marcilio2021} use t-tests to identify characteristic features for each cluster, while Bibal \etal~\cite{Bibal2021} uses decision trees to identify discriminative features between clusters.
-% Marcilio and Eler~\cite{MarcilioEler2021}, on the other hand, use Shapley values to explain clusters in the embedding.
-% Importantly, all of these methods require some degree of user interaction, either manual cluster selection or manual interactive inspection of the identified features.
-
-%Interactive interfaces have been developed to facilitate the exploration of two-dimensional embeddings~\cite{Stahnke2016,Chatzimparmpas2020,Eckelt2022,WangHohmanChau2023}.
-%Many of these tools are limited to a single dimensionality reduction algorithm~\cite{Broeksema2013,Chatzimparmpas2020,Bibal2020}, which limits their general applicability.
-%In addition, interactive tools require user input by design. While they often provide helpful functionality to facilitate common data exploration tasks, they ultimately still require some degree of user interaction, which can be time consuming and cognitively demanding.
-
-%While some authors have proposed modifying dimensionality reduction algorithms to make them more interpretable~\cite{Couplet2023,Scicluna2023}, most approaches explain the obtained embedding post-hoc. Post-hoc approaches have the benefit that they can be applied to any dimensionality reduction algorithm.
-
-% Summary paragraph
-% In this manuscript, we propose VERA, a fully automatic approach for generating static visual explanations of arbitrary two-dimensional embeddings.
-% VERA generates local explanations that associate different regions of the embedding space with particular high-dimensional feature values.
-% Unlike most existing methods, VERA does not rely on identifying clusters in the embedding space, and can identify regions that span clusters or identify subregions of clusters.
-% Drawing on insights from the social sciences, we design VERA to generate contrastive explanations, ensuring that the explanations generated are informative, relevant, and satisfying.
-
 \section{Methods}
 
 \begin{figure*}[t]
   \centering
   \includegraphics{fig_variable_values.pdf}
-  \caption{\label{fig:variable_values}We visualize each feature of our fictional Bookworm data set in the typical scatter plot fashion. The point positions are specified by a two-dimensional embedding of the data set. Categorical variables are colored with a discrete colormap, while the two numeric variables are colored with a continuous colormap. Missing values are colored gray.}
+  \caption{\label{fig:variable_values}Scatter plots for each feature of our fictional Bookwork dataset. The point positions correspond to the its two-dimensional embedding, revealing four distinct clusters connected by three transitions. Categorical variables are colored with a discrete colormap, while the two numeric variables are colored with a continuous colormap. Missing values are colored gray.}
 \end{figure*}
 
-Miller~\cite{Miller2019} posits that the process of explanation involves three cognitive processes: generation, selection, and evaluation. Of these three, VERA aims to automate the first and second. First, VERA generates several potential explanations -- all of which highlight a particular aspect of the embedding. Since these are unlikely to be equally informative, VERA then ranks and selects only the most salient of these in the second step. The selected explanations are then shown to the user, on whom the task of evaluating and contextualizing the explanations ultimately falls. 
+Miller~\cite{Miller2019} posits that the process of explanation involves three cognitive processes: generation, selection, and evaluation. In the context of explaining two-dimensional embeddings, VERA aims to automate the first and second of these three. First, VERA generates several potential explanations -- each of which describes a different pattern in embedding. Second, since some explanations are likely more informative than others, VERA ranks and selects only the most salient explanations to show to the user. Finally, the selected explanations are shown to the user, on whom the task of evaluating and contextualizing the explanations ultimately falls. 
 
-%In this section, we describe \textit{Visual Explanations via Region Annotation (VERA)}, our proposed approach for generating static visual explanations for two-dimensional embedding.
-%Miller~\cite{Miller2019} argues that, when generating everyday explanations, people tend to prefer contrastive explanations over descriptive explanations. Therefore, we design VERA with contrastivity in mind, and have taken great care that each step works towards generating informative and satisfying explanations.
-%Miller further posits that explanations involve three cognitive processes: explanation generation, selection, and evaluation. In this work, we aim to automate the first and second of these cognitive processes. In the first step, we generate several potential explanations, then rank and select the most salient of these in the second step. The evaluation step is ultimately left to the end user, as only they can evaluate the usefulness of an explanation for their particular problem. 
+We propose two different types of visual explanations: \textit{constrastive explanations} and \textit{descriptive explanations}.
+Constrastive explanations show how the values of a single, high-dimensional feature are distributed across the embedding space.
+Descriptive explanations, on the other hand, list the feature values that describe specific regions of the embedding space.
+Contrastive explanations can help answer questions like ``Where do the different feature values occur?'' while descriptive explanations answer questions like ``What feature values are characteristic for this region?''.
 
-%Before proceeding, we must first define the necessary terminology. 
-Given an arbitrary data set $D \in \mathbb{R}^{N \times |F|}$ and its corresponding two-dimensional embedding $Y \in \mathbb{R}^{N \times 2}$, our aim is to visually relate different regions of $Y$ back to the original, high-dimensional features $F$.
-We refer to each high-dimensional feature $f \in F$ as a \textit{base variable}.
-Base variables can take on a wide range of values, some of which may be characteristic of particular regions of $Y$. For instance, data points in a particular cluster may all share the same category or contain similar numeric values.
-We package groupings of informative values into \textit{rules}, which typically define some particular categorical value or some numeric interval of values.
+Given an arbitrary data set $D \in \mathbb{R}^{N \times |F|}$ and its corresponding two-dimensional embedding $Y \in \mathbb{R}^{N \times 2}$, our aim is to relate different regions of $Y$ back to the original, high-dimensional features $f \in F$.
+Some feature values may be characteristic of specific regions of $Y$, for instance, data points in a particular cluster may all share the same category or contain similar numeric values.
+We associate groups of informative values into \textit{rules}, defining a particular category or numeric interval.
 A rule $\varphi_i$ is defined as a function $\varphi: Y \rightarrow \left \{ 0, 1
 \right \} $, which evaluates to $1$ if the rule condition is met for a given data sample $y$ and $0$ otherwise.
-Rules are associated with \textit{regions} via \textit{explanatory variables} $e_i$. Explanatory variables represent pairs of rules $\varphi_i$ and regions $r_i$, $e_i = \left ( r_i, \varphi_i \right )$.
+Rules are associated with \textit{regions} via \textit{region annotations} $e_i$, which represent pairs of rules $\varphi_i$ and regions $r_i$, $e_i = \left ( r_i, \varphi_i \right )$.
 Each region $R_i$ represents a set of points $R_i = \{ y_1, y_2, \cdots, y_N \} \subseteq Y$ contained within the region.
-Explanatory variables $\{ e_1, e_2, \cdots, e_k \}$ can be merged into \textit{explanatory variable groups} $e_{\text{group}}$ associated with rule $\varphi_{\text{group}}(y) = \prod_{i=1}^k \varphi_i(y)$ and region $R_{\text{group}} = \bigcup_{i=1}^{k} R_i$. As explanatory variable groups serve the same purpose as explanatory variables, we use the two terms interchangeably.
-Once we have identified a set of informative explanatory variables $E = \left \{ e_1, e_2, \cdots, e_K \right \}$, we next want to display these to the user. Simultaneously displaying all $K$ explanatory variables to the user in a single plot would likely result to overlapping regions, unreadable labels, and overall information clutter.
-Instead, we group explanatory variables into \textit{panel} $P \subseteq E$ that follow the principles of contrastive explanation. We refer to each panel as a \textit{visual explanation} and use the two terms interchangeably.
-Finally, a single panel will typically convey information about a single base variable or group of correlated base variables or may show a single partitioning of the embedding space.
-Therefore, we show the user a user-specified number of panels. We refer to a collection of panels as a \textit{layout} $L = \left \{ P_1, P_2, \cdots, P_L \right \}$.
+Region annotations $\{ e_1, e_2, \cdots, e_k \}$ can be merged into \textit{region annotation groups} $e_{\text{group}}$ associated with rule $\varphi_{\text{group}}(y) = \prod_{i=1}^k \varphi_i(y)$ and region $R_{\text{group}} = \bigcup_{i=1}^{k} R_i$. Since region annotation groups serve the same purpose as region annotations, we use the two terms interchangeably.
+Once we have identified a set of informative region annotations $E = \left \{ e_1, e_2, \cdots, e_K \right \}$, the next step is to display these to the user. Simultaneously displaying all region annotations to the user in a single image would result in overlapping regions and labels, rendering the visualization unreadable.
+Instead, we group region annotations into \textit{panels} $P \subseteq E$ (also referred to as \textit{visual explanations}) and arrange collections of panels into \textit{layouts} $L = \left \{ P_1, P_2, \cdots, P_L \right \}$. A layout is then displayed in a small multiple fashion.
 
-We describe the two different types of visual explanations proposed in this work.
-\textit{Constrastive explanations} typically consider a single base variable and depict where in the embedding space particular values of that variable occur.
-\textit{Descriptive explanations}, on the other hand, aim to describe what feature values are characteristic for specific regions of the embedding space.
-Contrastive explanations can help answer questions like ``Where do the different values of this feature occur?'' while descriptive explanations aid in answering questions like ``What feature values are characteristic for this cluster?''.
+In the upcoming sections, we use a fictional, guiding example to outline the individual steps of our approach.
+This fictional dataset, aptly named the Bookworm dataset, comprises of samples corresponding to books owned by an imaginary literary enthusiast. Each book is chracterized by seven features: book language, genre, number of pages, year and country of purchase, whether or not the book owners had children at the time of purchase, and whether or not the book was purchased for personal use or as a gift.
+Fig.~\ref{fig:variable_values} shows the distribution of feature values across in a specially-designed two-dimensional embedding.
 
-In the following sections, we illustrate the different steps of our approach using a fictional, guiding example.
-We construct a synthetic dataset, where each point corresponds to a book owned by a fictional literary enthusiast, which we aptly call the Bookworm dataset.
-The dataset consists of seven features: book language, genre, number of pages, year and country of purchase, whether or not the book owners had children at the time of purchase, and whether or not the book was purchased for personal use or as a gift.
-A two-dimensional embedding of this dataset is provided in advance, showing four distinct clusters of books connected by three transitions. The embedding, colored by the seven different feature values, is shown in Fig.~\ref{fig:variable_values}.
-
-Through these books, we can manually trace the life of this fictional bookworm. The books in the bottom left cluster give us a peek into their childhood; the cluster is filled with children's books, presumably given to them by their parents. Their teenage years are characterized by the bottom right cluster, filled with longer science fiction books. After spending their formative years in the United Kingdom, they packed up their belongings and made Germany their new home, where their literary tastes switched to the German classics, which remained their favorite books to this day. Soon thereafter, they had their first child, which they also decided to raise with an appreciation for the literary arts. However, to ensure their child be instilled with a sense of British national pride, they stubbornly refused to allow their child to read books from Germanic authors, and enforced a strict English, literature diet.
-
-In the subsequent sections, we will develop the building blocks of VERA and, through those, uncover this same life story, but in an automated fashion.
-
+Through these books, we can trace the life of this fictional book collector. The bottom left cluster give us a peek into their childhood; filled with children's books, presumably given to them by their parents. Their teenage years are represented by the bottom right cluster, filled with longer science fiction books. After spending their formative years in the United Kingdom, the collector relocates to Germany, where their literary tastes shift to German classics, which remain their favorites to this day. Soon thereafter, they have their first child, in which they also resolve to instill an appreciation for the literary arts. However, to preserve their child's British heritage, they limit their offspring to a strict diet of English literature.
+While this story can be inferred by carefully examining Fig.~\ref{fig:variable_values}, the following sections will show how VERA can produce explanations that uncover this narrative automatically.
 
 \subsection{Region Construction}
 \label{sec:region-construction}
 
-Visualization regions represent collections of data points in the embedding that share a common characteristic and serve as the fundamental building block in the construction of visual explanations.
-A region represents a collection of one or more polygons in the embedding space, each containing a set of data points. Ideally, a region should contain all data points with a particular characteristic and exclude all other data points. However, in most real-world embeddings, there is rarely a clean separation between points with a particular feature value and those without.
-
-At a high level, our region construction procedure follows three steps, depicted in Fig.~\ref{fig:region_construction}. For each base variable, we group samples based on their feature values, determining several ranges of numeric values or particular categories. We then pair each semantic rule with a spatial region of the embedding space in which the data points satisfy the rule. Finally, we merge over-fragmented, overlapping regions to obtain more informative regions.
+Region annotations are the fundamental building blocks of visual explanations, representing groups of data points in the embedding that share a common characteristic.
+In this section, we outline the steps to identify and construct informative region annotations. We discuss how to combine these regions into informative visual explanations in the next two sections.
+At a high level, our region construction procedure follows three steps, depicted in Fig.~\ref{fig:region_construction}.
 
 \begin{figure*}[t]
   \centering
   \includegraphics{fig_construct_regions.pdf}
-  \caption{\label{fig:region_construction}We illustrate the region construction process for a single variable using a synthetic example. (a) Two-dimensional embeddings are often inspected by coloring points by their corresponding feature values. However, the informativeness of this approach is often limited by the color scale which can be skewed in the presence of outliers. (b) We discretize the numeric values into five bins, resulting in five binary indicator variables. Here, points here are colored according to their discretization bin membership. (c) For each of the discretized bins, we extract regions by obtaining a contour from the corresponding KDE. (d) Finally, we merge ovelapping regions to obtain more informative and readable visualization.}
+  \caption{\label{fig:region_construction}We illustrate the region construction process for a single feature using a synthetic example. (a) Two-dimensional embeddings are often inspected by coloring points by their corresponding feature values. (b) We discretize the numeric values into five bins, resulting in five binary indicator variables. Here, points here are colored according to their discretization bin membership. (c) For each of the discretized bins, we extract regions by tracing the contours of the corresponding KDE. (d) Finally, we merge ovelapping regions to obtain more informative and readable visualization.}
 \end{figure*}
 
 \subsubsection{Extracting Explanatory Variables}
+\label{sec:discretization}
 
-An input data set $D$ can contain both categorical and numeric variables. Since our aim is to explain regions of the embedding in terms of the base variables' values, we must first identify regions in the embedding space in which variable values or ranges of values are localized.
-For each numeric variable, we discretize its values into $k$ bins using $k$-Means quantization. Each bin is then represented as a binary indicator variable which indicates each sample's membership to that particular bin. By default, we discretize numeric variables into five bins corresponding to the typical five-point scale: ``very low'', ``low'', ``medium'', ``high'', and ``very high''. For instance, the numeric variable in Fig.~\ref{fig:region_construction}.a is discretized into five bins, shown in Fig.~\ref{fig:region_construction}.b. Categorical variables are one-hot encoded, resulting in $k$ binary indicator variables, each indicating membership to a particular category. Each of the produced indicator variables is associated with a rule $\varphi_i$ indicating its discretization interval or category assignment. This procedure is repeated for each base variable, producing a collection of explanatory indicator variables, each associated with a binary assignment rule, corresponding to a particular value range or category.
+An input data set $D$ can include both categorical and numeric features.
+For categorical features, we apply one-hot encoding, indicating each sample's membership to a particular category in $k$ binary indicator variables.
+For numeric features, we use \mbox{$k$-Means} quantization to discretize their values into $k$ bins, each represented by a binary indicator variable indicating whether a sample falls within that bin.
+For example, the numeric feature in Fig.~\ref{fig:region_construction}.a is discretized into five bins, with Fig.~\ref{fig:region_construction}.b indicating bin membership using color.
+We apply these transformations to each input feature, associating each resulting indicator variable with a rule $\varphi_i$ that specifies its discretization interval or category assignment.
+The procedure results in a collection of binary indicator variables which form the basis for constructing region annotations.
 
-\subsubsection{Constructing Explanatory Regions}
+\subsubsection{Constructing Region Annotations}
 
-To construct regions, we adopt a procedure similar to that of \textit{splatterplots}~\cite{MayorgaGleicher2013}. For each binary indicator variable, we obtain its kernel density estimate (KDE) $D$ using a Gaussian kernel and extract contour lines at a user-specified level, defaulting at $0.25 \cdot \max D$.
-In our running example, the five categories corresponding to discretization bins in Fig.~\ref{fig:region_construction}.b are used to construct five corresponding regions, shown in Fig.~\ref{fig:region_construction}.c.
-%Note that, in general, when particular feature values are enriched in multiple regions of the space, the KDE may be multimodal, and we may end up with more than one contour line.
-Having obtained both rules and regions for each binary, indicator variable, we can now package these into explanatory variables $e_i$, containing rules $\varphi_i$ and regions $r_i$.
+Having obtained a collection of binary indicator variables and their associated rules, we next determine where their corresponding samples appear in the embedding. 
+For each variable, we obtain its kernel density estimate (KDE) $D$ using a Gaussian kernel.
+If sample-wise distortion measures of the embedding are provided, we incorporate them as weights during the estimation step to avoid generating explanations of poorly mapped samples in the embedding space. These regions likely correspond to spurious artifacts of the dimensionality reduction process rather any true underlying structure.
+Next, we extract contour lines of the KDE at a user-specified level and use the resulting polygons as our visual representation of a region $r_i$. By default, we extract contour lines at $0.25 \cdot \max D$.
+Each region corresponds to one or more polygons in the embedding space, encompassing samples that predominantly share a particular feature value.
+In our running example, the five categories corresponding to discretization bins in Fig.~\ref{fig:region_construction}.b are used to construct the five corresponding regions shown in Fig.~\ref{fig:region_construction}.c.
+We then combine the obtained rules and regions into region annotations $e_i = \left( r_i, \varphi_i \right)$, which serve as the building blocks for constructing visual explanations.
 
-An important consideration when estimating the KDE is setting the bandwidth $\sigma$ of the Gaussian kernel.
+An important consideration of the KDE step is setting the Gaussian kernel bandwidth $\sigma$.
 Different embedding algorithms produce embeddings that can span across different scales, e.g., one embedding may span from $-1$ to $1$ along its dimensions, while another may span from $-10$ to $10$.
-Additionally, a single scale parameter may not be appropriate for data sets containing different numbers of samples. For instance, in a dataset with 50 samples, we are likely interested in groups of 10-20 points, while in a dataset containing 2 million samples, the groups of interest are likely larger.
-Conceptually, the scale parameter provides an implicit trade-off between region understandability and complexity.
-The scale can be used to specify the level of detail of the extracted regions with larger scales resulting in more general, big-picture explanations of the embedding and smaller bandwidths revealing more fine-grained details.
-We here set the scale to equal the median distance of each point's $k$-th nearest neighbor, where we set $k=\sqrt{N}$.
-To allow users to modulate the trade-offs between understandability and complexity, users can modify the scale via a scaling factor parameter.
-
-When embedding high-dimensional data sets into two-dimensions, dimensionality reduction methods inevitably introduce distortions into the resulting embedding~\cite{Martins2014,Lehmann2016,NonatoAupetit2019}. Including poorly mapped samples in the kernel density estimation may result in the detection of spurious regions, which may mislead the user. To remedy this, users can provide mapping distortion estimates for each data point, which are subsequently used to weight samples in the KDE step.
+Additionally, a single scale parameter is unlikely to be appropriate for data sets containing different numbers of samples. For instance, in a dataset with 50 samples, we are likely to be interested in groups of 10-20 points, while in a dataset containing 2 million samples, the groups of interest are likely larger.
+By default, we set $\sigma$ to be equal to the median distance of each point's $k$-th nearest neighbor, setting $k=\sqrt{N}$, although this parameter can be adjusted by the user.
+Intuitively, the scale parameter controls the granularity of the obtained region anntations:
+small values lead to a larger number of smaller regions revealing fine-grained details, while large values generate larger regions, resulting in more high-level explanations.
 
 \subsubsection{Post-hoc Region Merging}
 \label{sec:post-hoc-merge}
 
-In our treatment of numeric variables, we discretized features to obtain semantic ranges of feature values. However, it is unlikely that a single number of bins will result in the optimal discretization for all numeric variables.
-For instance, in Fig.~\ref{fig:region_construction}.c, the values in the top section of the embedding are discretized into three bins, resulting in overlapping regions that clutter the visualization. Spatially, however, these three regions exhibit nearly perfect overlap and could be merged into a single region.
-Similar issues can arise with overlapping categories in categorical variables.
-To reduce this kind of spatial overlap, we develop a post-hoc merging procedure for the explanatory variables obtained from the previous steps.
+When constructing explanatory variables, we assign each sample to one of the resulting binary indicator variables, indicating its membership to a particular category or value range.
+However, it is common for samples belonging to different groups to occupy the same regions of the embedding space.
+For example, the discretization step in Fig.~\ref{fig:region_construction}.c assigns the samples in the top part of the embedding into three separate region annotations.
+However, spatially, these regions exhibit near perfect overlap and, upon inspecting their associated rules, we find that they could be consolidated into a single region annotation.
+Merging these kinds of regions would reduce the number of rules and regions, simplifying the resulting visual explanations and, ultimately, reducing the cognitive load on the end user.
 
-When considering a merge of two regions, we must first ensure a sufficiently high degree of spatial overlap. At this phase, we only consider merging explanatory variables originating from the same base variable.
+In order to identify and merge overlapping and semantically related regions, we develop a post-hoc merging procedure.
+The procedure identifies overfragmented regions derived from a single feature and consolidates them into a single region annotation.
+For a set of region annotations to be merged, they must satisfy two criteria: high spatial overlap and compatibility between their associated rules.
+
+Determining the semantic compatibility of rules is straightforward. For rules derived from ordinal or numeric features, only consecutive bins or categories may be merged. For rules originating from nominal categorical features, any combination of categories can be merged.
+
+Determining the degree of spatial overlap between two regions is similarly straighforward.
 We define the \textit{maximum overlap} between two regions $r_i$ and $r_j$ as
 \begin{equation}
 \text{max\_overlap}(r_i, r_j) = \max \left \{ \frac{|r_i \cap r_j|}{|r_i|}, \frac{|r_j \cap r_i|}{|r_j|} \right \}, \notag
 \end{equation}
-where $|r|$ denotes the number of points within the region. If the maximum overlap between two regions exceeds a user-specified threshold, in our case defaulting to $0.5$, we merge the two regions.
-The maximum overlap ensures that small regions, which are completely contained within larger region, are merged into the larger region.
+where $|r|$ denotes the number of samples within that region.
+A pair of regions can be merged if their maximum overlap exceeds a predetermined threshold.
+This formulation ensures that small regions, which are completely contained within larger regions, can be absorbed into larger regions.
 
-Each explanatory variable is comprised of a region $r_i$ containing points $y_i$, the majority of which satisfy its associated rule $\varphi_i$. To quantify the proportion of data points satisfying the rule in a given region, we define the \textit{purity} of a region $r_i$ as
-\begin{equation}
-\text{purity}(r) = \frac{1}{|r|} \sum_{y_i \in r} \varphi_i (y_i). \notag
-\end{equation}
-Merging two low-overlap regions may decrease the purity of the resulting region.
-To quantify the effect of a potential merge, we define the purity gain of two regions as
-\begin{equation}
-\text{purity\_gain}(r_i, r_j) = \max \left \{ \frac{\text{purity}(r_{\text{new}})}{\text{purity}(r_j)} - 1, \frac{\text{purity}(r_{\text{new}})}{\text{purity}(r_j)} - 1 \right \}. \notag
-\end{equation}
-To avoid unreliable, low-purity regions, we require the maximum purity gain to exceed a user-specified threshold, in our case defaulting to $0.5$.
+A set of region annotations is merged if at least one pair satisfies both criteria.
+In our running example, the three region annotations in the top of Fig.~\ref{fig:region_construction}.c exhibit near-perfect overlap and their associated rules are semantically compatible. Therefore, the three regions can be merged into a single region annotation, shown in Fig.~\ref{fig:region_construction}.d.
 
-When merging two explanatory variables, it is also important to consider the semantic compatibility of the two associated rules.
-For ordinal and discretized numeric features, we allow the merging of consecutive bins. For instance, the discretization rules $\{ x < 5, 5 \leq x < 6, 6 \geq x\}$ could be merged into $\{x < 6, 6 \geq x\}$, but not into $\{ 5 \leq x < 6, x < 5 \mid x \geq 6\}$.
-%The same restrictions apply to ordinal categorical variables, only allowing the merging of adjacent categories. For instance, the ordinal categories $\{1, 2, 3, 4\}$ could be merged into $\{\{1, 2, 3\}, \{4\}\}$, but not into $\{\{1, 4\}, \{2, 3\}\}$.
-Nominal categorical features have no natural ordering, therefore, we apply no such restrictions to these.
-%We apply no such restriction to nominal categorical variables. For example, the categorical variable values $\{red, green, blue\}$ could be merged into $\{\{red, blue\}, \{green\}\}$.
-
-Two explanatory variables are merged if they satisfy all three criteria.
-For instance, in our running example in Fig.~\ref{fig:region_construction}, consider the top region of the embedding in Fig.~\ref{fig:region_construction}.c. The three regions exhibit near-perfect overlap, scoring a maximum overlap close to 1. Because the underlying data points are distributed evenly among the three regions, the purity of each individual region is close to $1/3$. If we merge any pair of these three regions, the new region would include roughly $2/3$ of the points, giving a purity gain of about $2$. Finally, the three rules are semantically compatible and can be merged into a single, open-ended interval. The final, merged explanatory variable is shown in Fig.~\ref{fig:region_construction}.d.
-
-Features whose values exhibit no spatial correlation with the embedding space are merged into a single explanatory variable. These variables hold no explanatory power and are discarded from subsequent analysis.
-Having obtained our final explanatory variables, we can apply filtering to enforce a minimum size and purity, discarding small and unreliable regions.
+Following the region construction step, features with little or no spatial correlation produce overlapping regions that extend across the entire embedding space.
+Our post-hoc merging procedure merges these regions into a single region annotation that spans the entire embedding space and encompasses all feature values.
+Since these region annotations provide no meaningful information about the structure of the embedding space, we discard them from subsequent analysis.
 
 \subsection{Contrastive Explanations}
 \label{sec:contrastive}
 
-Contrastive explanations show where particular values of a given base variable occur in the region. This is akin to coloring points in a scatter plot based on their feature values, one feature at a time, but with two advantages. First, our procedure filters out spatially irrelevant features and ranks the remaining ones in terms of their information content, allowing the user to inspect only the most relevant features. Second, by performing discretization, our approach prevents outliers skewing the color scale, a common nuisance in scatter plots.
+Contrastive explanations show how the values of a particular feature are distributed across the embedding space.
+While conceptually similar to coloring points based on their feature values, our approach automatically filters out spatially irrelevant features and ranks the remaining ones according to their informativeness in explaining the observed patterns. This allows users to focus on the most relevant features without having to manually sift through potentially large numbers of available features.
+%Second, color scales based on numeric values are often skewed by extreme values, making the resulting visualizations difficult to read. Although such distortions are easily corrected, they remain a common nuisance. The discretization step described in Section~\ref{sec:discretization} eliminates this problem entirely, ensuring clearer visualizations without additional user effort.
 
 \subsubsection{Explanation Construction}
 
-The region construction process generates a set of explanatory variables for each base variable, each associated with its own region of the embedding space. While we could directly construct panels by including all explanatory variables for each base variable, we can further refine these further for contrastive explanations.
+Constructing contrastive visual explanations is straightforward: we simply include all region annotations $e_i$ associated with a particular feature $f$.
+However, even after filtering, we may still need be left with a large number of candidate explanations.
+To further reduce the number of candidate visual explanations, we develop a procedure to automatically identify and merge features with a high degree of spatial overlap.
 
-We devise the \textit{contrastive merge}, which merges spatially overlapping explanatory variables from different base variables into explanatory variable groups. Unlike the post-hoc merging procedure described in Section~\ref{sec:post-hoc-merge}, where we merged only explanatory variables originating from a single base variable, we here merge pairs of explanatory variables between two base variables.
-To perform the contrastive merge between two base variables $v_1$ and $v_2$, we require that each explanatory variable $e_i \in v_1$ has a spatially overlapping $e_j \in v_2$. If such a bipartite matching is found, we merge all bipartite pairs of explanatory variables, effectively merging two base variables into one.
-For instance, the two panels depicting two base variables in Fig.~\ref{fig:contrastive_merge} exhibit perfect overlap and are subsequently merged into a single panel.
-This procedure not only reduces the number of panels needed to convey the same amount of information but can also reveal potentially non-linear correlations between high-dimensional features.
+The \textit{contrastive merge} combines features with near-perfectly spatially overlapping region annotations. Unlike the post-hoc merging procedure described in Section~\ref{sec:post-hoc-merge}, which merges only region annotations originating from a single feature, we here merge pairs of region annotations belonging to two or more different features.
+In order for two features $f_1$ and $f_2$ to be merged, we require that each associated region annotations $e_i \in f_1$ have a nearly perfectly spatially overlapping counterpart $e_j \in f_2$. If such a bipartite matching is found, we merge the matching pairs of region annotations, effectively representing two features using a single collection of region annotations.
+For example, the left panel in Fig.~\ref{fig:contrastive_merge} depicts two separate features whose region annotations exhibit near-perfect overlap and can be merged into a single explanation shown on the right.
+This procedure not only reduces the number of candidate visual explanations, but communicates more information using fewer panels, while at the same time revealing relationships between high-dimensional features.
 
 \begin{figure}[t]
   \centering
   \includegraphics{fig_contrastive_merge.pdf}
-  \caption{\label{fig:contrastive_merge}The contrastive merge. If two base variables contain explanatory variables whose regions have a perfect overlap bipartite matching, we can merge the two base variables into one. This not only reduces the number of panels a user needs to inspect but also reveals correlations between particular variable values.}
+  \caption{\label{fig:contrastive_merge}The contrastive merge. If two features contain region annotations that have a nearly perfect overlap bipartite matching, we can merge the two features into one. This not only reduces the number of panels a user needs to inspect but also reveals relationships between features.}
 \end{figure}
 
 
 \subsubsection{Explanation Selection}
 \label{sec:contrastive-selection}
 
-Generating contrastive explanations is straightforward: We simply include all explanatory variables associated with each high-dimensional, base variable in separate panels.
-However, this alone provides little benefit to the user, as they would then have to inspect as many panels as there are features.
-Instead, we develop a ranking procedure that identifies the most informative features and orders them by their spatial localization.
+To identify visual explanations most likely to be informative to end users, we develop a ranking procedure based on three criteria: spatial localization, region purity, and the number of contained region annotations.
 
-Features whose values are localized to particular regions of the embedding space are likely to be more informative than features with values spread evenly across the embedding space. Explanatory variables associated with highly-localized features exhibit lower overlap between their regions than those associated with evenly distributed features. We compute the overlap between two explanatory variables as the Jaccard similarity of their regions. To obtain the \textit{total region overlap} of a panel $P$, we compute the mean overlap between all pairs of explanatory variables $(e_i, e_j) \in P \times P, i \neq j$.
+Features whose values are localized to particular regions of the embedding space are likely to be more informative than features with values spread evenly across the embedding space. Region annotations associated with highly-localized features exhibit lower overlap between their regions than those associated with evenly distributed features.
+We define the overlap between two explanatory variables as the Jaccard similarity of their regions and obtain the \textit{total region overlap} of a panel $P$ by computing the mean overlap between all pairs of explanatory variables $(e_i, e_j)$.
 
-The purity of each region indicates what proportion of the samples encompassed by the region satisfy the associated rule. High-purity regions signify a stronger spatial pattern than low-purity regions, and should be preferred. For each panel, we compute the \textit{mean purity} of the contained explanatory variables.
+The purity of each region indicates what proportion of the samples encompassed by the region satisfy the associated rule:
+\begin{equation}
+\text{purity}(r) = \frac{1}{|r|} \sum_{y_i \in r} \varphi_i (y_i). \notag
+\end{equation}
+High-purity regions signify a stronger spatial pattern than low-purity regions, and should be preferred. For each panel, we compute the \textit{mean purity} of the contained explanatory variables.
 
 A well-known finding from psychology states that human working memory has limited capacity and can pay attention to only a handful of items at a time. Several bounds have been proposed, including seven~\cite{Miller1956}, four~\cite{Cowan2001}, and two~\cite{Gobet2004}. We apply these findings to explanation selection, using an intermediate estimate of 3. Panels containing a large number of explanatory variables place more cognitive load on the user and are likely to overwhelm the user, therefore, simpler panels with fewer explanatory variables are preferred. To quantify this effect, we define the \textit{human attention score} $\left | 3 - |P| \right |$ where $|P|$ denotes the the number of contained explanatory variables in panel $P$.
 
-We compute these three metrics for each panel and rank the panels accordingly. This results in three panel rankings. To obtain a single, final panel ranking, we compute the weighted sum of individual rankings and select the top $k$ panels with the highest overall rankings. This process is illustrated in Fig.~\ref{fig:contrastive_generation}.
+We compute panel rankings for each of these three metrics and obtain a single, final panel ranking by computing the weighted sum of individual rankings. We then select the top $k$ panels with the highest overall rankings as our final contrastive explanations. This process is illustrated in Fig.~\ref{fig:contrastive_generation}.
 
 \begin{figure}[t]
   \centering
   \includegraphics{fig_contrastive_selection.pdf}
-  \caption{\label{fig:contrastive_generation}Contrastive layout generation. (a) Generating candidate panels simply involves including all explanatory variables associated with a particular base variable in a separate panel. Each candidate panel is scored and ranked according to three metrics, and a weighted mean rank is computed for each panel. (b) The top $k$ panels with the highest mean rank, indicated in red, are included in the resulting layout.}
+  \caption{\label{fig:contrastive_generation}Contrastive layout generation. (a) Generating candidate panels simply involves including all explanatory variables associated with a particular feature in a separate panel. Each candidate panel is scored and ranked according to three metrics, and a weighted mean rank is computed for each panel. (b) The top $k$ panels with the highest mean rank, indicated in red, are included in the resulting layout.}
 \end{figure}
 
 
 \subsection{Descriptive Explanations}
 
-Descriptive explanations describe regions of the embedding space by determining sets of features and feature values characteristic for each particular region. Unlike contrastive explanations, which characterize a single feature, descriptive explanations identify combinations of explanatory variables localized in the same regions of the embedding space across different base variables, uncovering potentially interesting relationships between features and feature values.
+Descriptive explanations describe regions of the embedding space by determining sets of features and feature values characteristic for each particular region. Unlike contrastive explanations, which characterize a single feature, descriptive explanations identify combinations of explanatory variables localized in the same regions of the embedding space across different features, uncovering potentially interesting relationships between features and feature values.
 
 \subsubsection{Explanation Construction}
 
@@ -336,10 +305,10 @@ Descriptive explanations are generated and selected in an iterative fashion.
 Given an initial set of available explanatory variables $S_0$, we first identify all potential combinations of explanatory variables such that the overlap between regions does not exceed some user-specified threshold. We cast this as an independent set problem, where each node in the graph corresponds to a particular explanatory variable, and edges are placed between them where the overlap between their corresponding regions exceeds the threshold. The independent sets of this graph correspond to collections of spatially non-overlapping regions, which are then considered candidate panels.
 
 A key consideration when generating descriptive explanations is how to enforce the principles of contrastive explanation.
-In contrastive explanations, the panels show regions of different feature values for single base variables and are contrastive by nature.
+In contrastive explanations, the panels show regions of different values for individual features and are contrastive by nature.
 Here, however, each panel can contain explanatory variables comprised describing different features. In this case, a user may not be able to compare regions with one another within a single panel, as the different regions may correspond to different features.
 
-To enforce a level of contrastivity, we score each panel according to its \textit{mean variable occurrence} (MVO). The MVO counts the occurrence of each included base variable in the explanatory variables and reports the mean value. A high MVO indicates that the many of the included base variables appeared in multiple explanatory variables. If a base variable appears in all explanatory variables, we assign a special  \textit{variable in all} (VIA) score of 1 and 0 otherwise.
+To enforce a level of contrastivity, we score each panel according to its \textit{mean variable occurrence} (MVO). The MVO counts the occurrence of each included feature in the explanatory variables and reports the mean value. A high MVO indicates that the many of the included features appeared in multiple explanatory variables. If a feature appears in all explanatory variables, we assign a special  \textit{variable in all} (VIA) score of 1 and 0 otherwise.
 
 
 Additionally, we score each panel according to its \textit{sample coverage}, i.e., what proportion of all data points are contained within any given region in the panel. We also include the \textit{mean purity} and \textit{human attention score} from Section~\ref{sec:contrastive-selection}, preferring panels with high-purity regions and panels with a manageable number of explanatory variables.
@@ -348,7 +317,7 @@ In order to select the best panel, we apply the same weighted rank-based approac
 We insert the most highly-ranked panel $P_{\text{max}}$ into the resulting layout, and the explanatory variables $e_i \in P_{\text{max}}$ are removed from the set of available explanatory variables $S_{t + 1} = S_{t} \setminus P_{\text{max}}$. We repeat the procedure until we generate the requested number of panels $k$ or until we run out of available explanatory variables $S$. The procedure is illustrated in Fig.~\ref{fig:descriptive_generation}.
 
 
-\section{Usage Scenario}
+\section{Usage Scenarios}
 \label{sec:case-studies}
 
 To demonstrate the versatility and effectiveness of VERA, we present the generated explanations across several diverse datasets.
@@ -377,29 +346,28 @@ Notice that many of the identified regions in Fig.~\ref{fig:attrition} do not co
 \begin{figure}[htb]
   \centering
     \includegraphics{case_study-abalone.pdf}
-    \caption{\label{fig:abalone}Contrastive explanations for a UMAP embedding of the Abalone dataset. Panels (a-d) highlight selected features, showing the spatial distribution of age, sex, and physical measurements, as well as correlations between related features.}
+    \caption{\label{fig:abalone}Contrastive explanations for a UMAP embedding of the Abalone dataset. Panels (a-d) highlight selected features, showing the spatial distribution of age, sex, and physical measurements, as well as correlations between features related to animal weight and size.}
 \end{figure}
 
-The Abalone dataset~\cite{Nash1994} is a well-known benchmark in regression tasks, containing 4,177 samples of abalones -- marine mollusks with distinctive ear-shaped shells. Each sample is characterized by eight features, including physical measurements of the body and shell, as well as biological attributes such as age and sex. We generate a two-dimensional embedding using the UMAP algorithm with the \textsf{umap-learn} library~\cite{McInnes2018}. The embedding reveals no distinct clusters, but forms an elongated shape spanning from left to right.
+The Abalone dataset~\cite{Nash1994} is a well-known benchmark in regression tasks, containing 4,177 samples of abalones -- marine mollusks with distinctive ear-shaped shells. Each sample is characterized by eight features, including physical measurements of the body and shell, as well as biological attributes such as age and sex. We generate a two-dimensional embedding with the UMAP algorithm using the \textsf{umap-learn} library~\cite{McInnes2018}. The obtained embedding reveals no distinct clusters, but forms an elongated shape stretching from left to right.
 
 Fig.~\ref{fig:abalone} shows selected contrastive explanations generated by VERA.
-Figs.~\ref{fig:abalone}.a and b show the spatial distribution of age and sex.
-Figs.~\ref{fig:abalone}.c and d highlight the benefits of the contrastive merge procedure. Fig.~\ref{fig:abalone}.c combines shucked weight, viscera weight, and whole weight into a single explanation, while diameter and length are merged in Fig.~\ref{fig:abalone}.d. By identifying these correlations, VERA reduces the number of explanations an analysts need to examine -- from five to two -- while simultaneously revealing the strong correlation between the two sets of features.
-Taken together, the four panels provide a high-level overview of the embedding structure: moving from left to right corresponds to increasing animal size, with small, infant animals appearing on the left. Additionally, the embedding suggests that sex is not correlated with animal size.
-This example highlights how the contrastive merge not only reduces redundancy in the feature space but also enables more interpretable, compact explanations by grouping mutually predictive attributes into unified regions.
+The explanations reveal that the elongated shape reflects the size and age of the abalones: younger abalones are smaller and lighter, while older abalones are larger and heavier. Fig.~\ref{fig:abalone}.b also suggests that the sex of the animals does not affect its size.
+Figs.~\ref{fig:abalone}.c and d highlight the benefits of the contrastive merge procedure. Fig.~\ref{fig:abalone}.c combines shucked weight, viscera weight, and whole weight into a single explanation, while Fig.~\ref{fig:abalone}.d combines shell diameter and length.
+This example illustrates how VERA can reduce the number of feature explanations analysts need to examine -- in this case from five to two -- while simultaneously revealing strong correlations between different sets of variables.
 
 \subsection{Iris and Penguin Datasets}
 
 \begin{figure}[ht]
   \centering
   \includegraphics{case_study-iris-penguins.pdf}
-  \caption{\label{fig:iris-penguins}Descriptive explanations of the Iris (a) and Penguin (b) data sets. Each explanation provides a complete high-level overview of the embedding structure.}
+  \caption{\label{fig:iris-penguins}Descriptive explanations of the Iris (a) and Penguin (b) data sets. Each explanation provides a comprehensive, high-level overview of the clusters revealed in the embedding.}
 \end{figure}
 
-The Iris~\cite{Anderson1936} and Penguin~\cite{Horst2020} datasets are widely used benchmarks in data visualization and machine learning due to their simplicity.
+The Iris~\cite{Anderson1936} and Penguin~\cite{Horst2020} datasets are widely used benchmarks in data visualization and machine learning due to their clear clustering strcuture and overall simplicity.
 Fig.\ref{fig:iris-penguins} shows one descriptive explanation for each data set, each of which provides a complete overview of the main patterns and relationships.
 In the Iris dataset (Fig.~\ref{fig:iris-penguins}.a), VERA identifies regions corresponding to the three species of iris flowers, each characterized by distinct combinations of sepal and petal measurements. For the Penguin dataset (Fig.~\ref{fig:iris-penguins}.b), VERA identifies clusters representing the three penguin species, separated by features such as flipper length and body mass.
-For simple data sets with relatively few features and well-defined clusters, a single descriptive explanation can be sufficient to capture the fully convey the structure of the embedding.
+For simple data sets such as these comprising relatively few features and having relatively well-defined clusters, a single descriptive explanation can be sufficient to capture the fully convey the structure of the embedding.
 
 
 \section{User Evaluation}
