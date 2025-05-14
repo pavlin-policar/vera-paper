@@ -72,7 +72,7 @@ VERA: Generating Visual Explanations of Two-Dimensional Embeddings \\ via Region
 
 \noindent We would like to submit our manuscript ``\textit{VERA: Generating Visual Explanations of Two-Dimensional Embeddings via Region Annotation}'' to be considered for publication in the ``\textit{IEEE Transactions on Visualization and Computer Graphics}'' as a Regular paper.
 
-We had submitted an earlier version of this manuscript to last year's IEEE Vis conference, where the reviewers raised several valid concerns that we have addressed in our revised paper. We would like to thank these reviewers for their valuable, detailed feedback, which helped us to improve the manuscript. Below, we provide point-by-point responses to the relevant comments and concerns raised by the reviewers.
+We had submitted an earlier version of this manuscript to last year's IEEE Vis conference, where the reviewers raised several valid concerns that we have addressed in our revised paper. We would like to thank these reviewers for their valuable, detailed feedback, which helped us to improve the manuscript. Below, we provide a selection point-by-point responses to the comments and concerns raised by the reviewers that are still applicable to this revised version of the paper.
 
 \vspace{3mm}
 
@@ -88,12 +88,12 @@ Bla\v{z} Zupan \\
 
 \subsection*{Reviewer 1}
 
-\reviewc{r1q1}{W1: From my understanding of the authors' system, I disagree with their base assertion that the system does not require some degree of human intervention. To begin the process, the embedding algorithm itself needs to be selected by a user, who must also tune the hyperparameters to produce an embedding that the VERA system can ingest. It can be fairly argued that this step is external to the VERA automated process, but it is undeniable that the system is dependent on receiving an embedding that contains meaningful regions, a fact that is noted by the authors in the final paragraph of Section 3.1.2.}
+% \reviewc{r1q1}{W1: From my understanding of the authors' system, I disagree with their base assertion that the system does not require some degree of human intervention. To begin the process, the embedding algorithm itself needs to be selected by a user, who must also tune the hyperparameters to produce an embedding that the VERA system can ingest. It can be fairly argued that this step is external to the VERA automated process, but it is undeniable that the system is dependent on receiving an embedding that contains meaningful regions, a fact that is noted by the authors in the final paragraph of Section 3.1.2.}
 
-\answer{}
+% \answer{}
 
 
-\reviewc{r1q2}{W2: Even if the previous point is ignored, the authors themselves state a number of human-tunable parameters that are necessary to adjust to that input embedding to produce a high-quality output from the VERA system, including level of KDE-based contour lines (Section 3.1.2), mapping distortion estimates for each data point (also 3.1.2), and region overlap threshold to determine whether regions should be joined (Section 3.1.3).  It could be argued that each of these parameters has a default and that setting them is optional, but using the defaults does not appear to guarantee a quality, meaningful VERA output.}
+\reviewc{r1q2}{W2: The authors state a number of human-tunable parameters that are necessary to adjust to that input embedding to produce a high-quality output from the VERA system, including level of KDE-based contour lines (Section 3.1.2), mapping distortion estimates for each data point (also 3.1.2), and region overlap threshold to determine whether regions should be joined (Section 3.1.3).  It could be argued that each of these parameters has a default and that setting them is optional, but using the defaults does not appear to guarantee a quality, meaningful VERA output.}
 
 \answer{}
 
@@ -103,9 +103,9 @@ Bla\v{z} Zupan \\
 \answer{While we agree that the guiding example used throughout the paper is very simple, we designed this dataset specifically in this way so that the different aspects and steps of our procedure could be demonstrated in a clear and visual manner. Moreover, while simple, this data set reflects many of the challenges relevant to our method in numerous real-world data sets.  However, we agree that including more real-world examples would better demonstrate the capabilities of VERA, therefore, we have added several more complex, real-world data sets to Section~\ref{sec:case-studies}.}
 
 
-\reviewc{r1q4}{W4: On the limitations point, the authors do note that the system is limited to datasets in which features have "human-readable, semantic meaning" and also encounters scaling problems as the number of features increases.  I would add several more limitations to these.  (1) the process of discretizing numeric variables into five bins assumes a normal of uniform distribution, whereas other distributions (skewed, bimodal) might be separated in a better way; (2) unless the term "binary indicator variable" is being incorrect used, these five bins still require further breakdown into five separate variables (as do any categorical variables with >2 classes), making the technique effectively limited to binary classification rather than naturally supporting multi-class classification;  (3) the process of merging variables assumes that consecutive order is important (x<5, 5<x<6, x>6), but there are cases such as correlations where values close to -1 and 1 share more in common than those close to 0.}
+% \reviewc{r1q4}{W4: On the limitations point, the authors do note that the system is limited to datasets in which features have "human-readable, semantic meaning" and also encounters scaling problems as the number of features increases.  I would add several more limitations to these.  (1) the process of discretizing numeric variables into five bins assumes a normal of uniform distribution, whereas other distributions (skewed, bimodal) might be separated in a better way; (2) unless the term "binary indicator variable" is being incorrect used, these five bins still require further breakdown into five separate variables (as do any categorical variables with >2 classes), making the technique effectively limited to binary classification rather than naturally supporting multi-class classification;  (3) the process of merging variables assumes that consecutive order is important (x<5, 5<x<6, x>6), but there are cases such as correlations where values close to -1 and 1 share more in common than those close to 0.}
 
-\answer{}
+% \answer{}
 
 
 \reviewc{r1q5}{M2: The system makes use of both descriptive and contrastive explanations, but only contrastive explanations are clearly called out in the Related Work.  Adding the "description explanation" keywords to the appropriate paragraphs in Section 2 will better highlight the differences between VERA and existing systems.}
@@ -113,7 +113,7 @@ Bla\v{z} Zupan \\
 \answer{Agreed. We have now made the categorization more explicit in the Related Work section.}
 
 
-\reviewc{r1q6}{M3:  At the end of Section 3.1.3, it is noted that "Features whose values exhibit no spatial correlation with the embedding space are merged into a single explanatory variable."  What percentage of features fall under this category in a typical embedding?  And does this number decrease if users tune the parameters noted in W1 to create a better embedding or in W2 to alter how the embedding is parsed?}
+\reviewc{r1q6}{M3:  At the end of Section 3.1.3, it is noted that "Features whose values exhibit no spatial correlation with the embedding space are merged into a single explanatory variable."  What percentage of features fall under this category in a typical embedding? And does this number decrease if users tune the parameters noted in W1 to create a better embedding or in W2 to alter how the embedding is parsed?}
 
 \answer{}
 
@@ -164,7 +164,7 @@ Moreover, I have other questions about scalability that isn't touched upon in th
 
 \reviewc{r2q6}{I greatly appreciate the detailed and natural language algorithm description, as it walks a reader through the different types of explanations. Using a synthetic dataset with known features and clusters is a good way to compare results (the figures emphasize this). I will say the amount of new terminology introduced is a little overwhelming at first since it's multiple levels of groups of points (lots of aggregating and merging!). Despite these pros, this section is rather long. Nearly 50\% of the paper is dedicated to this section and description. This balance makes the remainder of the paper feel rushed, and doesn't leave room for more examples, which I explain below.}
 
-\answer{}
+\answer{Agreed. We have now shortened the Methods section while keeping the natural language description of our approach, and have added three more examples to the case studies.}
 
 
 \reviewc{r2q7}{Since a major contribution of this work is the algorithm and the static labelled projection visualizations, it would be great to see more results on different datasets. This was also highlighted in the previous reviews, and while the new user study includes more than just the synthetic books datasets, we still don't get to see many many visualizations. I'd argue that showing many more examples would strongly help this submission given it's emphasis on static representation. I imagine a new figure (could even be full page, however I understand this would require cutting content - referring to my other concern above the algorithm sections could be compressed) that shows 3, 5, or even a dozen different embeddings as small multiples with the VERA approach applied to them to give readers a better idea of the approach and results.}

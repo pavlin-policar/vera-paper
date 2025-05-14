@@ -58,17 +58,18 @@ Each resulting embedding must then be inspected and interpreted, a task that is 
 
 % What are existing approaches, and why aren't they good enough?
 Existing research on interpreting two-dimensional embeddings has mostly focused on developing comprehensive interactive tools that help analysts explore every facet of resulting embeddings~\cite{}.
+%In complex domains, where raw feature values hold no semantic meaning, e.g. text, image, or video, the use of specialized approaches for each data modality is necessary. General purpose approaches, on the other hand, require that at least some of the features are human-interpretable.
 While these tools enable a detailed exploration of each particular embedding, the primary goal of EDA is often to obtain a high-level overview of the recovered structure rather than detailed investigation of each visual pattern.
 Although many tools offer features to speed-up and assist in the exploration process, e.g. automatic clustering or feature ranking, analysts must still actively navigate and make sense of the embedding, which is both cumbersome and time-consuming.
 A typical workflow might involve selecting a group of data points, inspecting their feature distributions, comparing these to the remaining data points, and annotating the visualization accordingly. This must, of course, be repeated for each interesting group of data points in each resulting embedding.
 Given the repetitive nature of this task, well-designed static approaches that require no user interaction can both speed up the interpretation process and reduce cognitive load on analysts.
 %While the analyst still needs to examine the outputs, doing so requires significantly less time and effort.
-%Static tools can also be easily integrated into automated pipelines, generating embedding explanations as a by-product. 
 %Once a particularly informative embedding is identified, the analyst can then turn to a more comprehensive interactive tool for deeper exploration of the embedding space.
 
 % How do we solve the problem?
-In this work, we propose \textit{Visual Explanations via Region Annotation (VERA)}, an automated embedding annotation tool for generating static visual explanations of two-dimensional embeddings.
-VERA automatically identifies and highlights features associated with distinct regions of the embedding, presenting them in a concise, small-multiple fashion. This approach helps analysts quickly and easily obtain a high-level overview of the obtained embedding.
+% TODO Incorporate the fact that we are dealing with general-purpose tools, not specific to some domain
+In this work, we propose \textit{Visual Explanations via Region Annotation (VERA)}, an automated general-purpose embedding annotation tool for generating static visual explanations of two-dimensional embeddings.
+Similarly to other general-purpose approaches, VERA operates on for datasets with at least some number of human-interpretable features, among which VERA automatically identifies and highlights features associated with distinct regions of the embedding, presenting them in a concise, small-multiple fashion. This approach helps analysts quickly and easily obtain a high-level overview of the obtained embedding.
 While a handful of static explanation approaches have already been proposed, these are often limited to a single explanation~\cite{DaSilva2015,VanDriel2020,Tian2021} or require the user to sift through a large number of output visualizations~\cite{Faust2019,Plumb2020}.
 A single explanation is often insufficient for explaining all relevant visual structures while requiring users to inspect a large number of visualizations diminishes much of their efficiency over interactive tools.
 In contrast, VERA generates a small set of highly informative visualizations, retaining the speed and simplicity of static visualizations without sacrificing the informativeness of interactive approaches in common exploratory data analysis tasks.
@@ -265,53 +266,61 @@ We compute panel rankings for each of these three metrics and compute their weig
 
 \subsection{Descriptive Explanations}
 
-Descriptive explanations describe regions of the embedding space by determining sets of features and their values that are characteristic for specific regions in the embedding space. Unlike contrastive explanations, which primarily focus on explaining single features, descriptive explanations identify combinations of feature values localized in the same regions of the embedding space, characterizing specific groups of samples.
+Descriptive explanations describe regions of the embedding space by determining sets of features and their feature values that are characteristic for the samples contained within these regions. Unlike contrastive explanations, which primarily show the distribution of a single feature, descriptive explanations describe regions in terms of combinations of multiple features.
 
 \subsubsection{Explanation Construction}
 
 \begin{figure}[t!]
   \centering
   \includegraphics{fig_descriptive_merge.pdf}
-  \caption{\label{fig:descriptive_merge}The descriptive merge. In this example, we consider a subset of three region annotations (a). In the first step, we split region annotation into disjoint regions (b). Then, we identify spatially overlapping region annotations and merge them into region annotation groups (c). In the final step, each region annotation group is enriched with background region annotation rules (d). In this instance, the middle panel depicting the pink region receives an additional, background descriptor, highlighted in red.}
+  \caption{\label{fig:descriptive_merge}The descriptive merge. In this example, we consider a subset of three region annotations (a). First, we split region annotations into disjoint regions (b). Then, we identify spatially overlapping region annotations and merge them into region annotation groups (c). Finally, each region annotation group is enriched with background rules (d). In this instance, the middle panel depicting the pink region receives an additional, background descriptor, highlighted in red.}
 \end{figure}
 
-As in contrastive explanation construction, the regions produced by the procedure outlined in Section~\ref{sec:region-construction} serve as a good starting point for generating explanations, but can be further refined to convey descriptive information using the \textit{descriptive merge}.
+To identify candidate regions and their characteristic feature values, our procedure finds sets of region annotations exhibiting a high degree of overlap and merges them into region annotation groups. Each resulting group then describes a particular region using the combination of features and feature values of each included region annotation.
+As in contrastive explanations, we use the region annotations produced by the region construction procedure outlined in Section~\ref{sec:region-construction} as our starting point.
 
-The \textit{descriptive merge} comprises of three basic steps. In the first step, we split region annotations comprised of multiple disjoint regions into separate region annotations. For instance, the three region annotations shown in Fig.~\ref{fig:descriptive_merge}.a each contain two disjoint regions, each of which is split into two region annotations in Fig.~\ref{fig:descriptive_merge}.b.
-
-After splitting disjoint regions, we next identify and group sets of overlapping region annotations into region annotations groups. 
+In order to find groups of overlapping region annotations, we devise the \textit{descriptive merge}, comprised of three steps, outlined in Fig.~\ref{fig:descriptive_merge}. First, we split region annotations containing multiple disjoint regions into separate region annotations. For instance, the three region annotations shown in Fig.~\ref{fig:descriptive_merge}.a each contain two disjoint regions, each of which is split into two region annotations in Fig.~\ref{fig:descriptive_merge}.b.
+  
+Second, we merge sets of overlapping region annotations into region annotations groups.
 Two region annotations can be merged if their regions $r_i$ and $r_j$ exhibit a sufficiently high degree of \textit{minimum overlap}:
 \begin{equation}
 \text{min\_overlap}(r_i, r_j) = \min \left \{ \frac{|r_i \cap r_j|}{|r_i|}, \frac{|r_j \cap r_i|}{|r_j|} \right \}. \notag
 \end{equation}
 
-This approach is similar to the post-hoc merging procedure described in Section~\ref{sec:post-hoc-merge}, where we required the maximum overlap to exceed a particular threshold. There, the maximum overlap metric ensured that smaller region annotations could be absorbed into larger, encompassing region annotations. Here, however, this approach would generate misleading annotations. Consider two region annotations $e_i$ and $e_j$ associated with rules $\varphi_i, \varphi_j$ and regions $r_i, r_j$ respectively. If $r_j$ corresponds to a small region, entirely contained within the larger region $r_i$, the merged rule $\varphi_{\text{new}}$ would indicate that the points within the new region satisfy both rules $\varphi_i$ and $\varphi_j$. Because the new region $R_{\text{new}}$ contains points from both $r_i$ and $r_j$, a large proportion of points in $e_{\text{new}}$ would not satisfy rule $\varphi_j$ and would be misleading. 
+Third, while the previous step merges region annotations exhibiting near-perfect overlap, these merged region annotations may not fully describe the characteristics of the samples within the region. For instance, the pink region in the middle panel of Fig.~\ref{fig:descriptive_merge}.c represents short children's books, obtained by merging the near-perfectly overlapping regions in Fig.~\ref{fig:descriptive_merge}.b highlighted in pink. However, these books are also fully contained within the yellow region corresponding to the English language in the left panel of Fig.~\ref{fig:descriptive_merge}.c. Therefore, it would be more informative to describe these books as short, English, children's books as shown in Fig.~\ref{fig:descriptive_merge}.d, rather than just short, children's books.
+To incorporate these additional characteristics, the third step enriches the generated region annotations with rules from larger, sufficiently overlapping regions.
+Importantly, we do not merge the regions themselves; we only add rules from the larger regions to the smaller ones.
+We refer to this process as \textit{background enrichment}.
 
-The merged regions produced in the previous step contain rules originating from regions with nearly perfect overlap. However, these new regions can be subsets of larger regions with their own associated rules. In the third step, provided the regions achieve a sufficiently high minimum overlap, we add rules from larger regions to the smaller, newly formed ones. Importantly, we do not merge the regions; we only add rules to the smaller regions.
-For example, the pink region in the middle panel of Fig.~\ref{fig:descriptive_merge}.c represents shorter children's books, obtained by merging the perfectly overlapping regions in Fig.~\ref{fig:descriptive_merge}.b highlighted in pink. However, these books are also contained within the yellow region in the left panel of Fig.~\ref{fig:descriptive_merge}.c, which corresponds to English books. The pink cluster in Fig.~\ref{fig:descriptive_merge}.c can therefore be enriched with the rule from the yellow cluster. The resulting explanatory variable is shown in Fig.~\ref{fig:descriptive_merge}.d. We refer to this step as \textit{background enrichment}.
+Step 2 is reminiscent of the post-hoc merging procedure described in Section~\ref{sec:post-hoc-merge}, where we required the \textit{maximum overlap} to exceed a pre-specified threshold. There, the maximum overlap ensured that smaller region annotations could be absorbed into larger, encompassing regions. Here, however, this approach would lead to misleading annotations.
+Consider merging two region annotations $e_i$ and $e_j$ associated with rules $\varphi_i, \varphi_j$ and regions $r_i, r_j$ respectively.
+If $r_j$ is a small region entirely contained within the larger region $r_i$, the points in $r_j$ will satisfy both rules $\varphi_i, \varphi_j$, while the remaining points in $r_i$ that are not in $r_j$ will not satisfy $\varphi_j$ but only $\varphi_i$.
+However, the merged rule $\varphi_{\text{new}}$ would indicate that the points within the merged region satisfy both rules $\varphi_i$ and $\varphi_j$, resulting in a misleading annotation. To avoid this, we here instead require a high degree of \textit{minimum overlap} between two regions, ensuring that both regions cover roughly the same data points and that the resulting annotation remains valid for all encompassed data points.
 
 \subsubsection{Explanation Selection}
 
 \begin{figure*}[t!]
   \centering
   \includegraphics{fig_descriptive_selection.pdf}
-  \caption{\label{fig:descriptive_generation}The descriptive layout generation follows an iterative approach. Given a set of available region annotations in (a), we identify non-overlapping combinations of these to be used as candidate panels. We show three such candidate panels in (b). Then, each panel is scored along five different metrics, which are subsequently ranked and averaged. The panel with the highest mean rank, indicated in red, is added to the resulting layout, shown in (c). Finally, we remove the region annotations in the selected panel from the set of available region annotations . We then repeat the procedure until we generate a specified number of panels or until we run out of region annotations.}
+  \caption{\label{fig:descriptive_generation}The descriptive layout generation follows an iterative approach: given a set of available region annotations in (a), we generate candidate panels by identifying their non-overlapping combinations. We show three such candidate panels in (b). Then, we score each panel along five different metrics, which are subsequently ranked and averaged. The panel with the highest mean rank, indicated in red, is added to the resulting layout, shown in (c). Finally, we remove the region annotations in the selected panel from the available region annotations. We then repeat the procedure until we obtain a specified number of panels or until we run out of region annotations.}
 \end{figure*}
 
-Descriptive explanations are generated and selected in an iterative fashion.
-Given an initial set of available region annotations $S_0$, we first identify all potential combinations such that the overlap between their associated regions does not exceed some user-specified threshold. We cast this as an independent set problem, where each node in the graph corresponds to a particular region annotation, and edges are placed between them where the overlap between their corresponding regions exceeds the threshold. The independent sets of this graph correspond to collections of spatially non-overlapping region annotations, which are then considered candidate panels.
+Descriptive explanations are obtained in an iterative fashion.
+Given an initial pool of available region annotations, we identify all their potential combinations such that the overlap between them does not exceed some user-specified threshold\footnote{Unlike in the merging procedure, in which overlapping region annotations were merged together, a high degree of overlap here would result in overlapping annotations in the final visualization, which would render the visualization unreadable.}.
+Each candidate panel is scored across five criteria. The resulting scores are ranked and aggregated using a mean-rank strategy, similar to that in Section~\ref{sec:contrastive-selection} and the highest-ranking panel is included in the final layout.
+The region annotations from the selected panel are then removed from the candidate pool, and the procedure is repeated until we generate the requested number of panels $k$ or until we run out of available region annotations. This procedure is illustrated in Fig.~\ref{fig:descriptive_generation}.
 
-A key consideration when generating descriptive explanations is how to enforce the principles of contrastive explanation.
-In contrastive explanations, the panels show regions of different values for individual features and are contrastive by nature.
-Here, however, each panel can contain region annotations describing different features. In this case, a user may not be able to compare regions with one another within a single panel, as the different regions may be characterized by different sets of features.
+In order to efficiently identify combinations of non-overlapping region annotations, we formulate this task as an independent set problem. We represent each region annotation as a node in a graph, and place edges between them if their overlap exceeds the threshold. Then, the independent sets of this graph correspond to sets of non-overlapping region annotations, which are then considered as candidate panels.
 
-To enforce a level of contrastivity, we score each panel according to its \textit{mean variable occurrence} (MVO). The MVO counts the occurrence of each included feature in the region annotations and reports the mean value. A high MVO indicates that the many of the included features appeared in multiple region annotations. If a feature appears in all region annotations, we assign a special \textit{variable in all} (VIA) score of 1 and 0 otherwise.
-
-Additionally, we score each panel according to its \textit{sample coverage}, i.e., what proportion of all data points are contained within any given region annotation in the panel. We also include the \textit{mean purity} and \textit{human attention score} from Section~\ref{sec:contrastive-selection}, preferring panels with high-purity regions and panels with a manageable number of region annotations.
-
-In order to select the best panel, we apply the same weighted rank-based approach as in Section~\ref{sec:contrastive-selection} to the five metrics described above.
-We insert the most highly-ranked panel $P_{\text{max}}$ into the resulting layout, and the region annotations $e_i \in P_{\text{max}}$ are removed from the set of available region annotations $S_{t + 1} = S_{t} \setminus P_{\text{max}}$. We repeat the procedure until we generate the requested number of panels $k$ or until we run out of available region annotations $S$. The procedure is illustrated in Fig.~\ref{fig:descriptive_generation}.
-
+Descriptive explanations are ranked and selected based on five criteria.
+The first three include the \textit{sample coverage}, i.e., what proportion of all data points are covered by the region annotations in the panel, the \textit{mean purity}, and the \textit{human attention score} from Section~\ref{sec:contrastive-selection}.
+These metrics favor panels that offer broad coverage of the embedding space, contain reliable regions, and remain visually manageable in terms of the number of annotations.
+The remaining two criteria ensure a degree of contrastivity, which, according to Miller~\cite{Miller2019}, should be more intuitive and satisfying to end users.
+Although descriptive explanations can characterise regions in terms of different, disjoint sets of features, we prioritize panels in which features appear across multiple region annotations. This allows users to compare feature values across different regions within a single panel rather than having to reference other visual explanations.
+To prioritize feature repetition, we score each panel according to its \textit{mean variable occurrence} (MVO), defined as the average number of times each feature appears across all region annotations within a particular panel.
+Panels with higher MVO scores are preferred, as they facilitate within-panel comparisons.
+We count the number of features that appear in all region annotations within a given panel in a dedicated \textit{variable in all} (VIA) score, favoring panels with higher VIA scores.
+Together, these five metrics ensure that we identify high-quality region annotations that cover the embedding space, and that their contents align with human preferences and cognitive abilities.
 
 \section{Usage Scenarios}
 \label{sec:case-studies}
@@ -349,7 +358,7 @@ The Abalone dataset~\cite{Nash1994} is a well-known benchmark in regression task
 
 Fig.~\ref{fig:abalone} shows four selected contrastive explanations generated by VERA.
 The explanations reveal that the elongated shape reflects the size and age of the abalones: younger abalones are smaller and lighter, while older abalones are larger and heavier. Fig.~\ref{fig:abalone}.b also suggests that the sex of the animals does not affect its size.
-Figs.~\ref{fig:abalone}.c and d highlight the benefits of the contrastive merge procedure. Fig.~\ref{fig:abalone}.c combines shucked weight, viscera weight, and whole weight into a single explanation, while Fig.~\ref{fig:abalone}.d combines shell diameter and length.
+Figs.~\ref{fig:abalone}.c-d highlight the benefits of the contrastive merge procedure. Fig.~\ref{fig:abalone}.c combines shucked weight, viscera weight, and whole weight into a single explanation, while Fig.~\ref{fig:abalone}.d combines shell diameter and length.
 This example illustrates how VERA can reduce the number of feature explanations analysts need to examine -- in this case from five to two -- while simultaneously revealing the strong correlation between these three features.
 
 \subsection{Iris and Penguin Datasets}
@@ -403,6 +412,9 @@ We expected that users would tend to trust full-featured, interactive toolkits l
 Finally, we asked participants which types of VERA explanations they found more informative, and asked them to rate each type of explanation for its usefulness on a typical five-point Likert scale. Consistent with Miller's~\cite{Miller2019} findings, most participants (75\%, $\text{SE}=6.6\%$) selected contrastive explanations as the most informative, while 15\% ($\text{SE}=5.4\%$) found both types of explanations equally informative, and 10\% ($\text{SE}=4.7\%$) found descriptive explanations more informative.
 Contrastive explanations received a higher overall rating of $4.3$ ($\text{SD}= 0.89$, $\text{SE}=0.13$), while descriptive explanations received a lower overall rating of $3.2$ ($\text{SD}= 1.06$, $\text{SE}=0.16$).
 We note that this result does not imply that descriptive explanations are not useful, but merely that users generally find contrastive explanations more informative than descriptive explanations.
+
+
+\section{Scalability Considerations}
 
 
 \section{Conclusion}
