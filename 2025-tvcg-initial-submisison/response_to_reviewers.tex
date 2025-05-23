@@ -72,7 +72,7 @@ VERA: Generating Visual Explanations of Two-Dimensional Embeddings \\ via Region
 
 \noindent We would like to submit our manuscript ``\textit{VERA: Generating Visual Explanations of Two-Dimensional Embeddings via Region Annotation}'' to be considered for publication in the ``\textit{IEEE Transactions on Visualization and Computer Graphics}'' as a Regular paper.
 
-We had submitted an earlier version of this manuscript to last year's IEEE Vis conference, where the reviewers raised several valid concerns that we have addressed in our revised paper. We would like to thank these reviewers for their valuable, detailed feedback, which helped us to improve the manuscript. Below, we provide a selection point-by-point responses to the comments and concerns raised by the reviewers that are still applicable to this revised version of the paper.
+We had submitted an earlier version of this manuscript to last year's IEEE Vis conference, where the reviewers raised several valid concerns that we have addressed in our revised paper. We would like to thank these reviewers for their valuable, detailed feedback, which helped us to improve the manuscript. Below, we provide point-by-point responses to the essential comments and concerns raised by the reviewers that are still applicable to this revised version of the paper.
 
 \vspace{3mm}
 
@@ -113,9 +113,9 @@ Bla\v{z} Zupan \\
 \answer{Agreed. We have now made the categorization more explicit in the Related Work section.}
 
 
-\reviewc{r1q6}{M3:  At the end of Section 3.1.3, it is noted that "Features whose values exhibit no spatial correlation with the embedding space are merged into a single explanatory variable."  What percentage of features fall under this category in a typical embedding? And does this number decrease if users tune the parameters noted in W1 to create a better embedding or in W2 to alter how the embedding is parsed?}
+%\reviewc{r1q6}{M3:  At the end of Section 3.1.3, it is noted that "Features whose values exhibit no spatial correlation with the embedding space are merged into a single explanatory variable."  What percentage of features fall under this category in a typical embedding? And does this number decrease if users tune the parameters noted in W1 to create a better embedding or in W2 to alter how the embedding is parsed?}
 
-\answer{}
+%\answer{}
 
 
 \reviewc{r1q7}{M4:  In Figure 5, the Language plot displays English in two distinct regions of the embedding rather than merging them into a single joined region.  Does this separation have an impact on user understanding, particularly after multiple features are joined to define a region?}
@@ -123,7 +123,7 @@ Bla\v{z} Zupan \\
 \answer{}
 
 
-\reviewc{r1q8}{M5:  Was there any thought given to extending explanations to describe why regions are (or are not) joined?  It's outside the scope of this system, but I'm thinking of the MNIST Digits dataset in particular.  How would a user interpret the decision underlying joining similar numbers like 1 and 7 but not other similar numbers like 6 and 8?}
+\reviewc{r1q8}{M5:  Was there any thought given to extending explanations to describe why regions are (or are not) joined?  It's outside the scope of this system, but I'm thinking of the MNIST Digits dataset in particular. How would a user interpret the decision underlying joining similar numbers like 1 and 7 but not other similar numbers like 6 and 8?}
 
 \answer{}
 
@@ -133,7 +133,7 @@ Bla\v{z} Zupan \\
 \answer{Agreed. We have now included measures of standard deviations and standard errors where appropriate.}
 
 
-\subsection*{Reviewer 2}
+%\subsection*{Reviewer 2}
 
 \reviewc{r2q1}{While the paper overall is well written and motivated, I cannot quite connect the dots for one of the main story points. Understanding embedding projections is challenging, yes. So this paper proposes a way to solve that, but through a static visualization. But the contribution is primarily an algorithm to label regions of a projection.}
 
@@ -142,19 +142,21 @@ Bla\v{z} Zupan \\
 
 \reviewc{r2q2}{The evaluation that was added to the end of the paper after some discussion from the previous reviews then compares the static visualization to an interactive visualization of the same thing, but without the automatic VERA labeling. This evaluation seems odd to me, as my expected comparison would have been how this algorithm compares to other projection labeling algorithms. I totally get the synergy of combining VERA with an interactive tool - it seems like every interactive tool should have the VERA approach built-in and be the default "on load" screen!}
 
-\answer{Thank you for this comment. While we agree that it would certainly make sense to compare VERA to other static labelling algorithms, we were, unfortunately, unable to find any directly comparable approaches. As noted in the Related Work section, the majority of existing tools are either interactive or limited to a single explanation, neither of which are, in our view, satisfying. After reviewing the literature, we found no actual comparisons between static tools and interactive tools, therefore, we decided that a comparison between the Orange data mining toolkit and VERA would be insightful. As we note in the Study Design section, many of the proposed interactive approaches can easily be reproduced in Orange, allowing a faithful comparison between VERA and interactive approaches more broadly.}
+\answer{Thank you for this comment. While we agree that a comparison between VERA and other static labelling algorithms would be valuable, we were, unfortunately, unable to find any directly comparable approaches either online or in the literature. As noted in the Related Work section, the majority of existing tools are either interactive, limited to a single explanation, or domain specific, and are not, in our view, directly comparable to VERA.
+
+After reviewing the literature, we were surprised to find no comparisons between static explanation tools and interactive explanation tools. Therefore, we decided that a comparison between the Orange data mining toolkit and VERA would be interesting to the field as a whole. As we note in the Study Design section, many of the proposed interactive approaches can easily be reproduced in Orange, allowing a faithful comparison between VERA and interactive approaches more broadly.}
 
 
-\reviewc{r2q3}{Given the length of the algorithm description, I expected the evaluation to be on it compared to other labeling algorithms, either in runtime performance, quality, or measuring user understanding. This relates to my next point below.}
+% \reviewc{r2q3}{Given the length of the algorithm description, I expected the evaluation to be on it compared to other labeling algorithms, either in runtime performance, quality, or measuring user understanding. This relates to my next point below.}
 
-\answer{}
+% \answer{As noted in ~\ref{r2q2}, we are unaware of any directly comparable static labelling approaches with which to compare our system.}
 
 
 \reviewc{r2q4}{Previous reviews ask about how the approaches scales. There has been some new texted added explaining that as features grow to the hundreds of thousands this approach may not work well since the labels will be long. It proposes using LLMs to summarize, which is neat, but my concerns are moreso for how this approach scales not just in features but also in number data points. For example, common use of dimensionality reduction is for ML datasets, which can have millions of points. There is no mention of scale in the current submission, and the only examples we see appear to have just a few hundred points.
 
 Moreover, I have other questions about scalability that isn't touched upon in the paper, which I found odd given it's strong algorithmic contribution. For example, how fast does this take to run? Is it in minutes, seconds, or interactive speed? How was it implemented? Where can it run? I see the code link but understand it's private until acceptance.}
 
-\answer{}
+\answer{Thank you for the suggestion. We have added a dedicated \textit{Scalability and Limitations} section to the manuscript, which includes both a theoretical time-complexity analysis of our approach, as well as  benchmarks that demonstrate the runtime and scaling of VERA.}
 
 
 \reviewc{r2q5}{While using dimensionality reduction of larger, labelled, high-dimensional dataset is useful for certain domains (mentioned in the submission), another common application for using this to cluster data for exploration in a unsupervised learning approach. Oftentimes in this case there is no additional metadata/features, or at least none that have interpretable units. It is written off that VERA would need to be extended to tackle this. Is there anything more that could be said here? Any hints, ideas, conjectures of applying VERA to these datasets?}
@@ -164,56 +166,58 @@ Moreover, I have other questions about scalability that isn't touched upon in th
 
 \reviewc{r2q6}{I greatly appreciate the detailed and natural language algorithm description, as it walks a reader through the different types of explanations. Using a synthetic dataset with known features and clusters is a good way to compare results (the figures emphasize this). I will say the amount of new terminology introduced is a little overwhelming at first since it's multiple levels of groups of points (lots of aggregating and merging!). Despite these pros, this section is rather long. Nearly 50\% of the paper is dedicated to this section and description. This balance makes the remainder of the paper feel rushed, and doesn't leave room for more examples, which I explain below.}
 
-\answer{Agreed. We have now shortened the Methods section while keeping the natural language description of our approach, and have added three more examples to the case studies.}
+\answer{Agreed. We have now shortened the Methods section while keeping the natural language description of our approach, and have added three more examples to the Usage Scenarios section.}
 
 
-\reviewc{r2q7}{Since a major contribution of this work is the algorithm and the static labelled projection visualizations, it would be great to see more results on different datasets. This was also highlighted in the previous reviews, and while the new user study includes more than just the synthetic books datasets, we still don't get to see many many visualizations. I'd argue that showing many more examples would strongly help this submission given it's emphasis on static representation. I imagine a new figure (could even be full page, however I understand this would require cutting content - referring to my other concern above the algorithm sections could be compressed) that shows 3, 5, or even a dozen different embeddings as small multiples with the VERA approach applied to them to give readers a better idea of the approach and results.}
+\reviewc{r2q7}{Since a major contribution of this work is the algorithm and the static labelled projection visualizations, it would be great to see more results on different datasets. This was also highlighted in the previous reviews, and while the new user study includes more than just the synthetic books datasets, we still don't get to see many many visualizations. I'd argue that showing many more examples would strongly help this submission given it's emphasis on static representation.}
 
-\answer{}
+\answer{Agreed. We have added VERA explanations of three more data sets, including the Abalone, Iris, and Penguins datasets.}
 
 
 \reviewc{r2q8}{It would be nice to have the related work partitioned, say into subsections or using paragraph titles to provide short descriptions for the different topics. While the related work is good, having these would help readability.}
 
-\answer{Having restructured much of the related work, ensuring the first sentence conveys the content of the paragraph, we think including headings would provide little benefit to the overall readability of the section. Therefore, in the interest of readability and keeping in mind the 12 page limit, we have decided not to include related work headings.}
+\answer{Having restructured the Related Work section, we think including headings would now provide little benefit to the overall readability of the section. In addition, given the 12-page limit, we have decided not to include related work headings.}
 
 
 
-\subsection*{Reviewer 3}
+%\subsection*{Reviewer 3}
 
-\reviewc{r3q1}{W1: The introduction could be strengthened by highlighting the techniques in VERA (e.g., contrastive and descriptive explanation selection/ranking) and user study results. While the current introduction provides background and motivation for embedding explanations, it lacks clarity on how VERA addresses mentioned challenges and its effectiveness.}
+%\reviewc{r3q1}{W1: The introduction could be strengthened by highlighting the techniques in VERA (e.g., contrastive and descriptive explanation selection/ranking) and user study results. While the current introduction provides background and motivation for embedding explanations, it lacks clarity on how VERA addresses mentioned challenges and its effectiveness.}
 
-\answer{}
-
-
-\reviewc{r3q2}{W2: The related work is comprehensive but overlooks recent interactive embedding visualization tools [e.g., 1–3]. For instance, WizMap [1] can automatically generate interactive embedding explanations. How does VERA differ from this work?
-\vspace{3mm}
-\\
-\noindent [1] Wang, Z. J., Hohman, F., \& Chau, D. H. (2023). WizMap: Scalable Interactive Visualization for Exploring Large Machine Learning Embeddings. arXiv preprint arXiv:2306.09328.
-\\
-\noindent [2] Lekschas, F. (2023). Regl-scatterplot: A scalable interactive javascript-based scatter plot library. Journal of Open Source Software, 8(84), 5275.
-\\
-\noindent [3] Sivaraman, V., Wu, Y., \& Perer, A. (2022, March). Emblaze: Illuminating machine learning representations through interactive comparison of embedding spaces. In 27th International Conference on Intelligent User Interfaces (pp.
-418-432).}
-
-\answer{Thank you for suggesting the additional references. We have now included a citation to WizMap, which is indeed relevant to our work. We now also mention three approaches that propose methods to compare multiple embeddings in the introductory paragraph of the Related Work section, including a citation to Emblaze. While not directly related to our work, comparing embeddings to one another is an adjacent task to ours. We have decided not to include the citation to Regl-scatterplot, since the publication describes a specific Javascript scatter plot rendering library which is not used in our work.}
+%\answer{}
 
 
-\reviewc{r3q3}{W3: VERA assumes that the features in the high dimensional space are interpretable. Many people use t-SNE and UMAP to generate 2D embedding visualizations for neural network's latent representation embeddings. These embeddings have a large number of dimensions (e.g., 1024 dimensions), and each dimension does not map to a human-understandable feature. How does VERA generalize to these ML embeddings? This is briefly discussed in the limitation section. I recommend mentioning the focus on tabular/interpretable features earlier in the paper.}
+% \reviewc{r3q2}{W2: The related work is comprehensive but overlooks recent interactive embedding visualization tools [e.g., 1–3]. For instance, WizMap [1] can automatically generate interactive embedding explanations. How does VERA differ from this work?
+% \vspace{3mm}
+% \\
+% \noindent [1] Wang, Z. J., Hohman, F., \& Chau, D. H. (2023). WizMap: Scalable Interactive Visualization for Exploring Large Machine Learning Embeddings. arXiv preprint arXiv:2306.09328.
+% \\
+% \noindent [2] Lekschas, F. (2023). Regl-scatterplot: A scalable interactive javascript-based scatter plot library. Journal of Open Source Software, 8(84), 5275.
+% \\
+% \noindent [3] Sivaraman, V., Wu, Y., \& Perer, A. (2022, March). Emblaze: Illuminating machine learning representations through interactive comparison of embedding spaces. In 27th International Conference on Intelligent User Interfaces (pp.
+% 418-432).}
 
-\answer{Agreed. We have now explicitly stated this limitation already in the related work section: ``General-purpose techniques implicitly assume that the original features are, to some degree, semantically meaningful and human-interpretable. In domains where this is not the case – such as raw image pixels, word counts, or deep latent representations – domain-specific solutions are often required, as in the case for text [27], [28] and images [29], [30].''}
-
-
-\reviewc{r3q4}{W4: Section 3 mentions some configurations in VERA, such as k-means quantization with k=5 and using top-3 explanation selection. How can users adjust these settings in practice? This is not detailed in Sections 4 and 5. It would be great if VERA is more interactive and allows users to easily change configurations through interactions (e.g., slider, drop-down menu).}
-
-\answer{}
-
-
-\reviewc{r3q5}{W5: Using Orange data mining toolkit as a baseline model may not be ideal since it lacks embedding explanations. I wonder if it is possible to use related works with embedding explanations as a stronger baseline model. Otherwise, it should be acknowledged in the limitation section.}
-
-\answer{We have now added the following sentence to the Study Design section: ``While not explicitly designed for interpreting embeddings, Orange includes many standard visualization tools for exploring two-dimensional embeddings. Many related approaches based on feature distribution plots~\cite{Stahnke2016,Eckelt2022} and disciminative models~\cite{Bibal2021,Marcilio2021} can be easily reproduced in Orange using only a handful of widgets.''. Prior to the study, we provided a short tutorial on how to use Orange in this manner. This is already included in the third paragraph of the Study Design section: ``Before conducting the study, we provided a short tutorial on both Orange and VERA explanations.''}
+% \answer{Thank you for suggesting the additional references. We have now included a citation to WizMap, which is indeed relevant to our work. We now also mention three approaches that propose methods to compare multiple embeddings in the introductory paragraph of the Related Work section, including a citation to Emblaze. While not directly related to our work, comparing embeddings to one another is an adjacent task to ours. We have decided not to include the citation to Regl-scatterplot, since the publication describes a specific Javascript scatter plot rendering library which is not used in our work.}
 
 
-\reviewc{r3q6}{M1: What does "satisfying explanations" mean? (Section 3) One might argue that "satisfying explanations" can elicit confirmation bias when interacting with VERA.}
+\reviewc{r3q3}{VERA assumes that the features in the high dimensional space are interpretable. Many people use t-SNE and UMAP to generate 2D embedding visualizations for neural network's latent representation embeddings. These embeddings have a large number of dimensions (e.g., 1024 dimensions), and each dimension does not map to a human-understandable feature. How does VERA generalize to these ML embeddings? This is briefly discussed in the limitation section. I recommend mentioning the focus on tabular/interpretable features earlier in the paper.}
+
+\answer{Agreed. We have now explicitly stated this limitation already in the related work section: ``General-purpose techniques implicitly assume that the original features are, to some degree, semantically meaningful and human-interpretable. In domains where this is not the case – such as raw image pixels, word counts, or deep latent representations – domain-specific solutions are often required, as in the case for text and images.''}
+
+
+%\reviewc{r3q4}{W4: Section 3 mentions some configurations in VERA, such as k-means quantization with k=5 and using top-3 explanation selection. How can users adjust these settings in practice? This is not detailed in Sections 4 and 5. It would be great if VERA is more interactive and allows users to easily change configurations through interactions (e.g., slider, drop-down menu).}
+
+%\answer{}
+
+
+\reviewc{r3q5}{Using Orange data mining toolkit as a baseline model may not be ideal since it lacks embedding explanations. I wonder if it is possible to use related works with embedding explanations as a stronger baseline model. Otherwise, it should be acknowledged in the limitation section.}
+
+\answer{We have now added the following sentence to the Study Design section: ``While not explicitly designed for interpreting embeddings, Orange includes many standard visualization tools for exploring two-dimensional embeddings. Many related approaches based on feature distribution plots and disciminative models can be easily reproduced in Orange using only a handful of widgets.''.
+
+Prior to the study, we provided a short tutorial on how to use Orange in this manner. This is already included in the third paragraph of the Study Design section: ``Before conducting the study, we provided a short tutorial on both Orange and VERA explanations.''}
+
+
+%\reviewc{r3q6}{M1: What does "satisfying explanations" mean? (Section 3) One might argue that "satisfying explanations" can elicit confirmation bias when interacting with VERA.}
 
 \answer{}
 

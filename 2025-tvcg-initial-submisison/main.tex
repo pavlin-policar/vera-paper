@@ -412,7 +412,33 @@ Contrastive explanations received a higher overall rating of $4.3$ ($\text{SD}= 
 We note that this result does not imply that descriptive explanations are not useful, but merely that users generally find contrastive explanations more informative than descriptive explanations.
 
 
-\section{Scalability Considerations}
+\section{Scalability and Limitations}
+
+When considering scalability, we consider two aspects: algorithmic complexity and visual limitations.
+
+\textit{Algorithmic complexity} can be analysed in terms of the number of samples $N$ and the number of features $F$.
+In VERA, the samples are used only during the region construction step described in Section~\ref{sec:region-construction}, where we obtain the KDE for each feature. A KDE can be efficiently computed in linear time using an FFT-accelerated interpolation-based approach, resulting in linear time complexity $\mathcal{O}(N)$.
+Since the remaining steps of VERA operate solely on the extracted region annotations, the overall time complexity with respect to $N$ is linear, reflected in Fig.~\ref{fig:benchmarks}.a. We also note that accurate estimates of the KDE can be obtained by subsampling the dataset.
+
+The number of features $F$ has a greater impact on runtime.
+After extracting the initial region annotations, VERA applies a post-hoc merging procedure to annotations from each feature, which takes linear time $\mathcal{O}(F)$.
+Both contrastive and descriptive explanations then construct an overlap graph of the resulting region annotations, which involves calculating the pairwise overlap betweeen all pairs of region annotations, requiring $\mathcal{O}(F^2)$ time. The overlap graph is then used for both contrastive and descriptive merge steps.
+In contrastive explanations, the remaining step is a linear time panel ranking, resulting in an overall time complexity of $\mathcal{O}(F^2)$, as can be seen in Fig.~\ref{fig:benchmarks}.b.
+In descriptive explanations, we use the merged region annotations to construct a second overlap graph and use its independent sets as candidate panels. Finding independent sets is NP-hard, requiring $\mathcal{O}(2^F)$ time.
+However, the actual runtime of our procedure is often much lower and can vary significantly across datasets, as illustrated in Fig.~\ref{fig:benchmarks}.b.
+This is due to the descriptive merge step, which often greatly reduces the total number of candidate region annotations, resulting in a much smaller graph and, consequently, lower independent set runtime.
+For datasets with a large number of features $F$, we have found that greedy graph coloring results in good approximate solutions and requires only linear time. In this case, descriptive explanation generation is dominated by the graph construction $\mathcal{O}(F^2)$.
+Although both contrastive and descriptive explanations exhibit superlinear time complexity, VERA remains practical for many real-world datasets, with execution times ranging from seconds to a few minutes on standard hardware.
+
+\textit{Visual limitations} primarily affects descriptive explanations, particularly when the number of features is large. In these cases, VERA may produce long lists of region descriptors -- particularly when background enrichment is used -- which pose two key challenges.
+First, long descriptor lists impose a cognitive burden on users, who must manually inspect and interpret the output. Second, these lists consume screen space, leading to visual clutter: labels may overlap with each other or with data points, extend off-screen, or otherwise obstruct the view.
+Future work could mitigate these issues by leveraging large language models (LLMs) to generate short, informative summaries of long region descriptors.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics{benchmarks.pdf}
+  \caption{\label{fig:benchmarks}We benchmark the single-core performance of VERA on a consumer-grade M1 MacBook Pro on different-sized synthetic datasets. (a) VERA scales linearly in the number of samples $N$, as shown by the six near-straight lines, corresponding to datasets with a different number of features $F$. (b) Runtime with respect to the number of region annotations (after post-hoc merging and filtering) $F$ for contrastive and descriptive explanation generation.}
+\end{figure}
 
 
 \section{Conclusion}
@@ -422,13 +448,13 @@ Here, we introduced \textit{Visual Explanations via Region Annotation (VERA)}, a
 Our approach leans on insights from social sciences to design highly informative visualizations that align closely with human cognitive processes, and generates explanations that are both informative and satisfying.
 VERA addresses several key limitations of current interactive and static approaches, both retaining the speed efficiency of static approaches while at the same time remaining as informative as its comprehensive interactive counterparts on many exploratory data analysis tasks.
 Despite its effectiveness, our work could be extended in several important ways and provides opportunities for future research.
-Extending VERA to handle diverse data modalities, including image, video, text, and graph data, addressing scalability with large feature sets, and exploring integration with interactive analytics platforms all represent promising directions. Furthermore, recent advances in large language models for semantic summarization could be leveraged to generate more concise and relevant annotations.
+Extending VERA to handle diverse data modalities, including image, video, text, and graph data, addressing scalability with large feature sets, and exploring integration with interactive analytics platforms all represent promising directions. Furthermore, recent advances in LLMs for automatic summarization could be leveraged to generate more concise and relevant annotations.
 Overall, VERA represents a meaningful step towards a fast and effective approach for explaining two-dimensional non-linear embeddings.
 
 
 \section*{Code Availability}
 
-Our open-source, Python implentation of VERA is freely-available at \url{https://github.com/pavlin-policar/vera} and is licensed under the BSD-3 license.
+Our open-source, Python implentation of VERA is freely-available at \url{https://github.com/pavlin-policar/vera} and is licensed under the BSD-3 license. The materials used to prepare this manuscript are available at \url{https://github.com/pavlin-policar/vera-paper}.
 
 
 \section*{Acknowledgments}
