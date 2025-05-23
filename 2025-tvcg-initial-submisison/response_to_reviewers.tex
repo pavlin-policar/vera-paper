@@ -120,12 +120,12 @@ Bla\v{z} Zupan \\
 
 \reviewc{r1q7}{In Figure 5, the Language plot displays English in two distinct regions of the embedding rather than merging them into a single joined region.  Does this separation have an impact on user understanding, particularly after multiple features are joined to define a region?}
 
-\answer{}
+\answer{\textcolor{red}{Na to ne bi odgovarjal, ker je konfuzno. Pravzaprav sploh ne razumem, kaj sprašuje.}}
 
 
 \reviewc{r1q8}{Was there any thought given to extending explanations to describe why regions are (or are not) joined?  It's outside the scope of this system, but I'm thinking of the MNIST Digits dataset in particular. How would a user interpret the decision underlying joining similar numbers like 1 and 7 but not other similar numbers like 6 and 8?}
 
-\answer{}
+\answer{\textcolor{red}{Tudi na to ne bi odgovarjal. Odgovor na to je: regije, ki se ne prekrivajo dovolj, se ne združuje. Tukaj ni nič bolj pametnega zadaj. Konkretno na primeru MNIST-a bi uporabnik dobil nesmiselne razlage, ker bi anotacije naštevale piksle, ki imajo takšno ali drugačno vrednost.}}
 
 
 \reviewc{r1q9}{In the results in Section 5.2, reporting standard deviations along with the means and p-values would be useful context.}
@@ -137,7 +137,7 @@ Bla\v{z} Zupan \\
 
 \reviewc{r2q1}{While the paper overall is well written and motivated, I cannot quite connect the dots for one of the main story points. Understanding embedding projections is challenging, yes. So this paper proposes a way to solve that, but through a static visualization. But the contribution is primarily an algorithm to label regions of a projection.}
 
-\answer{}
+\answer{\textcolor{red}{Blaž, na to ne znam odgovoriti. Introduction sem prestrukturiral in upam, da je zdaj povezava med doprinosom in težavo, ki jo izpostavljamo, bolj razvidna. Verjetno pa lahko ta komentar tudi izpustim iz tega cover letter-ja.}}
 
 
 \reviewc{r2q2}{The evaluation that was added to the end of the paper after some discussion from the previous reviews then compares the static visualization to an interactive visualization of the same thing, but without the automatic VERA labeling. This evaluation seems odd to me, as my expected comparison would have been how this algorithm compares to other projection labeling algorithms. I totally get the synergy of combining VERA with an interactive tool - it seems like every interactive tool should have the VERA approach built-in and be the default "on load" screen!}
@@ -161,7 +161,7 @@ Moreover, I have other questions about scalability that isn't touched upon in th
 
 \reviewc{r2q5}{While using dimensionality reduction of larger, labelled, high-dimensional dataset is useful for certain domains (mentioned in the submission), another common application for using this to cluster data for exploration in a unsupervised learning approach. Oftentimes in this case there is no additional metadata/features, or at least none that have interpretable units. It is written off that VERA would need to be extended to tackle this. Is there anything more that could be said here? Any hints, ideas, conjectures of applying VERA to these datasets?}
 
-\answer{}
+\answer{As is the case with other general-purpose embedding annotation approaches, VERA relies on a collection of interpretable features to generate explanations. In theory, VERA could be extended to other types of data, but domain-specific approaches would need to be developed, e.g., identifying exemplar images in image-based data or topics for text-based data. In this manuscript, we focus on a general-purpose approach and leave these extensions for future work, as stated in the conclusion: ``Extending VERA to handle diverse data modalities, including image, video, text, and graph data, addressing scalability with large feature sets, and exploring integration with interactive analytics platforms all represent promising directions.''}
 
 
 \reviewc{r2q6}{I greatly appreciate the detailed and natural language algorithm description, as it walks a reader through the different types of explanations. Using a synthetic dataset with known features and clusters is a good way to compare results (the figures emphasize this). I will say the amount of new terminology introduced is a little overwhelming at first since it's multiple levels of groups of points (lots of aggregating and merging!). Despite these pros, this section is rather long. Nearly 50\% of the paper is dedicated to this section and description. This balance makes the remainder of the paper feel rushed, and doesn't leave room for more examples, which I explain below.}
