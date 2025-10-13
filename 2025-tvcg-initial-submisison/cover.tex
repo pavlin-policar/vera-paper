@@ -94,7 +94,7 @@ Bla\v{z} Zupan \\
 
 {\bf Revisions Based on Feedback from the IEEE VIS Review} \\[5mm]
 
-A previous version of this manuscript was submitted to the 2025 IEEE VIS Conference. Although the paper was not accepted, we received valuable and detailed feedback, which we used to substantially improve the manuscript that we are now submitting to IEEE TVCG. We would like to thank the reviewers for their constructive comments and suggestions. Below, we provide point-by-point responses to the key comments and concerns raised by the reviewers that remain relevant to this revised version of the paper.
+A previous version of this manuscript was submitted to the 2024 IEEE VIS Conference. Although the paper was not accepted, we received valuable and detailed feedback, which we used to substantially improve the manuscript that we are now submitting to IEEE TVCG. We would like to thank the reviewers for their constructive comments and suggestions. Below, we provide point-by-point responses to the key comments and concerns raised by the reviewers that remain relevant to this revised version of the paper.
 
 \subsection*{Reviewer 1}
 
@@ -215,7 +215,7 @@ Moreover, I have other questions about scalability that isn't touched upon in th
 
 \reviewc{r3q3}{VERA assumes that the features in the high dimensional space are interpretable. Many people use t-SNE and UMAP to generate 2D embedding visualizations for neural network's latent representation embeddings. These embeddings have a large number of dimensions (e.g., 1024 dimensions), and each dimension does not map to a human-understandable feature. How does VERA generalize to these ML embeddings? This is briefly discussed in the limitation section. I recommend mentioning the focus on tabular/interpretable features earlier in the paper.}
 
-\answer{Agreed. We have now explicitly stated this limitation in both the Abstract and the Related Work section. In the Abstract, we clarify: ``VERA identifies informative regions in the embedding space and automatically produces visual explanations using provided human-interpretable features, ...'' and in the Related Work section, we note: ``General-purpose techniques implicitly assume that the original features are, to some degree, semantically meaningful and human-interpretable. In domains where this is not the case—such as raw image pixels, word counts, or deep latent representations—domain-specific solutions are often required, as in the case of text and image data.''}
+\answer{Agreed. We have now explicitly stated this limitation in both the Abstract and the Related Work section. In the Abstract, we clarify: ``VERA identifies informative regions in the embedding space and associates them with user-provided human-interpretable features, ...'' and in the Related Work section, we note: ``In domains where features are not directly interpretable -- such as images, compositional data, or deep latent representations -- domain-specific solutions are often required, as in the case of text, images, and drug-prescription data.''}
 
 
 %\reviewc{r3q4}{W4: Section 3 mentions some configurations in VERA, such as k-means quantization with k=5 and using top-3 explanation selection. How can users adjust these settings in practice? This is not detailed in Sections 4 and 5. It would be great if VERA is more interactive and allows users to easily change configurations through interactions (e.g., slider, drop-down menu).}
