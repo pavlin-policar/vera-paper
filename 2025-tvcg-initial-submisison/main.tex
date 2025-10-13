@@ -37,8 +37,8 @@
 Two-dimensional embeddings obtained from dimensionality reduction techniques such as MDS, t-SNE, or UMAP, are widely used to visualize high-dimensional data and support researchers in visually identifying clusters, outliers, and other interesting patterns in the data. However, interpreting and contextualizing the identified patterns remains challenging, often requiring manual inspection which can be both time-consuming and repetitive.
 We propose VERA (Visual Explanations via Region Annotation), a general-purpose method that generates static visual explanations for two-dimensional embeddings.
 VERA identifies informative regions in the embedding space and associates them with user-provided human-interpretable features, producing concise visual annotations that summarize the structure of the embedding landscape at a glance.
-We demonstrate VERA's utility on several real-world datasets and evaluate its effectiveness in a user study comparing it with the utility of a comprehensive, interactive data-mining toolkit. Study participants who used VERA achieved comparable accuracy on typical exploratory analysis tasks while requiring significantly less time and effort.
-Our results show that VERA's generated static explanations can convey the essential insights of complex embeddings and support users in typical exploratory data analysis tasks, while requiring significantly less time and effort from the user.
+We demonstrate VERA's utility on several real-world datasets and evaluate its effectiveness in a user study comparing it with the utility of a comprehensive interactive data mining toolkit.
+Our results show that VERA's generated static explanations can convey the essential insights of complex embeddings and support users in typical exploratory data analysis tasks, while requiring significantly less time and user effort.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -47,7 +47,7 @@ Dimensionality reduction, Embedding, Visualization, Visual explanation, Explaina
 
 \section{Introduction}
 % Why is dimensionality reduction important?
-\IEEEPARstart{T}{wo-dimensional}, point-based visualizations of high-dimensional data are a cornerstone of exploratory data analysis and are used across diverse scientific domains such as biology, economics, chemistry, political science, astronomy, and physics~\cite{Liu2017,DeBodt2025}. As data sets with tens of thousands of features and millions of samples have become commonplace, visual exploration is often the first step toward discovering meaningful patterns and generating hypotheses. Such visualizations, often called \textit{embeddings}, project high-dimensional relationships into a two-dimensional space, as illustrated in Fig.~\ref{fig:motivation}. Once the embedding is obtained, analysts seek to interpret what its shapes and clusters represent in the original data.
+\IEEEPARstart{T}{wo-dimensional}, point-based visualizations of high-dimensional data are a cornerstone of exploratory data analysis and are used across diverse scientific domains such as biology, economics, chemistry, political science, astronomy, and physics~\cite{Liu2017,DeBodt2025}. As datasets with tens of thousands of features and millions of samples have become commonplace, visual exploration is often the first step toward discovering meaningful patterns and generating hypotheses. Such visualizations, often called \textit{embeddings}, project high-dimensional relationships into a two-dimensional space, as illustrated in Fig.~\ref{fig:motivation}. Once the embedding is obtained, analysts seek to interpret what its shapes and clusters represent in the original data.
 
 \begin{figure}[htb]
   \centering
@@ -57,13 +57,12 @@ An example of a two-dimensional embedding and its possible interpretation. The U
 }
 \end{figure}
 
-
 Today, data science practitioners have at their disposal a plethora of scalable dimensionality reduction methods that can be used to reduce data to two dimensions, including principal components analysis (PCA)~\cite{Jolliffe2002}, linear discriminant analysis (LDA)~\cite{Fisher1936}, FreeViz~\cite{Demsar2007}, multidimensional scaling (MDS)~\cite{Kruskal1978}, t-distributed stochastic neighbor embedding (t-SNE)~\cite{Maaten2008}, and uniform manifold approximation and projection (UMAP)~\cite{McInnes2018}.
 These methods are routinely applied to reveal clusters, transitions, and outliers that provide insight into the underlying data's landscape.
 
 % Why is the interpretation of visualizations hard?
 After performing dimensionality reduction, analysts typically examine the resulting visualization to identify any discernible visual patterns and interpret how these reflect underlying phenomena in the data.
-Linear methods, such as PCA, LDA, and FreeViz, offer intuitive interpretations since their inferred dimensions correspond to linear combinations of the original features. Nonlinear methods, such as MDS, t-SNE, and UMAP, can reveal more complex patterns and relationships, yet the lack of direct correspondence between embedding dimensions and original features makes interpretation difficult. As scalable dimensionality reduction algorithms continue to improve~\cite{McInnes2018,Linderman2019,Lambert2022}, analysts frequently generate multiple embeddings using different parameter settings or algorithms, each revealing distinct aspects of the underlying data manifold~\cite{Kobak2019}. Each resulting embedding must then be inspected and interpreted, a process that is both time-consuming, subjective, and cognitively demanding.
+Linear methods, such as PCA, LDA, and FreeViz, offer intuitive interpretations since their inferred dimensions correspond to linear combinations of the original features. Nonlinear methods, such as MDS, t-SNE, and UMAP, can reveal more complex patterns and relationships, yet the lack of direct correspondence between embedding dimensions and original features makes interpretation difficult. As scalable dimensionality reduction algorithms continue to improve~\cite{McInnes2018,Linderman2019,Lambert2022}, analysts frequently generate multiple embeddings using different parameter settings or algorithms, each revealing distinct aspects of the underlying data manifold~\cite{Kobak2019}. Each resulting embedding must then be inspected and interpreted, a process that is time-consuming, subjective, and cognitively demanding.
 
 % What are existing approaches, and why aren't they good enough?
 Existing research on interpreting two-dimensional embeddings has focused primarily on interactive visualization tools that allow users to explore the embedding space in detail. Examples include systems that link embeddings to feature distributions, enable brushing and linking, or provide cluster exploration interfaces (e.g.,~\cite{Endert2014,Krause2014}).
@@ -75,15 +74,13 @@ A typical workflow may involve selecting a group of data points, inspecting thei
 Given the repetitive nature of these exploratory data analysis tasks, automated, static approaches that require no user interaction in explaining the data landscapes can substantially reduce analysis time and cognitive effort while still conveying the essential structure of the embedding. Such methods can complement interactive tools by providing quick, interpretable summaries that guide deeper investigation when needed.
 
 % How do we solve the problem?
-In this work, we propose \textit{Visual Explanations via Region Annotation (VERA)}, an automated, general-purpose method for generating static visual explanations of two-dimensional embeddings. VERA automatically identifies informative regions in the embedding space and associates them with user-provided human-interpretable features, presenting these associations as concise, small-multiple visual summaries. This approach helps analysts quickly and easily obtain a high-level overview of the embedding.
-
-While several static explanation methods have already been proposed~\cite{DaSilva2015,VanDriel2020,Tian2021}, existing approaches either produce a single global explanation—often insufficient to capture multiple meaningful structures or generate a large number of visualizations that users must manually inspect~\cite{Faust2019,Plumb2020}. VERA overcomes these limitations by generating a small set of highly informative visualizations, retaining the speed and simplicity of static visualizations without sacrificing the informativeness of interactive approaches in common exploratory data analysis tasks.
+In this paper, we propose \textit{Visual Explanations via Region Annotation (VERA)}, an automated, general-purpose method for generating static visual explanations of two-dimensional embeddings. VERA automatically identifies informative regions in the embedding space and associates them with user-provided human-interpretable features, presenting these associations as concise, small-multiple visual summaries. This approach helps analysts quickly and easily obtain a high-level overview of the embedding.
 
 Our main contributions are as follows:
 \begin{enumerate}
   \item We introduce VERA, a general-purpose framework for generating static, region-based visual explanations of two-dimensional data embeddings.
   \item We present an automated procedure for detecting informative regions of point-based visualizations and linking them to relevant, user-provided human-interpretable features.
-  \item We validate VERA through a user study comparing it with the utility of a comprehensive interactive data-mining toolkit, showing that VERA enables users to perform typical embedding interpretation tasks with comparable accuracy while requiring significantly less time.
+  \item We validate VERA through a user study comparing it with the utility of a comprehensive interactive data mining toolkit, showing that VERA enables users to perform typical embedding interpretation tasks with comparable accuracy while requiring significantly less time.
 \end{enumerate}
 
 Together, these contributions demonstrate that VERA’s static visual explanations can effectively convey the essential insights of complex embeddings, offering a fast and accessible complement to interactive data exploration.
@@ -93,7 +90,7 @@ Together, these contributions demonstrate that VERA’s static visual explanatio
 
 Alongside the development of novel dimensionality reduction approaches for the visualization of high-dimensional data~\cite{Kruskal1978,Maaten2008,McInnes2018}, several tools have been developed to aid in interpreting the resulting visualizations~\cite{ChengMueller2016,Marcilio2021,Fujiwara2020}.
 General-purpose interpretation approaches aim to relate the obtained embedding to high-dimensional, human-interpretable features.
-In domains where features are not directly interpretable -- such as images, compositional data, or deep latent representations -- domain-specific solutions are often required, as in the case of text~\cite{Heimerl2016,WangHohmanChau2023}, images~\cite{Liu2019,Ye2024}, and drug-prescription data~\cite{Policar2023}.
+In domains where features are not directly interpretable -- such as images, compositional data, or deep latent representations -- domain-specific solutions are often required, as in text~\cite{Heimerl2016,WangHohmanChau2023}, images~\cite{Liu2019,Ye2024}, and drug-prescription data~\cite{Policar2023}.
 
 Interpretation techniques broadly fall into global and local approaches.
 Global approaches typically express the embedding axes as linear combinations of the original features~\cite{Broeksema2013,Coimbra2016}.
@@ -112,10 +109,10 @@ Several approaches combine well-established statistical tools -- such as feature
 Others propose custom solutions; for example, Fujiwara \etal~\cite{Fujiwara2020} propose a contrastive variant of PCA, while Kandogan~\cite{Kandogan2012} combines several hand-crafted metrics.
 
 Despite the plethora of existing approaches, current solutions share several notable limitations. Most are implemented as interactive tools that require extensive user interaction. This is especially time-consuming when inspecting and comparing multiple embeddings.
-Other approaches are limited to producing a single explanation, often focusing on the most salient combination of feature values while neglecting other potentially interesting but less prominent combinations.
+Other approaches are limited to producing a single explanation, often focusing on the most salient combination of feature values while neglecting other potentially interesting but less prominent combinations~\cite{DaSilva2015,VanDriel2020,Tian2021}, or generate a large number of visualizations that users must manually inspect~\cite{Faust2019,Plumb2020}.
 Others are tightly coupled to specific dimensionality reduction techniques, reducing their general applicability across methods~\cite{Chatzimparmpas2020,Broeksema2013,ChengMueller2016}. Finally, the majority of existing approaches define regions based on a single, discrete clustering of the embedding space. This approach risks potentially missing overlapping or continuous structures in the embedding space, such as transitions or trajectories, which do not fit neatly within discrete cluster boundaries.
 
-In contrast to existing interpretation methods, VERA automatically produces concise, static visual explanations without requiring user interaction. It combines descriptive and contrastive perspectives to summarize the embedding's structure, providing informative regional annotations rather than a single global summary or a large set of candidate views. Unlike most existing methods, VERA does not rely on predefined clusters and can detect and annotate arbitrary visual structures in the embedding space.
+In contrast to existing interpretation methods, VERA automatically produces concise, static visual explanations without requiring user interaction. It combines descriptive and contrastive perspectives to summarize the embedding structure, providing informative regional annotations rather than a single global summary or a large set of candidate views. Unlike most existing methods, VERA does not rely on predefined clusters and can detect and annotate arbitrary visual structures in the embedding space.
 
 \section{Methods}
 
@@ -130,7 +127,7 @@ Miller~\cite{Miller2019} posits that the process of explanation involves three c
 In line with existing work, we adopt two complementary types of visual explanations: \textit{contrastive explanations}, showing how the values of a high-dimensional feature vary across the embedding space, and \textit{descriptive explanations}, identifying feature values characteristic for specific regions of the embedding.
 Contrastive explanations answer questions like ``Where do the different feature values occur?'' while descriptive explanations answer ``What feature values are characteristic for this region?''.
 
-Given a data set $D \in \mathbb{R}^{N \times |F|}$ and its corresponding two-dimensional embedding $Y \in \mathbb{R}^{N \times 2}$, our aim is to relate different regions of $Y$ back to the original, high-dimensional features $f \in F$.
+Given a dataset $D \in \mathbb{R}^{N \times |F|}$ and its corresponding two-dimensional embedding $Y \in \mathbb{R}^{N \times 2}$, our aim is to relate different regions of $Y$ back to the original, high-dimensional features $f \in F$.
 Some feature values may be characteristic of specific regions of $Y$; for instance, data points in a particular cluster may all share the same category or contain similar numeric values.
 We group informative feature values within \textit{rules} that indicate a particular category or numeric interval.
 A rule $\varphi_i$ is defined as a function $\varphi: Y \rightarrow \left \{ 0, 1
@@ -190,12 +187,10 @@ Intuitively, the scale parameter controls the granularity of the resulting regio
 \subsubsection{Post-hoc Region Merging}
 \label{sec:post-hoc-merge}
 
-When constructing explanatory variables, we assign each sample to one of the resulting binary indicator variables, denoting its membership in a particular category or value range.
-However, it is common for samples belonging to different intervals or categories to occupy the same regions of the embedding space, producing overlapping region annotations.
-In some cases, rules associated with overlapping regions can be merged into a single rule, thereby simplifying the resulting visual explanations and reducing the cognitive load on the end user.
-For example, the three overlapping regions in the top part of Fig.~\ref{fig:region_construction}.c have semantically compatible rules, and can be merged into a single region annotation, shown in Fig.~\ref{fig:region_construction}.d.
-
-To identify and consolidate overlapping and semantically related region annotations, we introduce the following post-hoc merging procedure.
+Samples belonging to different intervals or categories often occupy the same regions of the embedding space, producing overlapping region annotations.
+In some cases, the rules associated with these overlapping regions can be merged into a single rule.
+For example, the three overlapping regions in the top part of Fig.~\ref{fig:region_construction}.c have semantically compatible rules and can be merged into a single region annotation, shown in Fig.~\ref{fig:region_construction}.d.
+To identify and merge overlapping region annotations and their associated semantically compatible rules, we introduce a simple post-hoc merging procedure.
 Two or more region annotations are eligible for merging if they exhibit high spatial overlap and semantic compatibility between their rules.
 
 Determining the semantic compatibility of rules is straightforward. For rules derived from ordinal or numeric features, only adjacent bins or categories may be merged. For rules originating from nominal categorical features, any combination of categories can be merged.
@@ -215,18 +210,18 @@ Because such regions reflect uniformly distributed feature values and carry no s
 \subsection{Contrastive Explanations}
 \label{sec:contrastive}
 
-Contrastive explanations show how the values of a particular feature vary across the embedding space. While conceptually similar to coloring points by feature value, our approach automatically filters out spatially uninformative features and ranks the remaining ones by their informativeness. This allows users to focus on the most relevant features without manually sifting through a potentially large set of candidates.
+Contrastive explanations show how the values of a particular feature vary across the embedding space. While conceptually similar to coloring points by feature value, our approach automatically filters out spatially uninformative features and ranks the remaining ones by informativeness. This allows users to focus on the most relevant features without manually sifting through a potentially large set of candidates.
 
 \subsubsection{Explanation Construction}
 
 We generate contrastive explanations by including all region annotations $e_i$ associated with a given feature $f$.
 However, even after filtering singleton region annotations, a large number of candidate explanations may still remain.
-To further reduce the number of candidates, we introduce the \textit{contrastive merge}, which identifies and combines features whose regions exhibit strong spatial correlation.
+To further reduce the number of candidates, we introduce the \textit{contrastive merge}, which combines features whose regions exhibit strong spatial correlation.
 
 Unlike the post-hoc merging procedure described in Section~\ref{sec:post-hoc-merge}, which merges only region annotations derived from a single feature, the contrastive merge combines region annotations derived from multiple features. To merge region annotations associated with two features $f_1$ and $f_2$, each region annotation $e_i \in f_1$ must have a nearly perfectly overlapping counterpart $e_j \in f_2$. When such a bijection exists, the matching pairs of region annotations are merged, effectively representing both features using a single collection of region annotations.
 The same logic naturally extends to more than two features.
 For example, the left panel in Fig.~\ref{fig:contrastive_merge} depicts two separate features whose region annotations exhibit near-perfect overlap and can be merged into a single explanation shown on the right.
-This reduces the number of candidate visual explanations while also revealing relationships among high-dimensional features.
+This reduces the number of candidate visual explanations while revealing relationships among high-dimensional features.
 
 \begin{figure}[t]
   \centering
@@ -330,13 +325,13 @@ The IBM Employee Attrition dataset~\cite{IbmEmployeeAttrition} contains records 
 \begin{figure*}[t]
   \centering
   \includegraphics{case_study-attrition.pdf}
-  \caption{\label{fig:attrition}Explanations of the IBM Employee Attrition data set. Panels (a-d) show four contrastive explanations corresponding to the spatially most correlated features with this particular embedding. The descriptive explanations shown in panels (e-h) characterize different regions of the embedding space.}
+  \caption{\label{fig:attrition}Explanations of the IBM Employee Attrition dataset. Panels (a-d) show four contrastive explanations corresponding to the spatially most correlated features with this particular embedding. The descriptive explanations shown in panels (e-h) characterize different regions of the embedding space.}
 \end{figure*}
 
 Fig.~\ref{fig:attrition} shows the four highest-ranked contrastive and descriptive explanations selected by VERA.
 The first two contrastive explanations in Figs.~\ref{fig:attrition}.a and b reveal that the three clusters are primarily distinguished by employees' departments and education fields.
 Fig.~\ref{fig:attrition}.c shows that the three clusters can be further subdivided into specific job roles, while Fig.~\ref{fig:attrition}.d shows that the number of total working years also corresponds to the samples' spatial positions.
-These four panels alone already offer a meaningful interpretation of the three main clusters uncovered by the t-SNE algorithm.
+Together, these four panels already offer a meaningful interpretation of the three main clusters uncovered by the t-SNE algorithm.
 
 The descriptive explanations depicted in Figs.~\ref{fig:attrition}.e-h offer descriptions of specific regions of the embedding space. For instance, the blue cluster in Fig.~\ref{fig:attrition}.e lists the characteristics of the human resources department and primarily includes junior, married employees with lower salaries. In contrast, the red cluster contains more senior, married individuals with higher salaries. Cross-referencing Fig.~\ref{fig:attrition}.c reveals that most employees in the red cluster hold managerial or research director roles. We can similarly inspect the other regions to gain further insight into the structure captured by the embedding.
 
@@ -350,12 +345,12 @@ Notice that many of the identified regions in Fig.~\ref{fig:attrition} do not co
     \caption{\label{fig:abalone}Contrastive explanations for a UMAP embedding of the Abalone dataset. Panels (a-d) highlight selected features, showing the spatial distribution of age, sex, and physical measurements, as well as correlations between features related to animal weight and size.}
 \end{figure}
 
-The Abalone dataset~\cite{Nash1994} contains 4,177 samples of abalones -- marine mollusks with distinctive ear-shaped shells. Each sample is characterized by eight features, including physical measurements of the body and shell and biological attributes such as age and sex. We generate a two-dimensional embedding with the UMAP algorithm using the \textsf{umap-learn} library~\cite{McInnes2018}. The embedding reveals reveals an elongated structure extending from left to right.
+The Abalone dataset~\cite{Nash1994} contains 4,177 samples of abalones -- marine mollusks with distinctive ear-shaped shells. Each sample is characterized by eight features, including physical measurements of the body and shell and biological attributes such as age and sex. We generate a two-dimensional embedding with the UMAP algorithm using the \textsf{umap-learn} library~\cite{McInnes2018}. The embedding reveals an elongated structure extending from left to right.
 
 Fig.~\ref{fig:abalone} shows four selected contrastive explanations generated by VERA.
 The explanations reveal that the elongated shape reflects the size and age of the abalones: younger abalones are smaller and lighter, while older abalones are larger and heavier. Fig.~\ref{fig:abalone}.b also suggests that the sex of the animals does not affect their size.
 Figs.~\ref{fig:abalone}.c-d highlight the benefits of the contrastive merge procedure. Fig.~\ref{fig:abalone}.c combines shucked weight, viscera weight, and whole weight into a single explanation, while Fig.~\ref{fig:abalone}.d combines shell diameter and length.
-This example illustrates how VERA can reduce the number of feature explanations analysts need to examine -- in this case, from five to two -- while simultaneously revealing the strong correlation between these three features.
+This not only reduces the number of explanations from five to two but also reveals the strong correlation between the three merged features.
 
 \subsection{Iris and Penguin Datasets}
 
@@ -366,7 +361,7 @@ This example illustrates how VERA can reduce the number of feature explanations 
 \end{figure}
 
 The Iris~\cite{Anderson1936} and Penguin~\cite{Horst2020} datasets are widely used benchmarks in data visualization and machine learning due to their clear clustering structure and overall simplicity.
-Fig.~\ref{fig:iris-penguins} shows one descriptive explanation for each data set, providing a concise overview of the main patterns and relationships.
+Fig.~\ref{fig:iris-penguins} shows one descriptive explanation for each dataset, providing a concise overview of the main patterns and relationships.
 In the Iris dataset (Fig.~\ref{fig:iris-penguins}.a), VERA identifies regions corresponding to the three species of iris flowers, each characterized by distinct combinations of sepal and petal measurements. For the Penguin dataset (Fig.~\ref{fig:iris-penguins}.b), VERA identifies clusters representing the three penguin species, separated by features such as flipper length and body mass.
 For simple datasets such as these containing relatively few features and having relatively well-defined clusters, a single descriptive explanation is often sufficient to convey the entire embedding structure.
 
@@ -382,7 +377,7 @@ We selected the Orange data mining toolkit~\cite{Demsar2013} as our interactive 
 Although not explicitly designed for interpreting embeddings, Orange includes standard visualization tools for exploring two-dimensional embeddings. Many related approaches based on feature distribution plots~\cite{Stahnke2016,Eckelt2022} and discriminative models~\cite{Bibal2021,Marcilio2021} can be easily reproduced in Orange using only a handful of widgets.
 
 We prepared two groups of three real-world datasets each, selected to vary in complexity.
-The first data set group $D_1$ comprises the Iris~\cite{Anderson1936}, Employee Attrition~\cite{IbmEmployeeAttrition}, and Raisin~\cite{RaisinDataset} data sets. The second data set group $D_2$ includes the Penguins~\cite{Horst2020}, Titanic~\cite{Dawson1995}, and Wine Quality~\cite{Cortez2009} data sets. For each data set, participants answered a series of typical exploratory questions about two-dimensional embeddings, such as: ``What makes this cluster different from the remaining clusters?'', ``What characterizes the samples in this cluster?'', and ``Do you notice any trend along this region?''.
+The first dataset group $D_1$ comprises the Iris~\cite{Anderson1936}, Employee Attrition~\cite{IbmEmployeeAttrition}, and Raisin~\cite{RaisinDataset} datasets. The second dataset group $D_2$ includes the Penguins~\cite{Horst2020}, Titanic~\cite{Dawson1995}, and Wine Quality~\cite{Cortez2009} datasets. For each dataset, participants answered a series of typical exploratory questions about two-dimensional embeddings, such as: ``What makes this cluster different from the remaining clusters?'', ``What characterizes the samples in this cluster?'', and ``Do you notice any trend along this region?''.
 
 We recruited 57 bachelor's students enrolled in the Introduction to Machine Learning course at the Faculty of Computer and Information Science at the University of Ljubljana.
 Participation was purely voluntary, and no personally identifiable information was collected.
@@ -395,7 +390,7 @@ To assess response time and accuracy, we measured how long each participant took
 
 The results show that participants using VERA explanations performed as accurately as those using Orange but required significantly less time.
 The difference in user performance was not statistically significant ($t$-test $p=0.084$), with 91\% ($\text{SE}=0.9\%$) of participants answering correctly when using Orange and 93\% ($\text{SE}=1.0\%$) when using VERA.
-However, participants in both user groups answered significantly faster when using VERA explanations ($p<0.005$). On average, participants using Orange took $29$ minutes ($\text{SD}= 11.5$, $\text{SE}=2.1$) to complete questions related to $D_1$ and $23$ minutes ($\text{SD}= 6.0$, $\text{SE}=1.1$) to complete questions related to $D_2$. Conversely, participants using VERA explanations required $21$ minutes ($\text{SD}= 6.3$, $\text{SE}=1.2$) and $15$ minutes ($\text{SD}=5.4$, $\text{SE}=1.1$) for each data set group, representing a consistent increase in speed of approximately 33\%.
+However, participants in both user groups answered significantly faster when using VERA explanations ($p<0.005$). On average, participants using Orange took $29$ minutes ($\text{SD}= 11.5$, $\text{SE}=2.1$) to complete questions related to $D_1$ and $23$ minutes ($\text{SD}= 6.0$, $\text{SE}=1.1$) to complete questions related to $D_2$. Conversely, participants using VERA explanations required $21$ minutes ($\text{SD}= 6.3$, $\text{SE}=1.2$) and $15$ minutes ($\text{SD}=5.4$, $\text{SE}=1.1$) for each dataset group, representing a consistent increase in speed of approximately 33\%.
 These results confirm that participants in both groups were able to answer the questions with roughly the same degree of accuracy but at a much faster rate when using VERA explanations.
 
 Interestingly, when asked to list characteristic or distinguishing features for particular regions, participants often mentioned more features when using VERA explanations ($p=0.04$). When generating explanations using Orange, participants mentioned an average of $2.0$ ($\text{SD}= 1.29$, $\text{SE}=0.07$) features in their answers, while this increased to $2.2$ ($\text{SD}= 1.33$, $\text{SE}=0.07$) when using VERA explanations. This difference may stem from several factors. When using an interactive tool, users must manually inspect multiple features to assess their relationship to the embedding space. Participants often stopped their exploration after identifying one or two informative features, potentially overlooking additional relevant ones. VERA explanations, on the other hand, provide all relevant explanations at once. Although these explanations display only a limited number of features, VERA’s ranking mechanism ensures that the most salient ones appear first. Thus, the user simply \textit{sees} all the features and cannot miss them by accident.
@@ -445,7 +440,7 @@ VERA draws on insights from the social sciences to design visual explanations th
 VERA addresses several limitations of existing interactive and static methods, combining the efficiency of static visualization with the interpretive richness of interactive exploration in common exploratory data analysis tasks.
 Despite its effectiveness, VERA opens several promising directions for future research.
 Extending VERA to handle diverse data modalities, including image, video, text, and graph data, addressing scalability with large feature sets, and exploring integration with interactive analytics platforms all represent promising directions. Furthermore, recent advances in LLMs for automatic summarization could be leveraged to generate more concise and relevant annotations.
-Overall, VERA represents a significant step toward fast, effective, and cognitively aligned explanations of two-dimensional non-linear embeddings.
+Overall, VERA represents a significant step toward fast, effective, and cognitively aligned explanations of two-dimensional nonlinear embeddings.
 
 
 \section*{Code Availability}
