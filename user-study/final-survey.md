@@ -1,8 +1,4 @@
----
-title: 'Final Feedback Survey'
-date: 'February 2024'
-omitAsChapter: true
----
+## Final Feedback Survey
 
 Thank you for your participation!
 

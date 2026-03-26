@@ -1,8 +1,4 @@
----
-title: 'Using Orange for Interactive Explanations'
-date: 'February 2024'
-omitAsChapter: true
----
+## Using Orange for Interactive Explanations
 
 In this section, we will go through the typical workflow of trying to understand two-dimensional embeddings using Orange.
 

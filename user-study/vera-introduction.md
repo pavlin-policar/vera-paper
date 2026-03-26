@@ -1,8 +1,4 @@
----
-title: 'Using VERA for Static Explanations'
-date: 'February 2024'
-omitAsChapter: true
----
+## Using VERA for Static Explanations
 
 _Visual Explanations via Region Annotation_ (VERA) is a novel technique developed by our laboratory for the explanations of point embeddings. VERA produces a set of visual explanations shown as panels, each of which aims to explain a particular region of the visualization.
 
