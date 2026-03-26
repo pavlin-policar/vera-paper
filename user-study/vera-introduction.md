@@ -10,14 +10,14 @@ In the following quizzes, you will be provided with at most 16 visual explanatio
 Before starting each of the quizzes, please ensure you have the VERA explanations in front of you. You can find the VERA explanations below.
 
 If you have been assigned to **User Group 1**, please open the following explanations:
-- [Penguins](https://file.biolab.si/visual-explanations/veca-explanations/penguins.pdf)
-- [Titanic](https://file.biolab.si/visual-explanations/veca-explanations/titanic.pdf)
-- [Wine Quality](https://file.biolab.si/visual-explanations/veca-explanations/wine_quality.pdf)
+- [Penguins](https://file.biolab.si/visual-explanations/vera-explanations/penguins.pdf)
+- [Titanic](https://file.biolab.si/visual-explanations/vera-explanations/titanic.pdf)
+- [Wine Quality](https://file.biolab.si/visual-explanations/vera-explanations/wine_quality.pdf)
 
 If you have been assigned to **User Group 2**, please open the following explanations:
-- [Iris](https://file.biolab.si/visual-explanations/veca-explanations/iris.pdf)
-- [Employee Attrition](https://file.biolab.si/visual-explanations/veca-explanations/attrition.pdf)
-- [Raisin](https://file.biolab.si/visual-explanations/veca-explanations/raisin.pdf)
+- [Iris](https://file.biolab.si/visual-explanations/vera-explanations/iris.pdf)
+- [Employee Attrition](https://file.biolab.si/visual-explanations/vera-explanations/attrition.pdf)
+- [Raisin](https://file.biolab.si/visual-explanations/vera-explanations/raisin.pdf)
 
 Please keep these explanations open throughout this section and refer to them to solve the quizzes below.
 
