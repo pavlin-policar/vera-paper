@@ -16,10 +16,11 @@ Participants were randomly assigned into two groups. Both groups completed all s
 
 The study consists of the following phases for each group:
 
-1. **Introduction Phase**: Participants received a brief tutorial on the first tool (either Orange or VERA explanations)
+1. **Tutorial**: Participants received a brief tutorial on both tools.
+1. **First Tool Introduction**: Instructions on how to proceed using their first tool
 2. **First Dataset Group**: Three quizzes using the first tool
 3. **Survey Phase**: Participants completed a survey about their experience with the first tool
-4. **Second Introduction Phase**: Participants received a tutorial on the second tool
+4. **Second Tool Introduction**: Instructions on how to proceed using their second tool
 5. **Second Dataset Group**: Three quizzes using the second tool  
 6. **Survey Phase**: Participants completed a survey about the second tool
 7. **Final Survey**: Comparative feedback across both tools
@@ -37,16 +38,21 @@ Each dataset presents different characteristics and complexities to test the gen
 
 The exact sequence for each group is shown in the table below:
 
-| Dataset | Group 1 | Group 2 |
-|-|-|-|
-| | [Orange Introduction](orange-introduction.md) | [VERA Introduction](vera-introduction.md) |
-| [Iris](quiz-1-iris.md) | *Orange* | [*VERA explanations*](vera-explanations/vera_explanations_iris.pdf) |
-| [Employee Attrition](quiz-2-employee-attrition.md) | *Orange* | [*VERA explanations*](vera-explanations/vera_explanations_attrition.pdf) |
-| [Raisin](quiz-3-raisin.md) | *Orange* | [*VERA explanations*](vera-explanations/vera_explanations_raisin.pdf) |
-| | [Orange Survey](orange-survey.md) | [VERA Survey](vera-survey.md) |
-| | [VERA Introduction](vera-introduction.md) | [Orange Introduction](orange-introduction.md) |
-| [Penguins](quiz-1-penguins.md) | [*VERA explanations*](vera-explanations/vera_explanations_penguins.pdf) | *Orange* |
-| [Titanic](quiz-2-titanic.md) | [*VERA explanations*](vera-explanations/vera_explanations_titanic.pdf) | *Orange* |
-| [Wine Quality](quiz-3-wine-quality.md) | [*VERA explanations*](vera-explanations/vera_explanations_wine_quality.pdf) | *Orange* |
-| | [VERA Survey](vera-survey.md) | [Orange Survey](orange-survey.md) |
-| | [Final Survey](final-survey.md) | [Final Survey](final-survey.md) |
+| Step | Group 1 | Group 2 |
+|---|---|---|
+| Tutorial | | |
+| Introduction | [Orange Introduction](orange-introduction.md) | [VERA Introduction](vera-introduction.md) |
+| [Iris Quiz](quiz-1-iris.md) | *Orange* | [*VERA explanations*](vera-explanations/vera_explanations_iris.pdf) |
+| [Employee Attrition Quiz](quiz-2-employee-attrition.md) | *Orange* | [*VERA explanations*](vera-explanations/vera_explanations_attrition.pdf) |
+| [Raisin Quiz](quiz-3-raisin.md) | *Orange* | [*VERA explanations*](vera-explanations/vera_explanations_raisin.pdf) |
+| Tool Survey | [Orange Survey](orange-survey.md) | [VERA Survey](vera-survey.md) |
+| Introduction | [VERA Introduction](vera-introduction.md) | [Orange Introduction](orange-introduction.md) |
+| [Penguins Quiz](quiz-1-penguins.md) | [*VERA explanations*](vera-explanations/vera_explanations_penguins.pdf) | *Orange* |
+| [Titanic Quiz](quiz-2-titanic.md) | [*VERA explanations*](vera-explanations/vera_explanations_titanic.pdf) | *Orange* |
+| [Wine Quality Quiz](quiz-3-wine-quality.md) | [*VERA explanations*](vera-explanations/vera_explanations_wine_quality.pdf) | *Orange* |
+| Tool Survey | [VERA Survey](vera-survey.md) | [Orange Survey](orange-survey.md) |
+| [Final Survey](final-survey.md) | | |
+
+## Quiz Navigation
+
+When completing the quizzes, note that some questions refer to the figure immediately preceding the question. These figures provide visual context for answering the corresponding question.
