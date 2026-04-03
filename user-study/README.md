@@ -6,11 +6,11 @@ This directory contains the materials for a controlled user study comparing two 
 1. **Orange**: An interactive data mining toolkit for exploratory data analysis
 2. **VERA**: Static visual explanations via region annotation
 
-The study uses a counterbalanced design with six datasets presented in a carefully structured sequence to minimize order effects and learning bias.
+The study uses a counterbalanced design in which the two approaches are alternated across dataset groups to reduce fatigue and other order effects.
 
 ## Study Structure
 
-Participants were randomly assigned into two groups. Both groups completed all six quizzes in the same order, but used different tools for each dataset group. This counterbalanced approach ensures that any differences in performance can be attributed to the tools themselves rather than the order of presentation or specific datasets.
+Participants were randomly assigned into two groups. Both groups saw the same six datasets in the same order. However, Group 1 used Orange for the first three datasets and VERA for the last three, whereas Group 2 used VERA for the first three and Orange for the second three. This design makes the comparison between tools fairer by balancing possible fatigue or order effects across the two tools.
 
 ### Study Phases
 
