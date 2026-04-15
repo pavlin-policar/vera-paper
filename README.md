@@ -1,15 +1,18 @@
 # VERA: Accompanying paper code
 
-This repository contains the manuscript revision package and supplementary material for the VERA paper.
+This repository contains the manuscript package and supplementary material for the VERA paper.
 
 ## Repository contents
 
-- `2026-tvcg-resubmission-1/`: current TVCG resubmission package, including the manuscript, cover letter, and reviewer-response material
-- `supplement-data/`: shared downloader and local dataset cache used by the supplementary studies
-- `parameter-study/`: parameter sensitivity study for VERA, covering both region construction and explanation construction
-- `region-method-comparison/`: comparison between the paper's KDE-based region construction backend and a rangeset-inspired alternative motivated by Sohns et al.; includes both raw region-construction comparisons and the resulting VERA explanations with the downstream pipeline kept fixed
-- `user-study/`: full catalog of user-study questions, participant-facing materials, and questionnaires
-- `orange-workflow-examples/`: Orange workflows and screenshots used to document the interactive baseline and related embedding-interpretation workflows
+```text
+tvcg-embedding-annotation/
+├── 2026-tvcg-resubmission-1/  # manuscript and cover letter
+├── supplement-data/           # Data downloader
+├── parameter-study/           # Parameter sensitivity study for VERA
+├── region-method-comparison/  # KDE-versus-rangeset comparison
+├── user-study/                # User-study materials
+└── orange-workflow-examples/  # Orange workflows and screenshots documenting the interactive baseline and related embedding-interpretation workflows
+```
 
 ## Setup
 
@@ -43,7 +46,7 @@ Region-method comparison:
 python region-method-comparison/run_region_method_comparison.py region-method-comparison/config.json
 ```
 
-These two studies address several of the reviewer concerns raised in the TVCG revision, in particular:
+These two studies document several important methodological aspects of VERA, in particular:
 
 - robustness of VERA to parameter choices
 - practical guidance for default settings
@@ -56,3 +59,4 @@ Additional details, study outputs, and supporting materials are documented in:
 - `supplement-data/README.md`
 - `user-study/README.md`
 - `orange-workflow-examples/README.md`
+
