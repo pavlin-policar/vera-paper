@@ -8,7 +8,7 @@ In particular, the examples in this directory connect directly to the following 
 
 > Many related approaches based on feature distribution plots and discriminative models can be easily reproduced in Orange using only a handful of widgets. We provide several example workflows in the supplementary materials.
 
-This folder is that supplementary material. Several of the workflows below closely mirror interaction patterns proposed in prior work; where appropriate, we point to representative papers directly in the corresponding workflow descriptions. These citations are intended as illustrative examples rather than a comprehensive survey of related methods.
+This directory is that supplementary material. Several of the workflows below closely mirror interaction patterns proposed in prior work; where appropriate, we point to representative papers directly in the corresponding workflow descriptions. These citations are intended as illustrative examples rather than a comprehensive survey of related methods.
 
 ## What is included
 

@@ -1,6 +1,7 @@
 .ipynb_checkpoints/
 __pycache__/
 data/*
+/supplement-data/data/
 .DS_STORE
 .idea/
 
