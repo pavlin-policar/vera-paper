@@ -1,0 +1,334 @@
+\documentclass[11pt]{article}
+% \usepackage[margin=1in]{geometry} % to adjust the page margins
+\usepackage[document]{ragged2e}
+
+\usepackage[T1]{fontenc}
+\usepackage[round]{natbib}
+\usepackage{todonotes}
+\usepackage{gensymb}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage[top=1in,bottom=1in,left=1in,right=1in]{geometry}
+\usepackage{alltt}
+\usepackage{framed}
+\usepackage{xcolor}
+\usepackage{comment}
+\usepackage{graphicx}
+\usepackage{setspace} % For line spacing
+
+\usepackage{xr}[]
+\externaldocument{main}
+%\usepackage{url}
+\usepackage{hyperref}
+
+\renewcommand{\thetable}{\Alph{table}}
+\renewcommand{\thefigure}{\Alph{figure}}
+
+\newcommand{\beq}{\begin{equation}}
+\newcommand{\eeq}{\end{equation}}
+\newcommand{\beqs}{\begin{equation}}
+\newcommand{\eeqs}{\end{equation}}
+\newcommand{\mx}[1]{\ensuremath{\boldsymbol{\mathrm{{#1}}}}}   % Simple matrix format.
+
+
+% \newcommand{\review}[1]{\noindent{{\textbf{\textit{#1}}}}\vspace{3mm}}
+% \definecolor{colframe}{rgb}{0.01,0.199,0.1}
+
+\newcounter{rtaskno}
+\newcommand{\rtask}[1]{\refstepcounter{rtaskno}\label{#1}}
+
+\newcommand{\reviewc}[2]{\begin{leftbar}\noindent\rtask{#1}\ref{#1}. #2\end{leftbar}\vspace*{-4mm}}
+\newcommand{\review}[1]{\begin{leftbar}\noindent #1\end{leftbar}}
+\newcommand{\answer}[1]{\noindent #1\\[8mm]}
+\newcommand{\copyquote}[1]{\vspace{2mm} {\color{blue} #1}\vspace{5mm}}
+
+\newlength{\leftbarwidth}
+\setlength{\leftbarwidth}{3pt}
+\newlength{\leftbarsep}
+\setlength{\leftbarsep}{10pt}
+\renewenvironment{leftbar}{%
+    \def\FrameCommand{{\color{black}{\vrule width \leftbarwidth\relax\hspace {\leftbarsep}}}}%
+    \MakeFramed {\advance \hsize -\width \FrameRestore }%
+}{\endMakeFramed}
+
+
+% \usepackage[colorlinks=True,citecolor=black]{hyperref}
+
+\begin{document}
+\onehalfspacing % sets the line spacing to one and a half
+\setlength{\parskip}{3mm} % Increase space between paragraphs
+
+\noindent{\bf Poli\v{c}ar and Zupan: 
+\\
+VERA: Generating Visual Explanations of Two-Dimensional Embeddings \\ via Region Annotation}
+
+\vspace{2mm}
+\noindent {\bf COVER LETTER}
+
+\vspace{2mm}
+
+
+\noindent Dear Editor-in-Chief, Associate Editors,\\
+ 
+\vspace{3mm}
+
+\noindent We would like to submit our manuscript ``\textit{VERA: Generating Visual Explanations of Two-Dimensional Embeddings via Region Annotation}'' to be considered for publication in the ``\textit{IEEE Transactions on Visualization and Computer Graphics}'' as a Regular Paper.
+
+This work presents VERA, a general-purpose method that supports the interpretation of point-based visualizations derived from dimensionality-reduction techniques such as t-SNE, UMAP, and autoencoder-based embeddings. While these approaches enable rich visual representations of complex, high-dimensional data, their interpretation remains challenging. VERA automatically identifies informative regions in two-dimensional embeddings and links them to human-interpretable features, producing concise annotations that summarize embedding structure at a glance. We demonstrate VERA across multiple datasets and report a user study showing that participants using VERA achieved accuracy comparable to manually using an interactive data-mining toolkit while requiring significantly less time and effort, confirming its effectiveness for rapid, static interpretation of complex embeddings.
+
+Our work should be of interest to the visualization, visual analytics, and explainable AI communities, as it bridges automated explanation methods with human-centered visual understanding.
+
+The manuscript has not been published or submitted elsewhere, and both authors approve its submission. An earlier IEEE VIS version was substantially revised following reviewer feedback; their comments and our responses are provided below and in the separate document.
+
+\vspace{3mm}
+
+\noindent Kind regards,
+\vspace{3mm}
+
+\noindent Pavlin G. Poli\v{c}ar,
+Bla\v{z} Zupan \\ 
+\noindent Ljubljana, \today
+
+\newpage
+
+\subsection*{Reviewer 1}
+
+\reviewc{r1q1}{Abstract and Introduction do not clearly convey the uniqueness of this work.
+The current Abstract and Introduction only provide a general purpose of VERA. As described in Related Work, as well as one non-cited but similar work by Sohns et al., ``Attribute-based Explanation of Non-Linear Embeddings of High-Dimensional Data,'' TVCG 2022, various methods have been proposed to address visual explanations, generation of informative regions, etc. From the current Abstract and Introduction, I was not able to understand what is the uniqueness of VERA and what kind of important problems VERA tries to address. I recommend the authors to explain VERA's essential differences from other methods in Abstract and Introduction.}
+
+\todo{Blaz}
+\answer{%
+\textbf{Look at the next response. Maybe that needs to be put here.}\\
+Possible responses:
+- rephrase sentence to make it crystal clear that our aim is to *explain* two-dimensional embeddings.
+- respond to reviewer here with our justification, but add citation to work in related work, perhaps introduction.
+}
+
+
+\reviewc{r1q2a}{Comparison with existing visual explanation methods is limited.
+First of all, I think Sohns et al.'s work (``Attribute-based Explanation of Non-Linear Embeddings of High-Dimensional Data,'' TVCG 2022) is the most closely related work. However, the authors did not cite this paper. Sohns et al.'s work has various similairties: not relying on clustering, trying to mitigate overlapping issues, applying binning to continuous attributes, etc. But, I think still VERA has a clear strength in incorporating multiple attributes in a single visualization.}
+
+\answer{%
+We thank the reviewer for pointing out \citet{Sohns2022}, which is indeed related to our work and should have been cited. We have now added this citation and have added a paragraph to the Related Work section (Section \ref{sec:related_work}) to clarify the relationship between the two approaches more explicitly.
+
+Briefly, \citet{Sohns2022} propose a novel visual encoding -- rangesets -- for visualizing the spatial occurrence of feature values in a given embedding. As the reviewer points out, their approach shares many of the advantages of our KDE approach.
+However, we emphasize that defining regions is only the first stage of our system, and the novelty of VERA primary lies in subsequent steps, i.e., filtering, merging, and ranking.
+The region construction procedure is modular, and our KDE approach could easily be replaced by the rangeset approach.
+
+To illustrate this, we have now incorporated rangesets into our open-source implementation of VERA and now provide several examples of VERA explanations based on rangeset regions in the supplementary material.
+In Section.~\ref{sec:region_construction}, we additionally write: ``We note that region construction is modular: KDE contours can be replaced by alternative region representations while leaving the remaining steps unchanged, such as the alpha hulls used in rangesets~\citep{Sohns2022}. We include several visualizations based on this variant in the supplementary material.''
+
+We believe these changes clearly delineate our contributions from existing work and provide additional examples of VERA explanations.
+}
+
+
+\reviewc{r1q2b}{%
+The user study compares VERA only with Orange, a general-purpose interactive tool. While useful, this does not demonstrate improvement over methods explicitly designed for explaining embeddings, including Sohns et al. and the attribute-based family (e.g., using multiple visualizations made with Sohns et al.'s method vs a single visualization made with VERA). Even a small-scale qualitative or quantitative comparison would strengthen the claims.}
+
+\answer{%
+This concern is closely related to Comment \ref{r2q7} raised by Reviewer~2; please see our response there for the rationale behind using Orange as a representative interactive baseline.
+
+In the specific case of \citep{Sohns2022}, we believe the comparison would answer a somewhat different question from the one targeted in our study. As discussed in our revised Related Work section, approaches such as rangesets primarily provide visual encodings that show where feature values occur in the embedding, but they do not themselves perform the ranking and selection of explanations. A direct comparison between VERA and a full list of attribute-wise rangeset visualizations would therefore mainly test whether our explanation-selection and ranking pipeline is preferable to showing all candidate feature views and leaving the selection to the user. While this is an interesting question, it is not the main scope of the present user study.
+}
+
+
+\reviewc{r1q3}{VERA seems to have limited usefuleness for high-dimensional data.
+I would like to see visualization results and discussions on how VERA is useful when analyzing very high-dimensional data (e.g., over 1000 features). For example, is it possible to provide practical guidance on scalability limits for practitioners? While Introduction motivates the importance of automatic generation of explanations of embeddings with cases analyzing “tens of thousands of features”, the authors did not show anything close to this scale. For example, the usage scenarios use datasets with only 33 or fewer features. This number has a strong gap from the original motivation of this work. The authors should more clarify the scope of this work.}
+
+\todo{Blaz}
+\answer{%
+As mentioned and briefly discussed in the Scalability and Limitations section.
+}
+
+
+\reviewc{r1q4}{Several explanations and reasoning for the algorithm are missing.
+The authors introduced several settings/designs for VERA, but the reasoning for many of them is not explained, and the design choices remain looking arbitrary.
+
+For example, why ``$0.25 \times \text{MaxD}$'', ``$k=\sqrt N$'' are reasonable default parameters? How should we set “a predetermined threshold” for the region merging. What can be considered as “nearly perfect” overlapping? When |P| > 3, what will happen for the human annotation score? Why aggregating multiple scores with a weighted mean rank is a good idea?}
+
+\answer{%
+We agree that the previous version of our manuscript did not sufficiently justify several of the design choices and default parameters used in VERA. We now include a dedicated parameter sensitivity analysis in the supplementary material, together with practical guidance on parameter selection; see Comment~\ref{r2q1}.
+We also clarify the rationale for the ranking procedure in Section~\ref{sec:contrastive-selection}, where we now note ``We found that no single metric reliably produced good rankings across a variety of datasets, so we aggregate these complementary criteria using a weighted mean rank.''
+}
+
+
+\reviewc{r1q5}{While VERA merges multiple attribute values for explanations, what are the strengths of this when compared with looking multiple visulizations, each of which corresponding to an important attribute, e.g., Fig. 6a vs Fig. 6d (note: this is not evaluated through a user study)?}
+
+\todo{Pavlin}
+\answer{Correct. We did not evaluate this in the user study, but agree that this would be an interesting starting point for future work.
+
+When multiple attributes produce nearly identical region annotations, showing them in separate panels requires users to manually compare and align several highly similar visualizations. Our contrastive merge compresses these redundant views into a single explanation and directly communicates that the corresponding attributes are spatially correlated.
+
+As we mention several times in the paper, the primary advantages of this approach are
+- the merging procedure reduces the number of plots that the user has to inspect, saving time and space
+- this procedure immeditely identifies strongly correlated features. In fact, this procedure can identify features with non-linear correlations as well.
+}
+
+
+\reviewc{r1q6}{For example, based on Fig. 8, VERA tends to generate very long descriptions. Although the authors discussed LLMs might be able to make them more concise, as these descriptions are simply a list of attribute ranges/values, I think it is difficult to shorten then even with LLMs.}
+
+\answer{We maintain that LLMs offer a promising avenue for generating short, informative descriptions. Several recent publications show that they can be used to generate useful cluster annotations, e.g., topics from keywords in text data~\citep{Kozlowski2024,Piper2025} as well as textual descriptions of clusters or general, tabular data~\citep{Preiss2024,Hong2025,Buchmuller2026}. It would be fairly straightforward to adapt and incorporate any of these methods into our existing pipeline, or to build on this recent research and tailor cluster names to the domain at hand. However, a procedure like this would need to be carefully designed and evaluated, therefore, we leave this to future work.}
+
+
+\reviewc{r1q7}{Also, even with VERA, it looks like we need to see multiple visualizations to understand embeddings (e.g., Fig. 8a–d).}
+
+\todo{Pavlin}
+\answer{}
+
+\subsection*{Reviewer 2}
+
+\reviewc{r2q1}{To detect the regions, a larger number of processing steps needs to be executed, each of which introduces parameters. The choice of these parameters can severely affect the outcome. The influence of the parameters is not discussed in the paper. The list of parameters includes: the number of bins for numerical attributes, the level for the contour lines, the Gaussian kernel bandwidth, the maximum overlap threshold, the human-aware attention score, the weights for the final ranking, the threshold for near-perfect overlap, the overlap threshold for combining regions, and the number of layouts generated. The method needs to be evaluated with respect to the parameter selections.}
+
+\answer{We agree that the original manuscript did not sufficiently discuss the effects of the method parameters or justify the default choices used throughout the paper. To address this, we now include a dedicated parameter sensitivity study on eight different data sets in the supplementary materials. The study examines the effects of the main parameters in both the region construction and explanation generation stages. The results show that the default settings used in the manuscript generally yield high-quality explanations.
+
+We have added the following text to the end of the Methods section: ``Across the full pipeline, from region construction to explanation generation, our approach involves several user-settable parameters. In practice, the results are robust across a range of parameter settings, and the default values generally yield high-quality explanations. Further details are provided in the parameter sensitivity study in the supplementary materials.''
+}
+
+
+\reviewc{r2q2}{I would expect the binning of numerical attributes to be crucial. Not only does the number of bins need to be chosen, but also an appropriate binning strategy. The binning strategy is not explained in the paper. Looking at the example, it does not appear to be equidistant range binning. So, what is it? Is the binning based on percentiles? Neither of the two strategies would be perfect. I would expect that a 1D clustering would actually work best. However, that may also not be perfect for multivariate clusters. So, I really wonder what is being done here, what alternatives were considered, how the design choice was made, and how it was evaluated.}
+
+\todo{Pavlin}
+\answer{}
+
+
+\reviewc{r2q3}{When looking at the left image of Figure 6(d), I think that the annotations that are generated by the descriptive layouts may be misleading. This annotation seems to indicate that all English books are in the lower part of the embedding, which is not true. I would assume that this would be a problem for users to correctly interpret the annotated plots. The annotations look like filters, i.e., like "shall me all English books", but they are not. I find this highly confusing.}
+
+\todo{Pavlin}
+\answer{}
+
+
+\reviewc{r2q4}{The human-attention score assumes that 3 is the perfect number of clusters to show simultaneously. Why 3? The authors reference some papers that hint at using 7, 4, or 2. I would think that it depends on the data distributions. As long as clusters are clearly separated, I would add as many as possible. For example, if a dataset consists of 9 separated clusters in the 2D embedding, then the approach would most likely generate 3 layouts with 3 clusters each, while a single layout may explain the entire data instead. That sounds suboptimal to me.}
+
+\todo{Pavlin}
+\answer{}
+
+
+\reviewc{r2q5}{I also think that occlusion is a big issue for the presented method. The contours encircle regions that are filled with points colored in the respective color. These highlighted colored points occlude the non-colored ones. Sometimes there seems to be no not-colored points, but they are simply occluded.}
+
+\todo{Pavlin}
+\answer{
+We agree with the reviewer.
+}
+
+
+\reviewc{r2q6}{The user study is not sufficiently explained. I would need to see the full catalogue of questions, including the visualizations, to judge its validity. Given my comments above, I actually have doubts about the validity of the study. Moreover, I could imagine that some coordinated views via brushing and linking may work better.}
+
+\answer{%
+We agree that the original manuscript did not provide enough detail to fully assess the user study. We have therefore added the key user study materials, including the complete catalog of questions and visualizations shown to participants, to the supplementary material. We indicate the availability of this material in the final paragraph of Section~\ref{sec:user-study:design}: ``The complete catalog of study questions, participant-facing visual materials, and questionnaires are provided in the supplementary materials.''
+
+Regarding the reviewer's suggestion of coordinated views via brushing and linking, this is, in fact, the type of interactive workflow we used as our baseline.
+We now make this explicit in Section~\ref{sec:user-study:design}: ``We selected the Orange data mining toolkit as our interactive baseline because of its ease of use and support for exploratory analysis through interactive brushing and linked views.'' We now additionally include example Orange workflows showing how several existing embedding-interpretation approaches can be reproduced in Orange, writing: ``We provide several example workflows in the supplementary materials.''
+}
+
+
+\reviewc{r2q7}{For the study, the Orange data mining toolkit was used as a baseline, which is a toolkit that was published in a machine learning journal. Honestly, I do not know this toolkit and am not aware of its functionalities. I would need an explanation of the tool. But, why not use something that is established in the visualization community? Catching up on my previous comment, I could imagine that showing the selected region in coordinated views with parallel coordinates could serve as a baseline. It could also be static: Just highlight the selection in both the embedding and the parallel coordinates.}
+
+\answer{%
+Our intent in the user study was not to claim superiority over a particular visualization system, but to compare VERA against a representative baseline for interpreting embeddings.
+We chose Orange because many related embedding-interpretation workflows, including those based on feature distribution plots and discriminative models, can be reproduced in Orange using simple widget-based workflows. To make this clearer, we expanded Section~\ref{sec:user-study:design} and now state: ``We selected the Orange data mining toolkit as our interactive baseline because of its ease of use and support for exploratory analysis through interactive brushing and linked views.'' We also now add: ``We provide several example workflows in the supplementary materials.''
+
+Secondly, our students were already familiar with Orange from prior coursework.
+Since the study outcome includes response time, this reduced additional interface-learning overhead for the interactive baseline and helped limit confounding due to tool onboarding.
+We now make this motivation more explicit in the manuscript by adding: ``This prior familiarity with Orange reduced additional interface-learning overhead for the interactive baseline.''
+
+We agree that a coordinated-view baseline such as an embedding linked to parallel coordinates would also be reasonable. However, such a baseline still belongs to the same family of analyst-driven interactive workflows that VERA is intended to complement, as a user would still have to interactively make a selection in the embedding ahead of time. Our goal in the study was therefore to compare VERA against a representative interactive baseline from this family, rather than against one particular visualization design.
+}
+
+
+\reviewc{r2q8}{Combinations of semantically compatible rules are allowed, where, for categorical attributes, all combinations are compatible. However, it could be a projection artifact that two categories overlap. Is this considered somehow?}
+
+\todo{Pavlin}
+\answer{%
+I believe the reviewer is referring to poorly embedded regions of the embedding space, where two categories might overlap due to change due to poorly embedded data points.
+
+We already state in Section III-A.3 post-hoc region merging that
+``Determining the semantic compatibility of rules is straightforward. For rules derived from ordinal or numeric features, only adjacent bins or categories may be merged. For rules originating from nominal categorical features, any combination of categories can be merged.''
+
+TODO: Figure out a way to make this more explicit.
+}
+
+
+\reviewc{r2q9}{The descriptions become longish. For the synthetic 7D dataset, there are descriptions with 6 components. This does not scale very well to higher dimensionality.}
+
+\todo{Blaz}
+\answer{%
+We agree that this is one of the limitations of our approach. We already discuss this limitation and potential solutions in the ``Scalability and Limitations'' sections of our manuscript.
+}
+
+
+\reviewc{r2q10}{The rankings use the mean of a number of measures. However, maybe one of the measures is actually more suitable than others. Has this been evaluated?}
+
+\todo{Pavlin}
+\answer{%
+We agree that this is an important point, but this is future work.
+
+We thank the reviewer for this question. We did not perform a dedicated ablation or sensitivity analysis of the ranking criteria in the current paper. Our intent was to combine several complementary heuristics that reflect different desirable properties of an explanation, such as spatial localization, purity, coverage, and cognitive manageability, rather than to claim that each criterion contributes equally or optimally. We agree that evaluating alternative weighting schemes or single-metric rankings would be valuable and would help determine whether some criteria are more informative than others. We will clarify that the current ranking is heuristic and leave systematic ablation of the ranking components for future work.
+
+TODO: Rephrase.}
+
+
+\reviewc{r2q11}{The Iris and Penguins datasets actually used the class label as a feature. Then, obviously, the three classes can be found. I think this is not how it should be done.}
+
+\todo{Pavlin}
+\answer{
+TODO: Clarify that we don't use the class as a feature for DR
+
+We thank the reviewer for this comment. We have now added a sentence to the XX section clarifying that the class variable was not included as a feature in the dimensionality reduction step.
+% We respectfully disagree. Although excluding the target variable is crucial when performing predictive modelling, oftentimes, two-dimensional embeddings are inspected specifically to observe the separability of classes or to diagnose classes which are often confused. In these cases, it is imperative to label regions according to their class values in order to be able to reason about these kinds of errors. Furthermore, the goal of exploratory data analysis is to obtain a prelimiary understanding of the data, not predictive analysis. Visualizations like these can highlight potentially interesting correlations between variables, which may be useful in downstream analyses, but these must of course be independently validated. We would, however, note, that target variables should never be used when constructing the embedding, and we did not do this here either.
+}
+
+
+
+\subsection*{Reviewer 3}
+
+\reviewc{r3q1}{The motivation for using KDE should be strengthened. Explain why it is an appropriate solution, and what advantages it offers.}
+
+\todo{Pavlin}
+\answer{%
+Related to Reviewer 1.
+We now include a discussion that we choose KDE due to its familiarity and widespread use. For instance, splatterplots \citep{MayorgaGleicher2013}, DataContextMap \citep{ChengMueller2016}, as well as others \citep{Li2022,Li2023,Ye2025} use the same visual encoding approach; they compute kernel density estimates and extract isocontours to indicate shared regions in scatter plot visualizations.
+We note that KDEs offer several advantages, including not being tied to clusters. They are scalable, they have linear runtime. It is easy to incorporate distortion measures into the estimation step to avoid explaining poorly-embedded regions.
+
+Other visual modality approaches could be used as well. For instance, we now include the option to replace the KDE region extraction procedure with rangesets from \citet{Sohns2022} in our open-source implementation of VERA. However, we note that this approach does not scale well and does not admit distortion measures.
+
+Point to supplementary material where we show our approach working with rangesets.
+}
+
+
+\reviewc{r3q2}{The paper lacks proper comparison and positioning with respect to related methods. Without quantitative and qualitative comparisons, it is hard to judge whether VERA provides a substantial advance over existing methods. A more systematic discussion of their similarities, differences, and respective strengths/limitations is necessary to clarify the contribution.}
+
+\todo{Blaz}
+\answer{}
+
+
+\reviewc{r3q3}{The use cases are interesting, but they are built upon small datasets, raising doubts about the scalability of the method.}
+
+\answer{%
+Scalability is already explicitly addressed in Section~\ref{sec:scalability} (``Scalability and Limitations'') and in Fig. 8, where we report both algorithmic complexity and empirical runtime on synthetic datasets of varying size. In particular, we show that runtime scales linearly with the number of samples during region construction, while the main computational bottleneck is the number of extracted region annotations/features. We also discuss the higher complexity of descriptive explanation generation and note a greedy approximation for larger problems. We agree that the illustrative case studies themselves use relatively small to medium-sized datasets, but they are complemented by the dedicated scalability analysis.
+
+Furthermore, this revision adds supplementary material with a detailed parameter sensitivity analysis on eight datasets, including the Forest Covertype dataset~\cite{covertype_31} with over 581,000 samples. While this large-scale example also shows that the method remains applicable well beyond the dataset sizes used in the main paper, we include it in the supplementary material because its primary purpose is to illustrate parameter sensitivity rather than to serve as a qualitative case study.
+}
+
+
+\reviewc{r3q4}{The method appears to be sensitive to several parameters/thresholds. The authors are encouraged to perform a more thorough analysis on them and provide concrete guidelines for threshold settings, making it more practical for end users.}
+
+\answer{%
+Agreed. We now include a dedicated parameter sensitivity analysis in the supplementary material, together with practical guidance on parameter selection; see Comment~\ref{r2q1}.
+}
+
+
+\reviewc{r3q5}{The user evaluation results seem to show slight improvements when compared with the Orange tool used in the study. However, the question is whether it is worth the effort to achieve minor improvements.}
+
+\todo{Pavlin}
+\answer{%
+While we agree with the reviewer that the user study does not show a large improvement in accuracy; our central result is that VERA enables users to answer typical embedding-interpretation questions with comparable accuracy but significantly less time and effort. In the study, participants were approximately 33\% faster with VERA, while maintaining similar accuracy. We therefore do not view the improvement as minor in the context of exploratory analysis, where repeated interpretation of multiple embeddings can make time and cognitive effort a primary practical bottleneck.
+
+TODO: see if we can very clearly emphasize this point anywhere else in the paper.
+}
+
+
+\bibliographystyle{abbrvnat}
+\bibliography{cover-refs}
+
+\end{document}
