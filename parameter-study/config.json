@@ -1,0 +1,44 @@
+{
+  "datasets": [
+    "iris",
+    "penguins",
+    "abalone",
+    "titanic",
+    "attrition",
+    "wine_quality",
+    "adult",
+    "forest_covertype"
+  ],
+  "parameter_variations": {
+    "n_discretization_bins": [3, 5, 10],
+    "contour_level": [0.10, 0.25, 0.50],
+    "scale_factor": [0.5, 1, 2],
+    "merge_min_sample_overlap": [0.5, 0.7, 0.8, 0.9, 0.95]
+  },
+  "defaults": {
+    "n_discretization_bins": 5,
+    "contour_level": 0.25,
+    "scale_factor": 1.0,
+    "merge_min_sample_overlap": 0.8,
+    "sample_size": 5000,
+    "random_state": 0
+  },
+  "contrastive_defaults": {
+    "merge_threshold": 0.95
+  },
+  "contrastive_parameter_variations": {
+    "merge_threshold": [0.8, 0.9, 0.95, 0.99]
+  },
+  "descriptive_defaults": {
+    "merge_threshold": 0.8,
+    "enrich_with_background": true,
+    "max_overlap": 0.0
+  },
+  "descriptive_parameter_variations": {
+    "merge_threshold": [0.5, 0.7, 0.8, 0.9, 0.95],
+    "enrich_with_background": [true, false],
+    "max_overlap": [0.0, 0.1, 0.25]
+  },
+  "explanation_types": ["contrastive", "descriptive"],
+  "max_panels": 4
+}

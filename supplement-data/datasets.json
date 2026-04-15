@@ -1,0 +1,12 @@
+{
+  "datasets": [
+    "iris",
+    "penguins",
+    "abalone",
+    "titanic",
+    "attrition",
+    "wine_quality",
+    "adult",
+    "forest_covertype"
+  ]
+}
