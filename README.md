@@ -1,4 +1,4 @@
-# VERA: Accompanying paper code
+# VERA: Supplementary Material
 
 This repository contains the manuscript package and supplementary material for the VERA paper.
 

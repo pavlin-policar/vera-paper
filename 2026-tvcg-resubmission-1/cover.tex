@@ -40,7 +40,7 @@
 
 \newcommand{\reviewc}[2]{\begin{leftbar}\noindent\rtask{#1}\ref{#1}. #2\end{leftbar}\vspace*{-4mm}}
 \newcommand{\review}[1]{\begin{leftbar}\noindent #1\end{leftbar}}
-\newcommand{\answer}[1]{\noindent #1\\[8mm]}
+\newcommand{\answer}[1]{\noindent #1\par\vspace{2mm}}
 \newcommand{\copyquote}[1]{\vspace{2mm} {\color{blue} #1}\vspace{5mm}}
 
 \newlength{\leftbarwidth}
@@ -112,14 +112,14 @@ First of all, I think Sohns et al.'s work (``Attribute-based Explanation of Non-
 \answer{%
 We thank the reviewer for pointing out \citet{Sohns2022}, which is indeed related to our work and should have been cited. We have now added this citation and have added a paragraph to the Related Work section (Section \ref{sec:related_work}) to clarify the relationship between the two approaches more explicitly.
 
-Briefly, \citet{Sohns2022} propose a novel visual encoding -- rangesets -- for visualizing the spatial occurrence of feature values in a given embedding. As the reviewer points out, their approach shares many of the advantages of our KDE approach.
+Briefly, \citet{Sohns2022} propose a novel visual encoding -- rangesets -- for visualizing the spatial distribution of feature values in a given embedding. As the reviewer points out, their approach shares many of the advantages of our KDE approach.
 However, we emphasize that defining regions is only the first stage of our system, and the novelty of VERA primary lies in subsequent steps, i.e., filtering, merging, and ranking.
-The region construction procedure is modular, and our KDE approach could easily be replaced by the rangeset approach.
+The region construction procedure is modular, and our KDE approach could be substituted by other other approaches, including rangesets.
 
 To illustrate this, we have now incorporated rangesets into our open-source implementation of VERA and now provide several examples of VERA explanations based on rangeset regions in the supplementary material.
-In Section.~\ref{sec:region_construction}, we additionally write: ``We note that region construction is modular: KDE contours can be replaced by alternative region representations while leaving the remaining steps unchanged, such as the alpha hulls used in rangesets~\citep{Sohns2022}. We include several visualizations based on this variant in the supplementary material.''
+In Section.~\ref{sec:region_construction}, we additionally write: ``We note, however, that the region construction step is modular: KDE contours can be replaced by alternative region representations while leaving the remaining steps unchanged, such as the alpha hulls used in rangesets~\citep{Sohns2022}. We include several visualizations based on this variant in the supplementary material.''
 
-We believe these changes clearly delineate our contributions from existing work and provide additional examples of VERA explanations.
+We believe these changes help delineate our contributions from existing work, better demonstrate the novelty of the approach, and provide additional examples of VERA explanations.
 }
 
 
@@ -138,7 +138,7 @@ I would like to see visualization results and discussions on how VERA is useful 
 
 \todo{Blaz}
 \answer{%
-As mentioned and briefly discussed in the Scalability and Limitations section.
+As mentioned and briefly discussed in the Scalability and Limitations section. VERA does not really work well for these cases.
 }
 
 
@@ -149,20 +149,15 @@ For example, why ``$0.25 \times \text{MaxD}$'', ``$k=\sqrt N$'' are reasonable d
 
 \answer{%
 We agree that the previous version of our manuscript did not sufficiently justify several of the design choices and default parameters used in VERA. We now include a dedicated parameter sensitivity analysis in the supplementary material, together with practical guidance on parameter selection; see Comment~\ref{r2q1}.
-We also clarify the rationale for the ranking procedure in Section~\ref{sec:contrastive-selection}, where we now note ``We found that no single metric reliably produced good rankings across a variety of datasets, so we aggregate these complementary criteria using a weighted mean rank.''
+We also clarify the rationale for the weighted-mean aggergation stategy in Section~\ref{sec:contrastive-selection}, where we now note ``We found that no single metric reliably produced good rankings across a variety of datasets, so we aggregate these complementary criteria using a weighted mean rank.''
 }
 
 
 \reviewc{r1q5}{While VERA merges multiple attribute values for explanations, what are the strengths of this when compared with looking multiple visulizations, each of which corresponding to an important attribute, e.g., Fig. 6a vs Fig. 6d (note: this is not evaluated through a user study)?}
 
-\todo{Pavlin}
-\answer{Correct. We did not evaluate this in the user study, but agree that this would be an interesting starting point for future work.
-
-When multiple attributes produce nearly identical region annotations, showing them in separate panels requires users to manually compare and align several highly similar visualizations. Our contrastive merge compresses these redundant views into a single explanation and directly communicates that the corresponding attributes are spatially correlated.
-
-As we mention several times in the paper, the primary advantages of this approach are
-- the merging procedure reduces the number of plots that the user has to inspect, saving time and space
-- this procedure immeditely identifies strongly correlated features. In fact, this procedure can identify features with non-linear correlations as well.
+\answer{% TODO: Blaz - we haven't added anything here, just pointed to existing text
+We agree that this specific comparison was not isolated in the user study. The main advantage of the contrastive merge over showing several separate feature panels is that it removes the need for users to mentally align multiple nearly identical visualizations. When two features induce almost the same region annotations, the merged view expresses that correspondence directly in a single explanation, reducing the number of panels to inspect while also indicating that the features have very similar spatial structure in the embedding.
+We make this motivation explicit in the caption of Fig.~\ref{fig:contrastive_merge}, where we state that the contrastive merge ``reduces the number of panels a user needs to inspect'' and ``reveals relationships between features,'' and we further illustrate this in the Abalone example in Section~\ref{sec:case-studies:abalone}, where five explanations are reduced to two, writing: ``This not only reduces the number of explanations from five to two but also reveals the strong correlation between the three merged features.''
 }
 
 
@@ -173,8 +168,11 @@ As we mention several times in the paper, the primary advantages of this approac
 
 \reviewc{r1q7}{Also, even with VERA, it looks like we need to see multiple visualizations to understand embeddings (e.g., Fig. 8a–d).}
 
-\todo{Pavlin}
-\answer{}
+\answer{%
+We agree that embeddings of most real-world data often require multiple complementary views. This is precisely why VERA is designed as a ranked small-multiple summary rather than as a single all-in-one visualization: attempting to show all spatial differences in one panel would produce overlapping regions and labels and quickly become unreadable.
+
+The key benefit of VERA is therefore not that it always reduces the explanation to a single plot, but that it automatically filters uninformative features and selects a small number of informative panels. In Fig.~\ref{fig:attrition}, for example, VERA highlights four of the highest-ranked panels derived from the 33 available features. Without this selection step, the user would instead need to manually inspect feature distributions across all available variables.
+}
 
 \subsection*{Reviewer 2}
 
@@ -183,25 +181,48 @@ As we mention several times in the paper, the primary advantages of this approac
 \answer{We agree that the original manuscript did not sufficiently discuss the effects of the method parameters or justify the default choices used throughout the paper. To address this, we now include a dedicated parameter sensitivity study on eight different data sets in the supplementary materials. The study examines the effects of the main parameters in both the region construction and explanation generation stages. The results show that the default settings used in the manuscript generally yield high-quality explanations.
 
 We have added the following text to the end of the Methods section: ``Across the full pipeline, from region construction to explanation generation, our approach involves several user-settable parameters. In practice, the results are robust across a range of parameter settings, and the default values generally yield high-quality explanations. Further details are provided in the parameter sensitivity study in the supplementary materials.''
+% TODO: this doesn't talk about weight ranking
 }
 
 
 \reviewc{r2q2}{I would expect the binning of numerical attributes to be crucial. Not only does the number of bins need to be chosen, but also an appropriate binning strategy. The binning strategy is not explained in the paper. Looking at the example, it does not appear to be equidistant range binning. So, what is it? Is the binning based on percentiles? Neither of the two strategies would be perfect. I would expect that a 1D clustering would actually work best. However, that may also not be perfect for multivariate clusters. So, I really wonder what is being done here, what alternatives were considered, how the design choice was made, and how it was evaluated.}
 
-\todo{Pavlin}
-\answer{}
+\answer{%
+We thank the reviewer for raising this point. In fact, the discretization strategy used in VERA already follows the direction suggested by the reviewer: for continuous variables, we use univariate $k$-means binning rather than equal-width or percentile-based bins.
+
+We have now clarified this explicitly in the manuscript and added a short rationale for this choice: ``For numeric features, we discretize their values using univariate $k$-means binning, representing each bin by a binary indicator variable that denotes whether a sample falls within the corresponding interval.'' and the following footnote: ``We selected $k$-means binning because it better captures skewed and multimodal feature distributions, producing intervals that more closely follow the natural value groupings present in the data.''
+
+While we did not perform a dedicated comparison of alternative discretization strategies in the current paper, the supplementary parameter study does evaluate the effect of the number of discretization bins across eight datasets. These results show that the default choice of five bins generally yields stable and informative explanations. Moreover, the subsequent post-hoc merging step often absorbs moderate differences introduced by finer or coarser discretization, making the pipeline reasonably robust to the choice of $k$ within this discretization scheme. We found that intervals that better follow the empirical one-dimensional structure of a feature tend to produce cleaner candidate regions, whereas coarser or less adaptive bin boundaries may split visually coherent groups or merge distinct ones prematurely, making the downstream post-hoc merging step less effective.
+}
 
 
 \reviewc{r2q3}{When looking at the left image of Figure 6(d), I think that the annotations that are generated by the descriptive layouts may be misleading. This annotation seems to indicate that all English books are in the lower part of the embedding, which is not true. I would assume that this would be a problem for users to correctly interpret the annotated plots. The annotations look like filters, i.e., like "shall me all English books", but they are not. I find this highly confusing.}
 
-\todo{Pavlin}
-\answer{}
+\answer{%
+We agree that the descriptive annotation in Fig.~\ref{fig:descriptive_merge}.d can be misread as indicating where all English books are located in the embedding, rather than which feature values are characteristic of the highlighted region. Descriptive explanations are intended to characterize highlighted regions locally, whereas contrastive explanations are the appropriate view for questions about the global spatial distribution of a feature value.
+
+To clarify this distinction, we revised the manuscript in three places:
+\begin{enumerate}
+\item First, we have revised the text in the second paragraph of Section~\ref{sec:methods}: ``\textit{contrastive explanations}, showing how the values of a high-dimensional feature vary across the embedding space, and \textit{descriptive explanations}, summarizing feature values characteristic of individual highlighted regions.''
+
+\item Second, we have revised the opening paragraph of Section~\ref{sec:descriptive-explanations}: ``Descriptive explanations characterize regions of the embedding space by identifying combinations of features and feature values that are characteristic of the samples within those regions. Unlike contrastive explanations, which indicate where different feature values occur across the embedding space, descriptive explanations should be interpreted as local summaries of highlighted regions.''
+
+\item Third, we have added to the third paragraph of Section~\ref{sec:descriptive-explanations:construction}: ``Here, English serves as an additional descriptor of the highlighted region rather than indicating where all English books appear in the embedding.''
+\end{enumerate}
+}
 
 
 \reviewc{r2q4}{The human-attention score assumes that 3 is the perfect number of clusters to show simultaneously. Why 3? The authors reference some papers that hint at using 7, 4, or 2. I would think that it depends on the data distributions. As long as clusters are clearly separated, I would add as many as possible. For example, if a dataset consists of 9 separated clusters in the 2D embedding, then the approach would most likely generate 3 layouts with 3 clusters each, while a single layout may explain the entire data instead. That sounds suboptimal to me.}
 
-\todo{Pavlin}
-\answer{}
+\answer{%
+We agree that there is no universally optimal number of region annotations to show in a single panel, and that this depends on the spatial structure of the embedding. Our intent was not to claim that three is always the correct number, but to introduce a soft preference for moderately sized, more readable panels. In both the contrastive and descriptive cases, the human-attention score is only one component of the final ranking and therefore acts as a heuristic bias rather than as a hard constraint. Panels with more than three annotations are not excluded, and can still be selected when they score better on the other criteria, such as overlap, purity, coverage, or within-panel contrastivity.
+
+To clarify this, we made the following revisions:
+\begin{enumerate}
+    \item In Section~\ref{sec:contrastive-selection}, we now write ``we therefore include a \textit{human-attention score} as a heuristic readability prior'' and ``Here, three serves as a practical middle ground rather than a universal optimum.''
+    \item In Section~\ref{sec:descriptive-explanations:selection}, we now write ``These metrics favor panels that offer broad coverage of the embedding space, contain reliable regions, and remain visually manageable, while softly preferring simpler panels over more crowded ones.''
+\end{enumerate}
+}
 
 
 \reviewc{r2q5}{I also think that occlusion is a big issue for the presented method. The contours encircle regions that are filled with points colored in the respective color. These highlighted colored points occlude the non-colored ones. Sometimes there seems to be no not-colored points, but they are simply occluded.}
@@ -238,14 +259,10 @@ We agree that a coordinated-view baseline such as an embedding linked to paralle
 
 \reviewc{r2q8}{Combinations of semantically compatible rules are allowed, where, for categorical attributes, all combinations are compatible. However, it could be a projection artifact that two categories overlap. Is this considered somehow?}
 
-\todo{Pavlin}
 \answer{%
-I believe the reviewer is referring to poorly embedded regions of the embedding space, where two categories might overlap due to change due to poorly embedded data points.
+Projection artifacts can indeed create apparent overlaps between categories in the 2D embedding. This is considered in VERA already at the region-construction stage: when sample-wise distortion measures are available, we incorporate them as weights during KDE estimation, which downweights poorly mapped samples before regions are extracted. As a result, spurious regions, and therefore spurious overlaps that could later be merged, are less likely to be extracted in the first place.
 
-We already state in Section III-A.3 post-hoc region merging that
-``Determining the semantic compatibility of rules is straightforward. For rules derived from ordinal or numeric features, only adjacent bins or categories may be merged. For rules originating from nominal categorical features, any combination of categories can be merged.''
-
-TODO: Figure out a way to make this more explicit.
+We now clarify this in Section~\ref{sec:region_construction}: ``When sample-wise distortion measures are available, we downweight poorly mapped samples during KDE estimation, making spurious regions in distorted parts of the embedding less likely to be extracted.'' The accompanying note further explains that such regions likely correspond to spurious artifacts of the dimensionality reduction process rather than true underlying structure.
 }
 
 
@@ -259,23 +276,16 @@ We agree that this is one of the limitations of our approach. We already discuss
 
 \reviewc{r2q10}{The rankings use the mean of a number of measures. However, maybe one of the measures is actually more suitable than others. Has this been evaluated?}
 
-\todo{Pavlin}
 \answer{%
-We agree that this is an important point, but this is future work.
-
-We thank the reviewer for this question. We did not perform a dedicated ablation or sensitivity analysis of the ranking criteria in the current paper. Our intent was to combine several complementary heuristics that reflect different desirable properties of an explanation, such as spatial localization, purity, coverage, and cognitive manageability, rather than to claim that each criterion contributes equally or optimally. We agree that evaluating alternative weighting schemes or single-metric rankings would be valuable and would help determine whether some criteria are more informative than others. We will clarify that the current ranking is heuristic and leave systematic ablation of the ranking components for future work.
-
-TODO: Rephrase.}
+We did not perform a dedicated ablation to determine whether any single ranking criterion is consistently more suitable than the others, nor did we conduct a user study aimed at identifying an optimal aggregation of these criteria. Our motivation for aggregating multiple criteria was that they capture different desirable properties of an explanation, including spatial separation, region reliability, coverage, and visual manageability. As we now clarify in the manuscript, ``no single metric reliably produced good rankings across datasets, we aggregate these complementary criteria using a weighted mean rank.''
+We therefore view the current ranking as a heuristic aggregation of complementary criteria, chosen because it empirically produced reasonable rankings across datasets, rather than as a claim that the present weighting is optimal. A more systematic comparison of single-metric rankings and alternative aggregation schemes would be a valuable direction for future work.
+}
 
 
 \reviewc{r2q11}{The Iris and Penguins datasets actually used the class label as a feature. Then, obviously, the three classes can be found. I think this is not how it should be done.}
 
-\todo{Pavlin}
-\answer{
-TODO: Clarify that we don't use the class as a feature for DR
-
-We thank the reviewer for this comment. We have now added a sentence to the XX section clarifying that the class variable was not included as a feature in the dimensionality reduction step.
-% We respectfully disagree. Although excluding the target variable is crucial when performing predictive modelling, oftentimes, two-dimensional embeddings are inspected specifically to observe the separability of classes or to diagnose classes which are often confused. In these cases, it is imperative to label regions according to their class values in order to be able to reason about these kinds of errors. Furthermore, the goal of exploratory data analysis is to obtain a prelimiary understanding of the data, not predictive analysis. Visualizations like these can highlight potentially interesting correlations between variables, which may be useful in downstream analyses, but these must of course be independently validated. We would, however, note, that target variables should never be used when constructing the embedding, and we did not do this here either.
+\answer{%
+The reviewer raises an important point. We agree that class labels should not be used to construct the embedding itself. In our examples, however, the class variable was not used in the dimensionality reduction step for any of the data sets; it was only used afterward as a post hoc explanatory variable. We believe this is appropriate because embeddings are often inspected precisely to assess class separability and to understand which regions correspond to known categories. In that setting, the class label serves as a reference variable for interpretation and debugging rather than as an input used to generate the embedding. We will clarify this distinction explicitly in the opening paragraph of Section~\ref{sec:case-studies} (Usage Scenarios): ``When a dataset includes a known class or target variable, we use it only as a post hoc variable for interpreting the embedding and do not use it to construct the embedding itself.''
 }
 
 
@@ -284,15 +294,11 @@ We thank the reviewer for this comment. We have now added a sentence to the XX s
 
 \reviewc{r3q1}{The motivation for using KDE should be strengthened. Explain why it is an appropriate solution, and what advantages it offers.}
 
-\todo{Pavlin}
 \answer{%
-Related to Reviewer 1.
-We now include a discussion that we choose KDE due to its familiarity and widespread use. For instance, splatterplots \citep{MayorgaGleicher2013}, DataContextMap \citep{ChengMueller2016}, as well as others \citep{Li2022,Li2023,Ye2025} use the same visual encoding approach; they compute kernel density estimates and extract isocontours to indicate shared regions in scatter plot visualizations.
-We note that KDEs offer several advantages, including not being tied to clusters. They are scalable, they have linear runtime. It is easy to incorporate distortion measures into the estimation step to avoid explaining poorly-embedded regions.
+We agree that our motivation for using KDE could be strengthened and have now added the following to Section.~\ref{sec:region_construction}: ``Using KDE contours as regions provides several advantages: most importantly, it removes the need for a separate clustering step in the 2D embedding, which allows VERA to uncover continuous transitions rather than only cluster assignments. KDEs can also be computed efficiently, scaling linearly with the number of samples, and allow distortion measures to be incorporated directly during region construction.''
+%We also note that KDE-based contour overlays are widely used in scatterplot visualization as a means of depicting shared regions in point-based data and have been used extensively in prior work such as splatterplots \citep{MayorgaGleicher2013}, DataContextMap \citep{ChengMueller2016}, and related approaches \citep{Li2022,Li2023,Ye2025}.
 
-Other visual modality approaches could be used as well. For instance, we now include the option to replace the KDE region extraction procedure with rangesets from \citet{Sohns2022} in our open-source implementation of VERA. However, we note that this approach does not scale well and does not admit distortion measures.
-
-Point to supplementary material where we show our approach working with rangesets.
+We also clarify that region construction is modular and that KDE contours can be replaced by alternative region representations, such as the alpha hulls used in rangesets~\citep{Sohns2022}: ``We note, however, that the region construction step is modular: KDE contours can be replaced by alternative region representations while leaving the remaining steps unchanged, such as the alpha hulls used in rangesets~\cite{Sohns2022}.'' We also now provide several examples of this rangeset-based variant in the supplementary material.
 }
 
 

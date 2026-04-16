@@ -121,6 +121,7 @@ Others are tightly coupled to specific dimensionality reduction techniques, redu
 In contrast to existing explanation-generation methods, VERA automatically produces concise, static visual explanations without requiring user interaction. It combines descriptive and contrastive perspectives to summarize the embedding structure, providing informative regional annotations rather than a single global summary or a large set of candidate views. Unlike most existing methods, VERA does not rely on predefined clusters and can detect and annotate arbitrary visual structures in the embedding space.
 
 \section{Methods}
+\label{sec:methods}
 
 \begin{figure*}[t]
   \centering
@@ -130,7 +131,7 @@ In contrast to existing explanation-generation methods, VERA automatically produ
 
 Miller~\cite{Miller2019} posits that the process of explanation involves three cognitive stages: generation, selection, and evaluation. In the context of explaining two-dimensional embeddings, VERA aims to automate the first two of these, generating several candidate explanations, ranking them by informativeness, and presenting the selected explanations for human evaluation, interpretation, and contextualization.
 
-In line with existing work, we adopt two complementary types of visual explanations: \textit{contrastive explanations}, showing how the values of a high-dimensional feature vary across the embedding space, and \textit{descriptive explanations}, identifying feature values characteristic for specific regions of the embedding.
+In line with existing work, we adopt two complementary types of visual explanations: \textit{contrastive explanations}, showing how the values of a high-dimensional feature vary across the embedding space, and \textit{descriptive explanations}, summarizing feature values characteristic of individual highlighted regions.
 Contrastive explanations answer questions like ``Where do the different feature values occur?'' while descriptive explanations answer ``What feature values are characteristic for this region?''.
 
 Given a dataset $D \in \mathbb{R}^{N \times |F|}$ and its corresponding two-dimensional embedding $Y \in \mathbb{R}^{N \times 2}$, our aim is to relate different regions of $Y$ back to the original, high-dimensional features $f \in F$.
@@ -170,7 +171,7 @@ At a high level, our region construction procedure consists of three steps, illu
 
 An input dataset $D$ may contain a mix of categorical and numeric features.
 For categorical features, we apply one-hot encoding, representing each sample's membership in a given category using $k$ binary indicator variables.
-For numeric features, we discretize their values into $k$ bins, each represented by a binary indicator variable that denotes whether a sample falls within the corresponding interval.
+For numeric features, we discretize their values using univariate $k$-means binning, representing each bin by a binary indicator variable that denotes whether a sample falls within the corresponding interval\footnote{We selected $k$-means binning because it better captures skewed and multimodal feature distributions, producing intervals that more closely follow the natural value groupings present in the data.}.
 For example, the numeric feature in Fig.~\ref{fig:region_construction}.a is discretized into five bins shown in Fig.~\ref{fig:region_construction}.b.
 We associate each resulting indicator variable with a rule $\varphi_i$ that specifies the corresponding discretization interval or category membership.
 
@@ -179,7 +180,7 @@ We associate each resulting indicator variable with a rule $\varphi_i$ that spec
 
 Next, we locate the samples corresponding to each indicator variable within the embedding.
 For each variable, we obtain its kernel density estimate (KDE), denoted by $D$, using a Gaussian kernel function.
-If sample-wise distortion measures of the embedding are available, we incorporate them as weights during the estimation step. This avoids generating explanations for poorly mapped samples in the embedding space\footnote{These regions likely correspond to spurious artifacts of the dimensionality reduction process rather than any true underlying structure}.
+When sample-wise distortion measures are available, we downweight poorly mapped samples during KDE estimation, making spurious regions in distorted parts of the embedding less likely to be extracted\footnote{These regions likely correspond to spurious artifacts of the dimensionality reduction process rather than any true underlying structure.}.
 We extract contour lines of the KDE at a user-specified level, defaulting to $0.25 \times \max D$, and use the resulting polygons as the visual representation of a region $r_i$.
 By construction, each resulting region encompasses samples that predominantly share a particular feature value.
 We combine the obtained rules and regions into region annotations $e_i = \left( r_i, \varphi_i \right)$, which serve as the building blocks for constructing visual explanations.
@@ -191,7 +192,8 @@ Additionally, a single scale parameter is unlikely to be appropriate for dataset
 By default, we set $\sigma$ to equal the median distance of each point's $k$-th nearest neighbor, setting $k=\sqrt{N}$.
 Intuitively, the scale parameter controls the granularity of the resulting region annotations: smaller values produce many fine-grained regions, whereas larger values yield broader, higher-level regions.
 
-We note that region construction is modular: KDE contours can be replaced by alternative region representations while leaving the remaining steps unchanged, such as the alpha hulls used in rangesets~\cite{Sohns2022}. We include several visualizations based on this variant in the supplementary material.
+Using KDE contours as regions provides several advantages: most importantly, it removes the need for a separate clustering step in the 2D embedding, which allows VERA to uncover continuous transitions rather than only cluster assignments. KDEs can also be computed efficiently, scaling linearly with the number of samples, and allow distortion measures to be incorporated directly during region construction.
+We note, however, that the region construction step is modular: KDE contours can be replaced by alternative region representations while leaving the remaining steps unchanged, such as the alpha hulls used in rangesets~\cite{Sohns2022}. We include several visualizations based on this variant in the supplementary material.
 
 \subsubsection{Post-hoc Region Merging}
 \label{sec:post-hoc-merge}
@@ -242,7 +244,7 @@ This reduces the number of candidate visual explanations while revealing relatio
 \subsubsection{Explanation Selection}
 \label{sec:contrastive-selection}
 
-To identify the most informative contrastive explanations, we rank and select visual explanations using three criteria: total region overlap, mean purity, and a human-attention score.
+To identify the most informative contrastive explanations, we rank and select visual explanations using three criteria: total region overlap, mean purity, and a human attention score.
 
 Visual explanations describing features whose values are localized to particular regions of the embedding space are likely to be more informative than features whose values are spread more evenly across the embedding space. Region annotations associated with highly localized features exhibit less overlap than those of more evenly distributed features.
 
@@ -254,7 +256,7 @@ The \textit{purity} of each region annotation indicates what proportion of the s
 \end{equation}
 High-purity regions indicate stronger spatial structure and are therefore preferred. For each panel, we compute the \textit{mean purity} of the contained explanatory variables.
 
-A well-known finding from psychology states that human working memory has limited capacity and can pay attention to only a handful of items at a time. Several bounds have been proposed, including seven~\cite{Miller1956}, four~\cite{Cowan2001}, and two~\cite{Gobet2004}. Panels containing many region annotations are more likely to overwhelm users; therefore, panels with fewer annotations are preferred. We define the \textit{human-attention score} as $\left|3 - |P|\right|$, where $|P|$ denotes the number of region annotations in panel $P$, assigning the lowest score to panels containing three annotations. In our case, three represents an intermediate estimate of the number of items a user can comfortably consider simultaneously.
+A well-known finding from psychology states that human working memory has limited capacity and can pay attention to only a handful of items at a time. Several bounds have been proposed, including seven~\cite{Miller1956}, four~\cite{Cowan2001}, and two~\cite{Gobet2004}. Panels containing many region annotations are more likely to overwhelm users; we therefore include a \textit{human-attention score} as a heuristic readability prior. We define this score as $\left|3 - |P|\right|$, where $|P|$ denotes the number of region annotations in panel $P$, assigning the lowest score to panels containing three annotations. Here, three serves as a practical middle ground rather than a universal optimum.
 
 We compute individual panel rankings for each of the three metrics. Because no single metric reliably produced good rankings across datasets, we aggregate these complementary criteria using a weighted mean rank. We then select the top $k$ panels with the highest overall ranking as our final contrastive explanations. This process is illustrated in Fig.~\ref{fig:contrastive_generation}.
 
@@ -265,10 +267,12 @@ We compute individual panel rankings for each of the three metrics. Because no s
 \end{figure}
 
 \subsection{Descriptive Explanations}
+\label{sec:descriptive-explanations}
 
-Descriptive explanations characterize regions of the embedding space by identifying sets of features and feature values that are characteristic of the samples within those regions. Unlike contrastive explanations, which primarily show how the values of a single feature vary across regions, descriptive explanations capture how multiple features jointly characterize specific regions.
+Descriptive explanations characterize regions of the embedding space by identifying combinations of features and feature values that are characteristic of the samples within those regions. Unlike contrastive explanations, which indicate where different feature values occur across the embedding space, descriptive explanations should be interpreted as local summaries of highlighted regions.
 
 \subsubsection{Explanation Construction}
+\label{sec:descriptive-explanations:construction}
 
 \begin{figure}[t!]
   \centering
@@ -288,6 +292,7 @@ Two region annotations can be merged if their regions $r_i$ and $r_j$ exhibit a 
 \end{equation}
 
 Third, while the previous step merges region annotations exhibiting near-perfect overlap, these merged region annotations may not fully describe the characteristics of the samples within the region. For instance, the pink region in the middle panel of Fig.~\ref{fig:descriptive_merge}.c represents short children's books, obtained by merging the near-perfectly overlapping regions in Fig.~\ref{fig:descriptive_merge}.b highlighted in pink. However, these books are also fully contained within the yellow region corresponding to the English language in the left panel of Fig.~\ref{fig:descriptive_merge}.c. Hence, it is more informative to describe them as short, English children's books, as shown in Fig.~\ref{fig:descriptive_merge}.d, rather than simply as short children's books.
+Here, English serves as an additional descriptor of the highlighted region rather than indicating where all English books appear in the embedding.
 To incorporate these additional characteristics, the third step enriches the generated region annotations with rules from larger, sufficiently overlapping regions.
 Importantly, we do not merge the regions themselves; instead, we augment smaller regions with rules from larger, overlapping ones.
 We refer to this process as \textit{background enrichment}.
@@ -298,6 +303,7 @@ If $r_j$ is a small region entirely contained within the larger region $r_i$, th
 However, the merged rule $\varphi_{\text{new}}$ would incorrectly indicate that all points within the merged region satisfy both $\varphi_i$ and $\varphi_j$, leading to a misleading annotation. To avoid this, we instead require a high degree of \textit{minimum overlap} between two regions, ensuring that both cover approximately the same data points and that the resulting annotation remains valid across all encompassed samples.
 
 \subsubsection{Explanation Selection}
+\label{sec:descriptive-explanations:selection}
 
 \begin{figure*}[t!]
   \centering
@@ -314,7 +320,7 @@ To efficiently identify combinations of non-overlapping region annotations, we f
 
 Descriptive explanations are ranked and selected based on five criteria.
 The first three include the \textit{sample coverage}, i.e., what proportion of all data points are covered by the region annotations in the panel, the \textit{mean purity}, and the \textit{human attention score} from Section~\ref{sec:contrastive-selection}.
-These metrics favor panels that offer broad coverage of the embedding space, contain reliable regions, and remain visually manageable in terms of the number of annotations.
+These metrics favor panels that offer broad coverage of the embedding space, contain reliable regions, and remain visually manageable, while softly preferring simpler panels over more crowded ones.
 The fourth and fifth criteria ensure a degree of contrastivity, which, according to Miller~\cite{Miller2019}, should lead to more intuitive and satisfying explanations.
 Although descriptive explanations may characterize regions using distinct sets of features, we prioritize panels where features recur across multiple region annotations. This enables users to compare feature values across regions within a single panel, without needing to reference other visual explanations.
 To prioritize feature repetition, we score each panel according to its \textit{mean variable occurrence} (MVO), defined as the average number of times each feature appears across all region annotations within a particular panel.
@@ -328,7 +334,7 @@ Across the full pipeline, from region construction to explanation generation, ou
 \section{Usage Scenarios}
 \label{sec:case-studies}
 
-To demonstrate the versatility and effectiveness of VERA, we present generated explanations across several diverse datasets.
+To demonstrate the versatility and effectiveness of VERA, we present generated explanations across several diverse datasets. When a dataset includes a known class or target variable, we use it only as a post hoc variable for interpreting the embedding and do not use it to construct the embedding itself.
 
 \subsection{IBM Employee Attrition Dataset}
 
@@ -350,6 +356,7 @@ The descriptive explanations depicted in Figs.~\ref{fig:attrition}.e-h offer des
 Notice that many of the identified regions in Fig.~\ref{fig:attrition} do not correspond to discrete clusters but rather represent regions within or across clusters. For instance, the gray region in Fig.~\ref{fig:attrition}g corresponds to single employees with less than 15 years of experience and low job levels—likely younger, junior staff. Conversely, the yellow region primarily includes divorced employees, for whom job level and total working years are unspecified. This demonstrates VERA’s ability to characterize not only entire clusters but also informative subregions within them.
 
 \subsection{Abalone Dataset}
+\label{sec:case-studies:abalone}
 
 \begin{figure}[htb]
   \centering
