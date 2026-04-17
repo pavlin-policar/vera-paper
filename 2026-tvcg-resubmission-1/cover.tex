@@ -215,11 +215,11 @@ To clarify this distinction, we revised the manuscript in three places:
 \reviewc{r2q4}{The human-attention score assumes that 3 is the perfect number of clusters to show simultaneously. Why 3? The authors reference some papers that hint at using 7, 4, or 2. I would think that it depends on the data distributions. As long as clusters are clearly separated, I would add as many as possible. For example, if a dataset consists of 9 separated clusters in the 2D embedding, then the approach would most likely generate 3 layouts with 3 clusters each, while a single layout may explain the entire data instead. That sounds suboptimal to me.}
 
 \answer{%
-We agree that there is no universally optimal number of region annotations to show in a single panel, and that this depends on the spatial structure of the embedding. Our intent was not to claim that three is always the correct number, but to introduce a soft preference for moderately sized, more readable panels. In both the contrastive and descriptive cases, the human-attention score is only one component of the final ranking and therefore acts as a heuristic bias rather than as a hard constraint. Panels with more than three annotations are not excluded, and can still be selected when they score better on the other criteria, such as overlap, purity, coverage, or within-panel contrastivity.
+We agree that there is no universally optimal number of region annotations to show in a single panel, and that this depends on the spatial structure of the embedding. Our intent was not to claim that three is always the correct number, but to introduce a soft preference for moderately sized, more readable panels. In both the contrastive and descriptive cases, the human attention score is only one component of the final ranking and therefore acts as a heuristic bias rather than as a hard constraint. Panels with more than three annotations are not excluded, and can still be selected when they score better on the other criteria, such as overlap, purity, coverage, or within-panel contrastivity.
 
 To clarify this, we made the following revisions:
 \begin{enumerate}
-    \item In Section~\ref{sec:contrastive-selection}, we now write ``we therefore include a \textit{human-attention score} as a heuristic readability prior'' and ``Here, three serves as a practical middle ground rather than a universal optimum.''
+    \item In Section~\ref{sec:contrastive-selection}, we now write ``we therefore include a \textit{human attention score} as a heuristic readability prior'' and ``Here, three serves as a practical middle ground rather than a universal optimum.''
     \item In Section~\ref{sec:descriptive-explanations:selection}, we now write ``These metrics favor panels that offer broad coverage of the embedding space, contain reliable regions, and remain visually manageable, while softly preferring simpler panels over more crowded ones.''
 \end{enumerate}
 }
@@ -260,7 +260,7 @@ We agree that a coordinated-view baseline such as an embedding linked to paralle
 \reviewc{r2q8}{Combinations of semantically compatible rules are allowed, where, for categorical attributes, all combinations are compatible. However, it could be a projection artifact that two categories overlap. Is this considered somehow?}
 
 \answer{%
-Projection artifacts can indeed create apparent overlaps between categories in the 2D embedding. This is considered in VERA already at the region-construction stage: when sample-wise distortion measures are available, we incorporate them as weights during KDE estimation, which downweights poorly mapped samples before regions are extracted. As a result, spurious regions, and therefore spurious overlaps that could later be merged, are less likely to be extracted in the first place.
+Projection artifacts can indeed create apparent overlaps between categories in the 2D embedding. We do not claim to resolve this issue in all cases. Instead, when suitable sample-wise distortion measures are available for a given embedding, VERA can incorporate them as weights during KDE estimation, which downweights poorly mapped samples and makes spurious regions in distorted parts of the embedding less likely to be extracted. Since different dimensionality reduction approaches may call for different distortion measures, we leave this choice to the user rather than assuming a single universally appropriate correction.be merged, are less likely to be extracted in the first place.
 
 We now clarify this in Section~\ref{sec:region_construction}: ``When sample-wise distortion measures are available, we downweight poorly mapped samples during KDE estimation, making spurious regions in distorted parts of the embedding less likely to be extracted.'' The accompanying note further explains that such regions likely correspond to spurious artifacts of the dimensionality reduction process rather than true underlying structure.
 }
@@ -326,11 +326,12 @@ Agreed. We now include a dedicated parameter sensitivity analysis in the supplem
 
 \reviewc{r3q5}{The user evaluation results seem to show slight improvements when compared with the Orange tool used in the study. However, the question is whether it is worth the effort to achieve minor improvements.}
 
-\todo{Pavlin}
 \answer{%
-While we agree with the reviewer that the user study does not show a large improvement in accuracy; our central result is that VERA enables users to answer typical embedding-interpretation questions with comparable accuracy but significantly less time and effort. In the study, participants were approximately 33\% faster with VERA, while maintaining similar accuracy. We therefore do not view the improvement as minor in the context of exploratory analysis, where repeated interpretation of multiple embeddings can make time and cognitive effort a primary practical bottleneck.
+While we agree that the user study does not show a large gain in accuracy, our central result is that VERA enables users to answer typical embedding-interpretation questions with comparable accuracy but significantly less time and effort. In the study, participants were approximately 33\% faster with VERA while maintaining similar accuracy. We consider this gain practically meaningful, since users typically inspect many embeddings and repeatedly answer similar questions, so a 33\% reduction in response time substantially reduces cumulative effort.
 
-TODO: see if we can very clearly emphasize this point anywhere else in the paper.
+This interpretation is already reflected in several places in the manuscript. For instance, in the Abstract, we state that VERA requires ``significantly less time and user effort.'' In the Introduction, we write that static approaches ``can substantially reduce analysis time and cognitive effort.'' In the Results section, we already summarize the study by stating that participants answered with ``roughly the same degree of accuracy but at a much faster rate'' when using VERA explanations.
+
+To make this point even clearer, we have now added the following text to Section~\ref{sec:user-study:results}: ``We consider this gain practically meaningful, since analysts typically inspect many embeddings and perform similar interpretation tasks; in that setting, a 33\% reduction in response time substantially reduces cumulative effort.''
 }
 
 
