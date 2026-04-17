@@ -1,20 +1,30 @@
-# VERA: Supplementary Material
+# VERA: Paper Source and Supplementary Material
 
-This repository contains the manuscript package and supplementary material for the VERA paper.
+![VERA banner](readme-banner.png)
+
+This repository contains the LaTeX source and supplementary material for the paper **"VERA: Generating Visual Explanations of Two-Dimensional Embeddings via Region Annotation."** It accompanies the open-source Python implementation of VERA in the [`vera`](https://github.com/pavlin-policar/vera) repository.
+
+## Overview
+
+VERA is a method for automatically generating static visual explanations of two-dimensional embeddings produced by techniques such as t-SNE and UMAP. Instead of requiring analysts to manually inspect clusters, transitions, and outliers one feature at a time, VERA identifies informative regions in the embedding and links them to human-interpretable feature values.
+
+The goal is to provide a fast, high-level summary of what an embedding shows. VERA produces both contrastive explanations, which show how feature values vary across the embedding space, and descriptive explanations, which characterize individual regions. In the paper, we show that these generated explanations can support common embedding-interpretation tasks with comparable accuracy to an interactive analysis workflow while requiring substantially less user effort.
 
 ## Repository contents
 
 ```text
 tvcg-embedding-annotation/
-├── 2026-tvcg-resubmission-1/      # manuscript and cover letter
+├── 2026-tvcg-resubmission-1/      # Current manuscript source
 ├── bookworm/                      # Synthetic book-purchase example data
-├── supplement-data/               # Data downloader
+├── supplement-data/               # Shared dataset downloader for supplementary studies
 ├── parameter-study/               # Parameter sensitivity study for VERA
 ├── region-method-comparison/      # KDE-versus-rangeset comparison
 ├── purity-indication-comparison/  # Purity-based visual emphasis comparison
 ├── user-study/                    # User-study materials
 └── orange-workflow-examples/      # Orange baseline workflows and screenshots
 ```
+
+The main paper source lives in `2026-tvcg-resubmission-1/`. The remaining directories provide supplementary material, replication resources, and reviewer-facing evidence for the methodological choices and evaluation described in the manuscript.
 
 ## Setup
 
