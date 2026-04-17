@@ -146,8 +146,18 @@ The authors introduced several settings/designs for VERA, but the reasoning for 
 For example, why ``$0.25 \times \text{MaxD}$'', ``$k=\sqrt N$'' are reasonable default parameters? How should we set “a predetermined threshold” for the region merging. What can be considered as “nearly perfect” overlapping? When |P| > 3, what will happen for the human annotation score? Why aggregating multiple scores with a weighted mean rank is a good idea?}
 
 \answer{%
-We agree that the previous version of our manuscript did not sufficiently justify several of the design choices and default parameters used in VERA. We now include a dedicated parameter sensitivity analysis in the supplementary material, together with practical guidance on parameter selection; see Comment~\ref{r2q1}.
-We also clarify the rationale for the weighted-mean aggergation stategy in Section~\ref{sec:contrastive-selection}, where we now note ``We found that no single metric reliably produced good rankings across a variety of datasets, so we aggregate these complementary criteria using a weighted mean rank.''
+We agree that the previous version of our manuscript did not sufficiently justify several of the design choices and default parameters used in VERA.
+
+For each parameter, we include a short justification, writing:
+\begin{enumerate}
+    \item In Section~\ref{sec:region_construction}: ``We extract contour lines of the KDE at a user-specified level, defaulting to $0.25 \times \max D$, and use the resulting polygons as the visual representation of a region $r_i$.
+    This value provides a practical middle ground: lower levels produce broader, less localized regions, whereas higher levels restrict contours to dense cores and can fragment them.''
+    \item In Section~\ref{sec:region_construction}: ``By default, we set $\sigma$ to equal the median distance of each point's $k$-th nearest neighbor, setting $k=\sqrt{N}$. This yields a scale-adaptive local bandwidth that grows with the sample size while remaining sensitive to local structure.''
+    \item In Section~\ref{sec:post-hoc-merge}: ``A pair of regions is merged when their maximum overlap exceeds a user-specified threshold. We use a conservative default so that clearly redundant regions are consolidated while nearby but distinct structures remain separate.''
+    \item In Section~\ref{sec:contrastive-selection}: ``Because no single metric reliably produced good rankings across datasets, we aggregate them using a weighted mean-rank strategy. This treats the criteria as complementary heuristics and avoids relying on any one metric alone.''
+\end{enumerate}
+
+We also include a dedicated parameter sensitivity analysis in the supplementary material, together with practical guidance on parameter selection; see Comment~\ref{r2q1}.
 }
 
 
@@ -229,7 +239,8 @@ To clarify this, we made the following revisions:
 We agree that point-level occlusion is an important limitation of static scatter plot-based visualizations. However, VERA is primarily a region-based explanation method: the contours and labels are the main explanatory objects, while the scatter points provide local context. Our pipeline therefore aims to reduce region-level overlap through merging, filtering, and low-overlap panel selection.
 We now clarify this in Section~\ref{sec:region_construction}, adding ``In the resulting visualizations, these contours serve as the primary representation of region annotations, while the scatter plot provides contextual sample locations.''
 
-Moreover, VERA does not assume perfectly pure regions: purity is modeled quantitatively, and our implementation supports an optional purity-aware rendering in which lower-purity regions are shown with lighter fills and thinner boundaries. While this does not eliminate occlusion, it helps visually deemphasize more ambiguous regions, and we now include supplementary comparisons of the default and purity-aware renderings.
+In addition, our implementation includes an optional purity-aware rendering that deemphasizes lower-purity regions through lighter fills and thinner boundaries. We include examples of this auxiliary rendering in the supplementary material. While this does not eliminate occlusion, it helps visually deemphasize more ambiguous regions, and we now include supplementary comparisons of the default and purity-aware renderings.
+
 }
 
 
@@ -260,7 +271,7 @@ We agree that a coordinated-view baseline such as an embedding linked to paralle
 \reviewc{r2q8}{Combinations of semantically compatible rules are allowed, where, for categorical attributes, all combinations are compatible. However, it could be a projection artifact that two categories overlap. Is this considered somehow?}
 
 \answer{%
-Projection artifacts can indeed create apparent overlaps between categories in the 2D embedding. We do not claim to resolve this issue in all cases. Instead, when suitable sample-wise distortion measures are available for a given embedding, VERA can incorporate them as weights during KDE estimation, which downweights poorly mapped samples and makes spurious regions in distorted parts of the embedding less likely to be extracted. Since different dimensionality reduction approaches may call for different distortion measures, we leave this choice to the user rather than assuming a single universally appropriate correction.be merged, are less likely to be extracted in the first place.
+Projection artifacts can indeed create apparent overlaps between categories in the 2D embedding. We do not claim to resolve this issue in all cases. Instead, when suitable sample-wise distortion measures are available for a given embedding, VERA can incorporate them as weights during KDE estimation, which downweights poorly mapped samples and makes spurious regions in distorted parts of the embedding less likely to be extracted in the first place. Since different dimensionality reduction approaches may call for different distortion measures, we leave this choice to the user rather than assuming a single universally appropriate correction.
 
 We now clarify this in Section~\ref{sec:region_construction}: ``When sample-wise distortion measures are available, we downweight poorly mapped samples during KDE estimation, making spurious regions in distorted parts of the embedding less likely to be extracted.'' The accompanying note further explains that such regions likely correspond to spurious artifacts of the dimensionality reduction process rather than true underlying structure.
 }
@@ -276,7 +287,7 @@ We agree that this is one of the limitations of our approach. We already discuss
 \reviewc{r2q10}{The rankings use the mean of a number of measures. However, maybe one of the measures is actually more suitable than others. Has this been evaluated?}
 
 \answer{%
-We did not perform a dedicated ablation to determine whether any single ranking criterion is consistently more suitable than the others, nor did we conduct a user study aimed at identifying an optimal aggregation of these criteria. Our motivation for aggregating multiple criteria was that they capture different desirable properties of an explanation, including spatial separation, region reliability, coverage, and visual manageability. As we now clarify in the manuscript, ``no single metric reliably produced good rankings across datasets, we aggregate these complementary criteria using a weighted mean rank.''
+We did not perform a dedicated ablation to determine whether any single ranking criterion is consistently more suitable than the others, nor did we conduct a user study aimed at identifying an optimal aggregation of these criteria. Our motivation for aggregating multiple criteria was that they capture different desirable properties of an explanation, including spatial separation, region reliability, coverage, and visual manageability. As we now clarify in the manuscript, ``no single metric reliably produced good rankings across datasets, we aggregate them using a weighted mean-rank strategy.''
 We therefore view the current ranking as a heuristic aggregation of complementary criteria, chosen because it empirically produced reasonable rankings across datasets, rather than as a claim that the present weighting is optimal. A more systematic comparison of single-metric rankings and alternative aggregation schemes would be a valuable direction for future work.
 }
 

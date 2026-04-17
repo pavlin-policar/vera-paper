@@ -182,6 +182,7 @@ Next, we locate the samples corresponding to each indicator variable within the 
 For each variable, we obtain its kernel density estimate (KDE), denoted by $D$, using a Gaussian kernel function.
 When sample-wise distortion measures are available, we downweight poorly mapped samples during KDE estimation, making spurious regions in distorted parts of the embedding less likely to be extracted\footnote{These regions likely correspond to spurious artifacts of the dimensionality reduction process rather than any true underlying structure.}.
 We extract contour lines of the KDE at a user-specified level, defaulting to $0.25 \times \max D$, and use the resulting polygons as the visual representation of a region $r_i$.
+This value provides a practical middle ground: lower levels produce broader, less localized regions, whereas higher levels restrict contours to dense cores and can fragment them.
 In the resulting visualizations, these contours serve as the primary representation of region annotations, while the scatter plot provides context for the underlying samples.
 By construction, each resulting region encompasses samples that predominantly share a particular feature value.
 We combine the obtained rules and regions into region annotations $e_i = \left( r_i, \varphi_i \right)$, which serve as the building blocks for constructing visual explanations.
@@ -190,7 +191,7 @@ In our running example, the five categories corresponding to discretization bins
 An important consideration of the KDE step is the choice of Gaussian kernel bandwidth $\sigma$.
 Different embedding algorithms produce embeddings that can span across different scales, e.g., one embedding may span from $-1$ to $1$ along its dimensions, while another may span from $-10$ to $10$.
 Additionally, a single scale parameter is unlikely to be appropriate for datasets containing different numbers of samples. For instance, in a dataset with 50 samples, we are likely to be interested in groups of 10-20 points, while in a dataset containing 2 million samples, the groups of interest are likely larger.
-By default, we set $\sigma$ to equal the median distance of each point's $k$-th nearest neighbor, setting $k=\sqrt{N}$.
+By default, we set $\sigma$ to equal the median distance of each point's $k$-th nearest neighbor, setting $k=\sqrt{N}$. This yields a scale-adaptive local bandwidth that grows with the sample size while remaining sensitive to local structure.
 Intuitively, the scale parameter controls the granularity of the resulting region annotations: smaller values produce many fine-grained regions, whereas larger values yield broader, higher-level regions.
 
 Using KDE contours as regions provides several advantages: most importantly, it removes the need for a separate clustering step in the 2D embedding, which allows VERA to uncover continuous transitions rather than only cluster assignments. KDEs can also be computed efficiently, scaling linearly with the number of samples, and allow distortion measures to be incorporated directly during region construction.
@@ -213,7 +214,7 @@ We define the \textit{maximum overlap} between two regions $r_i$ and $r_j$ as
 \text{max\_overlap}(r_i, r_j) = \max \left \{ \frac{|r_i \cap r_j|}{|r_i|}, \frac{|r_j \cap r_i|}{|r_j|} \right \}, \notag
 \end{equation}
 where $|r|$ denotes the number of samples within that region.
-A pair of regions is merged when their maximum overlap exceeds a predetermined threshold.
+A pair of regions is merged when their maximum overlap exceeds a user-specified threshold. We use a conservative default so that clearly redundant regions are consolidated while nearby but distinct structures remain separate.
 This formulation ensures that small regions, which are completely encompassed by a larger region, can be absorbed into the larger region.
 
 Following the merging step, features with little or no spatial localization usually produce a single region annotation spanning the entire embedding.
@@ -259,7 +260,7 @@ High-purity regions indicate stronger spatial structure and are therefore prefer
 
 A well-known finding from psychology states that human working memory has limited capacity and can pay attention to only a handful of items at a time. Several bounds have been proposed, including seven~\cite{Miller1956}, four~\cite{Cowan2001}, and two~\cite{Gobet2004}. Panels containing many region annotations are more likely to overwhelm users; we therefore include a \textit{human attention score} as a heuristic readability prior. We define this score as $\left|3 - |P|\right|$, where $|P|$ denotes the number of region annotations in panel $P$, assigning the lowest score to panels containing three annotations. Here, three serves as a practical middle ground rather than a universal optimum.
 
-We compute individual panel rankings for each of the three metrics. Because no single metric reliably produced good rankings across datasets, we aggregate these complementary criteria using a weighted mean rank. We then select the top $k$ panels with the highest overall ranking as our final contrastive explanations. This process is illustrated in Fig.~\ref{fig:contrastive_generation}.
+We compute individual panel rankings for each of the three metrics. Because no single metric reliably produced good rankings across datasets, we aggregate them using a weighted mean-rank strategy. This treats the criteria as complementary heuristics and avoids relying on any one metric alone. We then select the top $k$ panels with the highest overall ranking as our final contrastive explanations. This process is illustrated in Fig.~\ref{fig:contrastive_generation}.
 
 \begin{figure}[t]
   \centering
