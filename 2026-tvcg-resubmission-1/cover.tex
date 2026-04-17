@@ -227,9 +227,11 @@ To clarify this, we made the following revisions:
 
 \reviewc{r2q5}{I also think that occlusion is a big issue for the presented method. The contours encircle regions that are filled with points colored in the respective color. These highlighted colored points occlude the non-colored ones. Sometimes there seems to be no not-colored points, but they are simply occluded.}
 
-\todo{Pavlin}
-\answer{
-We agree with the reviewer.
+\answer{%
+We agree that point-level occlusion is an important limitation of static scatter plot-based visualizations. However, VERA is primarily a region-based explanation method: the contours and labels are the main explanatory objects, while the scatter points provide local context. Our pipeline therefore aims to reduce region-level overlap through merging, filtering, and low-overlap panel selection.
+We now clarify this in Section~\ref{sec:region_construction}, adding ``In the resulting visualizations, these contours serve as the primary representation of region annotations, while the scatter plot provides contextual sample locations.''
+
+Moreover, VERA does not assume perfectly pure regions: purity is modeled quantitatively, and our implementation supports an optional purity-aware rendering in which lower-purity regions are shown with lighter fills and thinner boundaries. While this does not eliminate occlusion, it helps visually deemphasize more ambiguous regions, and we now include supplementary comparisons of the default and purity-aware renderings.
 }
 
 

@@ -1,0 +1,42 @@
+{
+  "datasets": [
+    "iris",
+    "penguins",
+    "abalone",
+    "titanic",
+    "attrition",
+    "wine_quality",
+    "adult",
+    "forest_covertype"
+  ],
+  "plot_variants": [
+    {
+      "tag": "regular",
+      "label": "Regular",
+      "indicate_purity": false
+    },
+    {
+      "tag": "indicate-purity",
+      "label": "Purity indicated",
+      "indicate_purity": true
+    }
+  ],
+  "defaults": {
+    "n_discretization_bins": 5,
+    "contour_level": 0.25,
+    "scale_factor": 1.0,
+    "merge_min_sample_overlap": 0.8,
+    "sample_size": 5000,
+    "random_state": 0
+  },
+  "contrastive_defaults": {
+    "merge_threshold": 0.95
+  },
+  "descriptive_defaults": {
+    "merge_threshold": 0.8,
+    "enrich_with_background": true,
+    "max_overlap": 0.0
+  },
+  "explanation_types": ["contrastive", "descriptive"],
+  "max_panels": 4
+}

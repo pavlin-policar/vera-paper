@@ -182,6 +182,7 @@ Next, we locate the samples corresponding to each indicator variable within the 
 For each variable, we obtain its kernel density estimate (KDE), denoted by $D$, using a Gaussian kernel function.
 When sample-wise distortion measures are available, we downweight poorly mapped samples during KDE estimation, making spurious regions in distorted parts of the embedding less likely to be extracted\footnote{These regions likely correspond to spurious artifacts of the dimensionality reduction process rather than any true underlying structure.}.
 We extract contour lines of the KDE at a user-specified level, defaulting to $0.25 \times \max D$, and use the resulting polygons as the visual representation of a region $r_i$.
+In the resulting visualizations, these contours serve as the primary representation of region annotations, while the scatter plot provides context for the underlying samples.
 By construction, each resulting region encompasses samples that predominantly share a particular feature value.
 We combine the obtained rules and regions into region annotations $e_i = \left( r_i, \varphi_i \right)$, which serve as the building blocks for constructing visual explanations.
 In our running example, the five categories corresponding to discretization bins in Fig.~\ref{fig:region_construction}.b are used to construct the five corresponding regions shown in Fig.~\ref{fig:region_construction}.c.

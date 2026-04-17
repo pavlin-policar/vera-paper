@@ -18,7 +18,7 @@ supplement-data/
 
 ## Datasets
 
-The directory contains the eight datasets used by both the parameter sensitivity study and the region-method comparison:
+The directory contains the eight datasets used in the experiments included in this repository:
 
 - Iris
 - Penguins
@@ -36,3 +36,4 @@ Run:
 ```bash
 python download_data.py
 ```
+

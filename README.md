@@ -6,12 +6,13 @@ This repository contains the manuscript package and supplementary material for t
 
 ```text
 tvcg-embedding-annotation/
-├── 2026-tvcg-resubmission-1/  # manuscript and cover letter
-├── supplement-data/           # Data downloader
-├── parameter-study/           # Parameter sensitivity study for VERA
-├── region-method-comparison/  # KDE-versus-rangeset comparison
-├── user-study/                # User-study materials
-└── orange-workflow-examples/  # Orange workflows and screenshots documenting the interactive baseline and related embedding-interpretation workflows
+├── 2026-tvcg-resubmission-1/      # manuscript and cover letter
+├── supplement-data/               # Data downloader
+├── parameter-study/               # Parameter sensitivity study for VERA
+├── region-method-comparison/      # KDE-versus-rangeset comparison
+├── purity-indication-comparison/  # Purity-based visual emphasis comparison
+├── user-study/                    # User-study materials
+└── orange-workflow-examples/      # Orange baseline workflows and screenshots
 ```
 
 ## Setup
@@ -30,7 +31,7 @@ Then download the eight shared datasets used by the supplementary studies:
 python supplement-data/download_data.py
 ```
 
-The datasets are stored in `supplement-data/data/` and reused by both studies.
+The datasets are stored in `supplement-data/data/` and reused by all supplementary studies and comparisons.
 
 ## Run the studies
 
@@ -46,16 +47,24 @@ Region-method comparison:
 python region-method-comparison/run_region_method_comparison.py region-method-comparison/config.json
 ```
 
-These two studies document several important methodological aspects of VERA, in particular:
+Purity-indication comparison:
+
+```bash
+python purity-indication-comparison/run_purity_indication_comparison.py purity-indication-comparison/config.json
+```
+
+These supplementary studies and comparisons document several important methodological aspects of VERA, in particular:
 
 - robustness of VERA to parameter choices
 - practical guidance for default settings
 - positioning of VERA relative to alternative region-construction backends such as rangesets
+- effect of purity-based visual emphasis in the final plotted explanations
 
 Additional details, study outputs, and supporting materials are documented in:
 
 - `parameter-study/README.md`
 - `region-method-comparison/README.md`
+- `purity-indication-comparison/README.md`
 - `supplement-data/README.md`
 - `user-study/README.md`
 - `orange-workflow-examples/README.md`
