@@ -1,5 +1,5 @@
 diff:
-	latexdiff ../2025-tvcg-initial-submission/main.tex main.tex > diff.tex
+	latexdiff main-old.tex main.tex > diff.tex
 	pdflatex diff
 	bibtex diff
 	pdflatex diff
