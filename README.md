@@ -7,6 +7,7 @@ This repository contains the manuscript package and supplementary material for t
 ```text
 tvcg-embedding-annotation/
 ├── 2026-tvcg-resubmission-1/      # manuscript and cover letter
+├── bookworm/                      # Synthetic book-purchase example data
 ├── supplement-data/               # Data downloader
 ├── parameter-study/               # Parameter sensitivity study for VERA
 ├── region-method-comparison/      # KDE-versus-rangeset comparison
@@ -62,6 +63,7 @@ These supplementary studies and comparisons document several important methodolo
 
 Additional details, study outputs, and supporting materials are documented in:
 
+- `bookworm/`
 - `parameter-study/README.md`
 - `region-method-comparison/README.md`
 - `purity-indication-comparison/README.md`
