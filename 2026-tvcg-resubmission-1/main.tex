@@ -34,9 +34,9 @@
 \maketitle
 
 \begin{abstract}
-Two-dimensional embeddings obtained from dimensionality reduction techniques such as MDS, t-SNE, or UMAP, are widely used to visualize high-dimensional data and support researchers in visually identifying clusters, outliers, and other interesting patterns in the data. However, interpreting and contextualizing the identified patterns remains challenging, often requiring manual inspection which can be both time-consuming and repetitive.
-We propose VERA (Visual Explanations via Region Annotation), a general-purpose method that generates static visual explanations for two-dimensional embeddings.
-VERA identifies informative regions in the embedding space and associates them with user-provided human-interpretable features, producing concise visual annotations that summarize the structure of the embedding landscape at a glance.
+Two-dimensional embeddings obtained from dimensionality reduction techniques such as MDS, t-SNE, or UMAP, are widely used to visualize high-dimensional data and support researchers in visually identifying clusters, outliers, and other interesting patterns in the data. However, the main challenge is not only to detect such patterns, but to explain what they represent in terms of the original, human-interpretable features of the data. Existing approaches often rely on interactive exploration or direct feature encodings, requiring substantial manual inspection that can be time-consuming and repetitive.
+As an alternative, we propose VERA (Visual Explanations via Region Annotation), a general-purpose method for explaining two-dimensional embeddings through automatically generated, static, region-based visual explanations.
+VERA identifies informative regions in the embedding space and associates them with user-provided human-interpretable features, producing concise visual annotations that summarize the structure of the embedding landscape at a glance. Rather than merely showing where feature values occur, VERA automatically filters, merges, and ranks candidate explanations, enabling users to focus on the most informative embedding structures without manual exploration.
 We demonstrate VERA's utility on several real-world datasets and evaluate its effectiveness in a user study comparing it with the utility of a comprehensive interactive data mining toolkit.
 Our results show that VERA's generated static explanations can convey the essential insights of complex embeddings and support users in typical exploratory data analysis tasks, while requiring significantly less time and user effort.
 \end{abstract}
@@ -47,7 +47,7 @@ Dimensionality reduction, Embedding, Visualization, Visual explanation, Explaina
 
 \section{Introduction}
 % Why is dimensionality reduction important?
-\IEEEPARstart{T}{wo-dimensional}, point-based visualizations of high-dimensional data are a cornerstone of exploratory data analysis and are used across diverse scientific domains such as biology, economics, chemistry, political science, astronomy, and physics~\cite{Liu2017,DeBodt2025}. As datasets with tens of thousands of features and millions of samples have become commonplace, visual exploration is often the first step toward discovering meaningful patterns and generating hypotheses. Such visualizations, often called \textit{embeddings}, project high-dimensional relationships into a two-dimensional space, as illustrated in Fig.~\ref{fig:motivation}. Once the embedding is obtained, analysts seek to interpret what its shapes and clusters represent in the original data.
+\IEEEPARstart{T}{wo-dimensional}, point-based visualizations of high-dimensional data are a cornerstone of exploratory data analysis and are used across diverse scientific domains such as biology, economics, chemistry, political science, astronomy, and physics~\cite{Liu2017,DeBodt2025}. As mutli-variate datasets with possibly thousands of features and large number of samples have become commonplace, visual exploration is often the first step toward discovering meaningful patterns and generating hypotheses. In practice, however, interpretation workflows typically focus on subsets of features that are human-interpretable and relevant to the analysis task, often ranging from tens to a few hundred variables. Our work is designed for this setting, where analysts seek concise explanations in terms of a manageable number of features rather than exhaustively processing thousands of dimensions. Visualizations of such datasets, often called \textit{embeddings}, project high-dimensional relationships into a two-dimensional space, as illustrated in Fig.~\ref{fig:motivation}. Once the embedding is obtained, analysts seek to interpret what its shapes and clusters represent in the original data.
 
 \begin{figure}[htb]
   \centering
@@ -74,7 +74,7 @@ A typical workflow may involve selecting a group of data points, inspecting thei
 Given the repetitive nature of these exploratory data analysis tasks, automated, static approaches that require no user interaction in explaining the data landscapes can substantially reduce analysis time and cognitive effort while still conveying the essential structure of the embedding. Such methods can complement interactive tools by providing quick, interpretable summaries that guide deeper investigation when needed.
 
 % How do we solve the problem?
-In this paper, we propose \textit{Visual Explanations via Region Annotation (VERA)}, an automated, general-purpose method for generating static visual explanations of two-dimensional embeddings. VERA automatically identifies informative regions in the embedding space and associates them with user-provided human-interpretable features, presenting these associations as concise, small-multiple visual summaries. This approach helps analysts quickly and easily obtain a high-level overview of the embedding.
+In this paper, we propose \textit{Visual Explanations via Region Annotation (VERA)}, an automated, general-purpose method for generating static visual explanations of two-dimensional embeddings. VERA automatically identifies informative regions in the embedding space and associates them with a smaller set of user-provided human-interpretable features, presenting these associations as concise, small-multiple visual summaries. This approach helps analysts quickly and easily obtain a high-level overview of the embedding.
 
 Our main contributions are as follows:
 \begin{enumerate}
@@ -234,12 +234,12 @@ To further reduce the number of candidates, we introduce the \textit{contrastive
 Unlike the post-hoc merging procedure described in Section~\ref{sec:post-hoc-merge}, which merges only region annotations derived from a single feature, the contrastive merge combines region annotations derived from multiple features. To merge region annotations associated with two features $f_1$ and $f_2$, each region annotation $e_i \in f_1$ must have a nearly perfectly overlapping counterpart $e_j \in f_2$. When such a bijection exists, the matching pairs of region annotations are merged, effectively representing both features using a single collection of region annotations.
 The same logic naturally extends to more than two features.
 For example, the left panel in Fig.~\ref{fig:contrastive_merge} depicts two separate features whose region annotations exhibit near-perfect overlap and can be merged into a single explanation shown on the right.
-This reduces the number of candidate visual explanations while revealing relationships among high-dimensional features.
+This reduces the number of candidate visual explanations while revealing relationships among high-dimensional features, and avoids the need for users to mentally align nearly identical spatial patterns across panels. Instead, similar features are summarized in a single explanation, making both the redundancy and the underlying feature relationships explicit.
 
 \begin{figure}[t]
   \centering
   \includegraphics{fig_contrastive_merge.pdf}
-  \caption{\label{fig:contrastive_merge}The contrastive merge. If two features contain region annotations that have a nearly perfect overlap bipartite matching, we can merge the two features into one. This not only reduces the number of panels a user needs to inspect but also reveals relationships between features.}
+  \caption{\label{fig:contrastive_merge}The contrastive merge. If two features contain region annotations that have a nearly perfect overlap bipartite matching, we can merge the two features into one. This not only reduces the number of panels a user needs to inspect but also reveals relationships between features, avoiding the need to compare multiple nearly identical visualizations manually.}
 \end{figure}
 
 
@@ -444,10 +444,11 @@ In descriptive explanations, we use the merged region annotations to construct a
 In practice, runtime is typically much lower and varies across datasets, as shown in Fig.~\ref{fig:benchmarks}.b.
 This reduction stems from the descriptive merge step, which often substantially decreases the number of candidate region annotations, yielding smaller graphs and faster independent set computations.
 For datasets with many features, a greedy graph-coloring heuristic yields good approximate solutions in linear time. In this case, graph construction ($\mathcal{O}(F^2)$) dominates the descriptive explanation generation time.
-Although both explanation types exhibit superlinear complexity, VERA remains practical for typical real-world datasets, completing in seconds to a few minutes on standard hardware.
+Although both explanation types exhibit superlinear complexity, VERA remains practical for typical real-world datasets, completing in seconds to a few minutes on standard hardware. 
 
 \textit{Visual limitations} primarily affect descriptive explanations, especially when the feature count is large. In these cases, VERA may produce long lists of region descriptors -- particularly when background enrichment is used -- which pose two key challenges.
 First, long descriptor lists impose a cognitive burden on users, who must manually inspect and interpret the output. Second, these lists consume screen space, leading to visual clutter: labels may overlap with each other or with data points, extend off-screen, or otherwise obstruct the view.
+In our current formulation, VERA is best suited for datasets with up to several hundred features, where meaningful explanations can be expressed in terms of a relatively small subset of variables. For datasets with thousands or tens of thousands of features, directly applying VERA becomes less effective, both computationally and visually, as the number of candidate region annotations grows and the resulting explanations become difficult to interpret.
 Future work could address these issues by leveraging large language models (LLMs) to automatically generate concise, informative summaries of lengthy region descriptors.
 
 \begin{figure}[t]
@@ -464,7 +465,7 @@ We introduced \textit{Visual Explanations via Region Annotation (VERA)}, an auto
 VERA draws on insights from the social sciences to design visual explanations that align with human cognitive processes, producing outputs that are both informative and intuitively satisfying.
 VERA addresses several limitations of existing interactive and static methods, combining the efficiency of static visualization with the interpretive richness of interactive exploration in common exploratory data analysis tasks.
 Despite its effectiveness, VERA opens several promising directions for future research.
-Extending VERA to handle diverse data modalities, including image, video, text, and graph data, addressing scalability with large feature sets, and exploring integration with interactive analytics platforms all represent promising directions. Furthermore, recent advances in LLMs for automatic summarization could be leveraged to generate more concise and relevant annotations.
+Extending VERA to handle diverse data modalities, including image, video, text, and graph data, improving scalability to very large feature sets through feature aggregation or abstraction, and exploring integration with interactive analytics platforms all represent promising directions. Furthermore, recent advances in LLMs for automatic summarization could be leveraged to generate more concise and relevant annotations.
 Overall, VERA represents a significant step toward fast, effective, and cognitively aligned explanations of two-dimensional nonlinear embeddings.
 
 

@@ -17,10 +17,15 @@
 \usepackage{graphicx}
 \usepackage{setspace} % For line spacing
 
-\usepackage{xr}[]
-\externaldocument{main}
-%\usepackage{url}
+
 \usepackage{hyperref}
+\usepackage{xr-hyper}
+\externaldocument{main}
+
+% \usepackage{xr}[]
+% \externaldocument{main}
+% %\usepackage{url}
+% \usepackage{hyperref}
 
 \renewcommand{\thetable}{\Alph{table}}
 \renewcommand{\thefigure}{\Alph{figure}}
@@ -95,12 +100,9 @@ Bla\v{z} Zupan \\
 \reviewc{r1q1}{Abstract and Introduction do not clearly convey the uniqueness of this work.
 The current Abstract and Introduction only provide a general purpose of VERA. As described in Related Work, as well as one non-cited but similar work by Sohns et al., ``Attribute-based Explanation of Non-Linear Embeddings of High-Dimensional Data,'' TVCG 2022, various methods have been proposed to address visual explanations, generation of informative regions, etc. From the current Abstract and Introduction, I was not able to understand what is the uniqueness of VERA and what kind of important problems VERA tries to address. I recommend the authors to explain VERA's essential differences from other methods in Abstract and Introduction.}
 
-\todo{Blaz}
+\todo{Pavlin: please check}
 \answer{%
-\textbf{Look at the next response. Maybe that needs to be put here.}\\
-Possible responses:
-- rephrase sentence to make it crystal clear that our aim is to *explain* two-dimensional embeddings.
-- respond to reviewer here with our justification, but add citation to work in related work, perhaps introduction.
+Thank you for this suggestion. We have revised the abstract and now explicitly state that VERA’s primary goal is to explain two-dimensional embeddings and, to clearly distinguish it from prior approaches, highlight that it automatically generates, filters, merges, and ranks region-based explanations, rather than merely providing visual encodings or relying on interactive exploration.
 }
 
 
@@ -134,9 +136,9 @@ In the specific case of \citep{Sohns2022}, we believe the comparison would answe
 \reviewc{r1q3}{VERA seems to have limited usefuleness for high-dimensional data.
 I would like to see visualization results and discussions on how VERA is useful when analyzing very high-dimensional data (e.g., over 1000 features). For example, is it possible to provide practical guidance on scalability limits for practitioners? While Introduction motivates the importance of automatic generation of explanations of embeddings with cases analyzing “tens of thousands of features”, the authors did not show anything close to this scale. For example, the usage scenarios use datasets with only 33 or fewer features. This number has a strong gap from the original motivation of this work. The authors should more clarify the scope of this work.}
 
-\todo{Blaz}
+\todo{Pavlin:to check}
 \answer{%
-As mentioned and briefly discussed in the Scalability and Limitations section. VERA does not really work well for these cases.
+Thank you for pointing this out. We agree, and have modified the writing to stress that VERA is best suited for datasets with up to several hundred features, where meaningful explanations can be expressed in terms of a relatively small subset of variables. We have made this explicit in the first paragraph in the Introduction, stressed the limitation to work with high-dimensional data in the section on Scalability and Limitations (see the writing on Visual Limitations), and added to Conclusion the need to ``improving scalability to very large feature sets through feature aggregation or abstraction'' in the further work.
 }
 
 
@@ -163,9 +165,9 @@ We also include a dedicated parameter sensitivity analysis in the supplementary 
 
 \reviewc{r1q5}{While VERA merges multiple attribute values for explanations, what are the strengths of this when compared with looking multiple visulizations, each of which corresponding to an important attribute, e.g., Fig. 6a vs Fig. 6d (note: this is not evaluated through a user study)?}
 
-\answer{% TODO: Blaz - we haven't added anything here, just pointed to existing text
-We agree that this specific comparison was not isolated in the user study. The main advantage of the contrastive merge over showing several separate feature panels is that it removes the need for users to mentally align multiple nearly identical visualizations. When two features induce almost the same region annotations, the merged view expresses that correspondence directly in a single explanation, reducing the number of panels to inspect while also indicating that the features have very similar spatial structure in the embedding.
-We make this motivation explicit in the caption of Fig.~\ref{fig:contrastive_merge}, where we state that the contrastive merge ``reduces the number of panels a user needs to inspect'' and ``reveals relationships between features,'' and we further illustrate this in the Abalone example in Section~\ref{sec:case-studies:abalone}, where five explanations are reduced to two, writing: ``This not only reduces the number of explanations from five to two but also reveals the strong correlation between the three merged features.''
+\todo{Pavlin: revised, please check}
+\answer{
+We agree that this specific comparison was not isolated in the user study. The main advantage of the contrastive merge over showing multiple separate feature visualizations is that it avoids the need for users to mentally align nearly identical spatial patterns across panels, instead summarizing similar features in a single explanation and making both redundancy and feature relationships explicit. To clarify this, we have revised Section~\ref{sec:contrastive} to explicitly state this benefit and updated the caption of Fig.~\ref{fig:contrastive_merge} to note that the merge avoids manual comparison of nearly identical visualizations.
 }
 
 
@@ -314,9 +316,10 @@ We also clarify that region construction is modular and that KDE contours can be
 
 \reviewc{r3q2}{The paper lacks proper comparison and positioning with respect to related methods. Without quantitative and qualitative comparisons, it is hard to judge whether VERA provides a substantial advance over existing methods. A more systematic discussion of their similarities, differences, and respective strengths/limitations is necessary to clarify the contribution.}
 
-\todo{Blaz}
-\answer{}
-
+\todo{Pavlin-please check.}
+\answer{%
+Thank you for this comment. To better address it, we have revised the Related Work section to more clearly distinguish between direct feature-encoding approaches (e.g., rangesets) and explanation-generation methods, and to explicitly position VERA within the latter category. In particular, we clarify that VERA extends beyond region construction by introducing automated filtering, merging, and ranking of candidate explanations, thereby reducing the need for manual inspection. We also added a dedicated discussion of the relationship to \citet{Sohns2022}, highlighting both similarities (e.g., region construction without clustering) and key differences (i.e., explanation selection and aggregation). These revisions should provide a more systematic comparison of the respective roles, strengths, and limitations of existing approaches and better clarify VERA’s contribution. Note that clarification of contributions was also requested by other reviewers, for example, please see our responses to Comments~\ref{r1q1} and \ref{r1q2a}.
+}
 
 \reviewc{r3q3}{The use cases are interesting, but they are built upon small datasets, raising doubts about the scalability of the method.}
 
