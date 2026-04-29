@@ -16,6 +16,7 @@
 \usepackage{comment}
 \usepackage{graphicx}
 \usepackage{setspace} % For line spacing
+\usepackage{pdfpages} % To include diff at the end
 
 
 \usepackage{hyperref}
@@ -74,13 +75,13 @@ VERA: Generating Visual Explanations of Two-Dimensional Embeddings \\ via Region
 \vspace{2mm}
 
 
-\noindent Dear Editor and the Reviewers\\
+\noindent Dear Editor,\\
  
 \vspace{3mm}
 
-\noindent We would like to submit a revised version of our manuscript ``\textit{VERA: Generating Visual Explanations of Two-Dimensional Embeddings via Region Annotation}'' to be considered for publication in the ``\textit{IEEE Transactions on Visualization and Computer Graphics}'' as a Regular Paper. The previously assigned log number for this manuscript is TVCG-2025-10-1088.
+\noindent We would like to resubmit a revised version of our manuscript ``\textit{VERA: Generating Visual Explanations of Two-Dimensional Embeddings via Region Annotation}'' to be considered for publication in the ``\textit{IEEE Transactions on Visualization and Computer Graphics}'' as a Regular Paper. The previously assigned log number for this manuscript is TVCG-2025-10-1088.
 
-We thank you for the comprehensive feedback that helped us improve the manuscript and for the opportunity to submit a revised version. In response to the reviewers' comments, we have revised the manuscript to better position VERA with respect to related work, clarify key methodological choices and interpretation of the explanations, strengthen the discussion of scope and limitations, and expand the description of the user study. We have also added extensive supplementary and replication materials at \url{https://github.com/pavlin-policar/vera-paper}, which is also referenced in the manuscript's Code Availability section. In addition, because VERA's region-construction step is modular, we have updated the implementation to support the alternative rangeset-based region construction highlighted by Reviewer 1 and provide supplementary examples based on this variant.
+We thank the reviewers for the comprehensive feedback that helped us improve the manuscript and for the opportunity to submit a revised version. In response, we have substantially revised the manuscript to clarify VERA's contribution relative to prior embedding-explanation methods, strengthen the justification of key methodological choices, clarify how explanations should be interpreted, and more explicitly discuss scope, scalability, and limitations. We have also expanded the user-study description and added extensive supplementary and replication materials at \url{https://github.com/pavlin-policar/vera-paper}, including the study materials, parameter sensitivity analyses, supplementary workflows, and additional region-construction examples. In addition, because VERA's region-construction step is modular, we have updated the implementation to support the alternative rangeset-based region construction highlighted by Reviewer 1 and include supplementary examples based on this alternative.
 
 Below, we provide detailed, point-by-point responses to the reviewers' comments. To facilitate the review process, we also include a version of the manuscript with the changes highlighted relative to the previous revision.
 
@@ -100,9 +101,10 @@ Bla\v{z} Zupan \\
 \reviewc{r1q1}{Abstract and Introduction do not clearly convey the uniqueness of this work.
 The current Abstract and Introduction only provide a general purpose of VERA. As described in Related Work, as well as one non-cited but similar work by Sohns et al., ``Attribute-based Explanation of Non-Linear Embeddings of High-Dimensional Data,'' TVCG 2022, various methods have been proposed to address visual explanations, generation of informative regions, etc. From the current Abstract and Introduction, I was not able to understand what is the uniqueness of VERA and what kind of important problems VERA tries to address. I recommend the authors to explain VERA's essential differences from other methods in Abstract and Introduction.}
 
-\todo{Pavlin: please check}
 \answer{%
-Thank you for this suggestion. We have revised the abstract and now explicitly state that VERA’s primary goal is to explain two-dimensional embeddings and, to clearly distinguish it from prior approaches, highlight that it automatically generates, filters, merges, and ranks region-based explanations, rather than merely providing visual encodings or relying on interactive exploration.
+Thank you for this suggestion. We have revised the abstract and now explicitly state that VERA's primary goal is to explain two-dimensional embeddings and, to clearly distinguish it from prior approaches, highlight that it automatically generates, filters, merges, and ranks region-based explanations, rather than merely providing visual encodings or relying on interactive exploration.
+
+We thank the reviewer for pointing out \citet{Sohns2022}, which is indeed related to our work and should have been cited. We have added this citation and discuss the relationship between VERA and rangesets in detail in our response to the following comment.
 }
 
 
@@ -110,14 +112,14 @@ Thank you for this suggestion. We have revised the abstract and now explicitly s
 First of all, I think Sohns et al.'s work (``Attribute-based Explanation of Non-Linear Embeddings of High-Dimensional Data,'' TVCG 2022) is the most closely related work. However, the authors did not cite this paper. Sohns et al.'s work has various similairties: not relying on clustering, trying to mitigate overlapping issues, applying binning to continuous attributes, etc. But, I think still VERA has a clear strength in incorporating multiple attributes in a single visualization.}
 
 \answer{%
-We thank the reviewer for pointing out \citet{Sohns2022}, which is indeed related to our work and should have been cited. We have now added this citation and have added a paragraph to the Related Work section (Section \ref{sec:related_work}) to clarify the relationship between the two approaches more explicitly.
+As the reviewer noted, rangesets are closely related to VERA. We have now added this citation and added a paragraph to the Related Work section (Section \ref{sec:related_work}) to clarify the relationship between the two approaches more explicitly.
 
 Briefly, \citet{Sohns2022} propose a novel visual encoding -- rangesets -- for visualizing the spatial distribution of feature values in a given embedding. As the reviewer points out, their approach shares many of the advantages of our KDE approach.
-However, we emphasize that defining regions is only the first stage of our system, and the novelty of VERA primary lies in subsequent steps, i.e., filtering, merging, and ranking.
-The region construction procedure is modular, and our KDE approach could be substituted by other other approaches, including rangesets.
+However, we emphasize that defining regions is only the first stage of our system, and the novelty of VERA primarily lies in subsequent steps, i.e., filtering, merging, and ranking.
+The region construction procedure is modular, and our KDE approach could be substituted by other approaches, including rangesets.
 
 To illustrate this, we have now incorporated rangesets into our open-source implementation of VERA and now provide several examples of VERA explanations based on rangeset regions in the supplementary material.
-In Section.~\ref{sec:region_construction}, we additionally write: ``We note, however, that the region construction step is modular: KDE contours can be replaced by alternative region representations while leaving the remaining steps unchanged, such as the alpha hulls used in rangesets~\citep{Sohns2022}. We include several visualizations based on this variant in the supplementary material.''
+In Section~\ref{sec:region_construction}, we additionally write: ``We note, however, that the region construction step is modular: KDE contours can be replaced by alternative region representations while leaving the remaining steps unchanged, such as the alpha hulls used in rangesets~\citep{Sohns2022}. We include several visualizations based on this variant in the supplementary material.''
 
 We believe these changes help delineate our contributions from existing work, better demonstrate the novelty of the approach, and provide additional examples of VERA explanations.
 }
@@ -136,7 +138,6 @@ In the specific case of \citep{Sohns2022}, we believe the comparison would answe
 \reviewc{r1q3}{VERA seems to have limited usefuleness for high-dimensional data.
 I would like to see visualization results and discussions on how VERA is useful when analyzing very high-dimensional data (e.g., over 1000 features). For example, is it possible to provide practical guidance on scalability limits for practitioners? While Introduction motivates the importance of automatic generation of explanations of embeddings with cases analyzing “tens of thousands of features”, the authors did not show anything close to this scale. For example, the usage scenarios use datasets with only 33 or fewer features. This number has a strong gap from the original motivation of this work. The authors should more clarify the scope of this work.}
 
-\todo{Pavlin:to check}
 \answer{%
 Thank you for pointing this out. We agree, and have modified the writing to stress that VERA is best suited for datasets with up to several hundred features, where meaningful explanations can be expressed in terms of a relatively small subset of variables. We have made this explicit in the first paragraph in the Introduction, stressed the limitation to work with high-dimensional data in the section on Scalability and Limitations (see the writing on Visual Limitations), and added to Conclusion the need to ``improving scalability to very large feature sets through feature aggregation or abstraction'' in the further work.
 }
@@ -165,8 +166,7 @@ We also include a dedicated parameter sensitivity analysis in the supplementary 
 
 \reviewc{r1q5}{While VERA merges multiple attribute values for explanations, what are the strengths of this when compared with looking multiple visulizations, each of which corresponding to an important attribute, e.g., Fig. 6a vs Fig. 6d (note: this is not evaluated through a user study)?}
 
-\todo{Pavlin: revised, please check}
-\answer{
+\answer{%
 We agree that this specific comparison was not isolated in the user study. The main advantage of the contrastive merge over showing multiple separate feature visualizations is that it avoids the need for users to mentally align nearly identical spatial patterns across panels, instead summarizing similar features in a single explanation and making both redundancy and feature relationships explicit. To clarify this, we have revised Section~\ref{sec:contrastive} to explicitly state this benefit and updated the caption of Fig.~\ref{fig:contrastive_merge} to note that the merge avoids manual comparison of nearly identical visualizations.
 }
 
@@ -191,7 +191,6 @@ The key benefit of VERA is therefore not that it always reduces the explanation 
 \answer{We agree that the original manuscript did not sufficiently discuss the effects of the method parameters or justify the default choices used throughout the paper. To address this, we now include a dedicated parameter sensitivity study on eight different data sets in the supplementary materials. The study examines the effects of the main parameters in both the region construction and explanation generation stages. The results show that the default settings used in the manuscript generally yield high-quality explanations.
 
 We have added the following text to the end of the Methods section: ``Across the full pipeline, from region construction to explanation generation, our approach involves several user-settable parameters. In practice, the results are robust across a range of parameter settings, and the default values generally yield high-quality explanations. Further details are provided in the parameter sensitivity study in the supplementary materials.''
-% TODO: this doesn't talk about weight ranking
 }
 
 
@@ -297,7 +296,7 @@ We therefore view the current ranking as a heuristic aggregation of complementar
 \reviewc{r2q11}{The Iris and Penguins datasets actually used the class label as a feature. Then, obviously, the three classes can be found. I think this is not how it should be done.}
 
 \answer{%
-The reviewer raises an important point. We agree that class labels should not be used to construct the embedding itself. In our examples, however, the class variable was not used in the dimensionality reduction step for any of the data sets; it was only used afterward as a post hoc explanatory variable. We believe this is appropriate because embeddings are often inspected precisely to assess class separability and to understand which regions correspond to known categories. In that setting, the class label serves as a reference variable for interpretation and debugging rather than as an input used to generate the embedding. We will clarify this distinction explicitly in the opening paragraph of Section~\ref{sec:case-studies} (Usage Scenarios): ``When a dataset includes a known class or target variable, we use it only as a post hoc variable for interpreting the embedding and do not use it to construct the embedding itself.''
+The reviewer raises an important point. We agree that class labels should not be used to construct the embedding itself. In our examples, however, the class variable was not used in the dimensionality reduction step for any of the data sets; it was only used afterward as a post hoc explanatory variable. We believe this is appropriate because embeddings are often inspected precisely to assess class separability and to understand which regions correspond to known categories. In that setting, the class label serves as a reference variable for interpretation and debugging rather than as an input used to generate the embedding. We clarify this distinction explicitly in the opening paragraph of Section~\ref{sec:case-studies} (Usage Scenarios): ``When a dataset includes a known class or target variable, we use it only as a post hoc variable for interpreting the embedding and do not use it to construct the embedding itself.''
 }
 
 
@@ -307,7 +306,7 @@ The reviewer raises an important point. We agree that class labels should not be
 \reviewc{r3q1}{The motivation for using KDE should be strengthened. Explain why it is an appropriate solution, and what advantages it offers.}
 
 \answer{%
-We agree that our motivation for using KDE could be strengthened and have now added the following to Section.~\ref{sec:region_construction}: ``Using KDE contours as regions provides several advantages: most importantly, it removes the need for a separate clustering step in the 2D embedding, which allows VERA to uncover continuous transitions rather than only cluster assignments. KDEs can also be computed efficiently, scaling linearly with the number of samples, and allow distortion measures to be incorporated directly during region construction.''
+We agree that our motivation for using KDE could be strengthened and have now added the following to Section~\ref{sec:region_construction}: ``Using KDE contours as regions provides several advantages: most importantly, it removes the need for a separate clustering step in the 2D embedding, which allows VERA to uncover continuous transitions rather than only cluster assignments. KDEs can also be computed efficiently, scaling linearly with the number of samples, and allow distortion measures to be incorporated directly during region construction.''
 %We also note that KDE-based contour overlays are widely used in scatterplot visualization as a means of depicting shared regions in point-based data and have been used extensively in prior work such as splatterplots \citep{MayorgaGleicher2013}, DataContextMap \citep{ChengMueller2016}, and related approaches \citep{Li2022,Li2023,Ye2025}.
 
 We also clarify that region construction is modular and that KDE contours can be replaced by alternative region representations, such as the alpha hulls used in rangesets~\citep{Sohns2022}: ``We note, however, that the region construction step is modular: KDE contours can be replaced by alternative region representations while leaving the remaining steps unchanged, such as the alpha hulls used in rangesets~\cite{Sohns2022}.'' We also now provide several examples of this rangeset-based variant in the supplementary material.
@@ -316,9 +315,8 @@ We also clarify that region construction is modular and that KDE contours can be
 
 \reviewc{r3q2}{The paper lacks proper comparison and positioning with respect to related methods. Without quantitative and qualitative comparisons, it is hard to judge whether VERA provides a substantial advance over existing methods. A more systematic discussion of their similarities, differences, and respective strengths/limitations is necessary to clarify the contribution.}
 
-\todo{Pavlin-please check.}
 \answer{%
-Thank you for this comment. To better address it, we have revised the Related Work section to more clearly distinguish between direct feature-encoding approaches (e.g., rangesets) and explanation-generation methods, and to explicitly position VERA within the latter category. In particular, we clarify that VERA extends beyond region construction by introducing automated filtering, merging, and ranking of candidate explanations, thereby reducing the need for manual inspection. We also added a dedicated discussion of the relationship to \citet{Sohns2022}, highlighting both similarities (e.g., region construction without clustering) and key differences (i.e., explanation selection and aggregation). These revisions should provide a more systematic comparison of the respective roles, strengths, and limitations of existing approaches and better clarify VERA’s contribution. Note that clarification of contributions was also requested by other reviewers, for example, please see our responses to Comments~\ref{r1q1} and \ref{r1q2a}.
+Thank you for this comment. To better address it, we have revised the Related Work section to more clearly distinguish between direct feature-encoding approaches (e.g., rangesets) and explanation-generation methods, and to explicitly position VERA within the latter category. In particular, we clarify that VERA extends beyond region construction by introducing automated filtering, merging, and ranking of candidate explanations, thereby reducing the need for manual inspection. We also added a discussion of the relationship to \citet{Sohns2022}, highlighting both similarities (e.g., region construction without clustering) and key differences (i.e., explanation selection and aggregation). These revisions should provide a more systematic comparison of the respective roles, strengths, and limitations of existing approaches and better clarify VERA’s contribution. Note that clarification of contributions was also requested by other reviewers, for example, please see our responses to Comments~\ref{r1q1} and \ref{r1q2a}.
 }
 
 \reviewc{r3q3}{The use cases are interesting, but they are built upon small datasets, raising doubts about the scalability of the method.}
@@ -350,5 +348,7 @@ To make this point even clearer, we have now added the following text to Section
 
 \bibliographystyle{abbrvnat}
 \bibliography{cover-refs}
+
+\includepdf[pages=-]{diff.pdf}
 
 \end{document}
