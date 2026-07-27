@@ -1,0 +1,211 @@
+\documentclass[11pt]{article}
+
+\usepackage[document]{ragged2e}
+\usepackage[T1]{fontenc}
+\usepackage[round]{natbib}
+\usepackage[top=1in,bottom=1in,left=1in,right=1in]{geometry}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{alltt}
+\usepackage{framed}
+\usepackage{xcolor}
+\usepackage{comment}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xr-hyper}
+\externaldocument{main}
+
+\renewcommand{\thetable}{\Alph{table}}
+\renewcommand{\thefigure}{\Alph{figure}}
+
+\newcommand{\beq}{\begin{equation}}
+\newcommand{\eeq}{\end{equation}}
+\newcommand{\beqs}{\begin{equation}}
+\newcommand{\eeqs}{\end{equation}}
+\newcommand{\mx}[1]{\ensuremath{\boldsymbol{\mathrm{{#1}}}}}
+
+\newcounter{rtaskno}
+\newcommand{\rtask}[1]{\refstepcounter{rtaskno}\label{#1}}
+\newcommand{\reviewc}[2]{\begin{leftbar}\noindent\rtask{#1}\ref{#1}. #2\end{leftbar}\vspace*{-4mm}}
+\newcommand{\review}[1]{\begin{leftbar}\noindent #1\end{leftbar}}
+\newcommand{\answer}[1]{\noindent #1\par\vspace{2mm}}
+\newcommand{\copyquote}[1]{\vspace{2mm} {\color{blue} #1}\vspace{5mm}}
+
+\newlength{\leftbarwidth}
+\setlength{\leftbarwidth}{3pt}
+\newlength{\leftbarsep}
+\setlength{\leftbarsep}{10pt}
+\renewenvironment{leftbar}{%
+    \def\FrameCommand{{\color{black}{\vrule width \leftbarwidth\relax\hspace {\leftbarsep}}}}%
+    \MakeFramed {\advance \hsize -\width \FrameRestore }%
+}{\endMakeFramed}
+
+\begin{document}
+\onehalfspacing
+\setlength{\parskip}{3mm}
+
+\noindent{\bf Poli\v{c}ar and Zupan:
+\\
+VERA: Generating Visual Explanations of Two-Dimensional Embeddings \\ via Region Annotation}
+
+\vspace{2mm}
+\noindent {\bf RESPONSE TO REVIEWERS}
+
+\vspace{2mm}
+
+\noindent Manuscript ID: TVCG-2026-04-0488
+
+\vspace{2mm}
+
+\noindent Dear Editor,\\
+
+\vspace{3mm}
+
+\noindent We submit a revised version of our manuscript ``\textit{VERA: Generating Visual Explanations of Two-Dimensional Embeddings via Region Annotation}'' for consideration for publication in the \textit{IEEE Transactions on Visualization and Computer Graphics}.
+
+\vspace{3mm}
+
+\noindent We thank the Associate Editor and the reviewers for their constructive feedback and have revised the manuscript accordingly.
+
+\vspace{3mm}
+
+\noindent Below, we provide detailed, point-by-point responses to the reviewers' comments. To facilitate the review process, we also include a version of the manuscript with the changes highlighted relative to the previous submission.
+
+\vspace{3mm}
+
+\noindent Kind regards,
+\vspace{3mm}
+
+\noindent Pavlin G. Poli\v{c}ar and Bla\v{z} Zupan\\
+\noindent Ljubljana, \today
+
+\newpage
+
+\subsection*{Associate Editor}
+
+\reviewc{aeq1}{The majority of reviewers believe that a major revision is required. I will suggest a major revision and encourage the authors to create a suitable changes document to be checked by the reviewers again.
+
+I would suggest that the authors compare, at least in a qualitative sense, the contribution to relevant related work (R1), show an example showing the scalability of the aproach to hundereds of dimensions (R1), and provide a better explanation/organisation of the results would benefit the paper (R3).
+
+The reviewers have some excellent comments, and I would encourage the authors to implement as many of them as possible to be subsequently reviewed again.}
+
+\answer{%
+}
+
+\subsection*{Reviewer 1}
+
+\reviewc{r1q1}{Uniqueness in Abstract and Introduction
+
+The abstract now emphasizes that VERA filters, merges, and ranks candidate explanations rather than simply encoding feature values, and the introduction adds useful framing about the intended analysis setting. This is an improvement.
+
+However, the differentiation is still stated in general terms. For example, neither the abstract nor the introduction articulates VERA's essential distinction from the most closely related explanation-generation methods (e.g., Sohns et al. and the attribute-based family). I would still encourage the authors to state, early and concretely, what VERA does that these prior methods do not, for instance, incorporating multiple attributes within a single annotated region and why such incorporation is important.}
+
+\answer{%
+}
+
+\reviewc{r1q2}{Comparison with existing visual explanation methods
+
+I appreciate that the authors now cite Sohns et al. [23], discuss it in Related Work. This addresses the citation omission.
+
+My core concern, however, is not fully resolved: the user study still compares VERA only against Orange, a general-purpose interactive tool. The revision does not include an explicit comparison (even small-scale or qualitative) against methods explicitly designed for explaining embeddings, and no rationale for this omission is given. The authors included rangesets-style variant output images in the supplementary material (GitHub repository); however, these figures are difficult to locate and compare with VERA as they are not in the main manuscript. More importantly, they do not provide an explicit qualitative evaluation of how VERA's benefits differ from this variant.
+
+Consequently, the claim of advantage over purpose-built approaches remains unsupported. A focused qualitative comparison (e.g., a set of Sohns et al. visualizations versus a single VERA panel on the same embedding) would substantially strengthen the contribution, even without a full user study.}
+
+\answer{%
+}
+
+\reviewc{r1q3}{Usefulness for high-dimensional data
+
+The authors responded by narrowing the stated scope rather than demonstrating high-dimensional results. The introduction now targets ``tens to a few hundred variables,'' and the limitations section states that VERA is best suited for up to several hundred features. The practical scalability guidance I requested is now provided.
+
+However, this ``best suited for'' claim is asserted but not demonstrated. The only data at that scale appears in the runtime experiment (Fig. 11), which measures computation time on synthetic data and does not show the resulting explanations. All usage scenarios with actual generated explanations use 33 features or fewer. Since the claim concerns visual readability and interpretability (not runtime), I would ask the authors to substantiate it with at least one example showing VERA's explanations on a dataset with a few hundred features, or to qualify the claim accordingly. This is especially important given the authors' own observation that long descriptor lists and label overlap degrade the descriptive explanations, problems that would plausibly emerge well before several hundred features.}
+
+\answer{%
+}
+
+\reviewc{r1q4}{Missing reasonings for algorithmic design.
+
+This concern is largely addressed. The added rationales for the default parameters, the explicit definition of the human-attention score, the justification of the aggregation strategy, and the new parameter sensitivity study together resolve the earlier impression that the design choices were arbitrary.
+
+One minor item remains: the region-merging threshold is described as ``user-specified'' with a ``conservative default'' but without a concrete value or selection procedure, and ``nearly perfect'' overlap in the contrastive merge is still not precisely defined.}
+
+\answer{%
+}
+
+\subsection*{Reviewer 2}
+
+\reviewc{r2q1}{The paper is well written, easy to read, nicely illustrated with a running example. The proposed contribution is more like a proof of concept: it is sound and principled, not too complex technically but potentially really useful. The global motivation is well stated and justified in a context where extremely local and sparse neighbor embedding are flourishing, with speed and scalability as primary asset, but also with the downside of sensitive parameterization and multiplicity of results. Somehow the proposed contribution helps in that context, without attacking the cause of the problem to its roots. Another minor limitation is that the scalability of modern methods of embeddings is precisely not really harnessed here in the proposed method of explanation. The paper might increase its potential impact by including one of those big/huge data sets from computational biology (RNAseq, large cell population).}
+
+\answer{%
+}
+
+\reviewc{r2q2}{p.11: the number of features is ``$|F|$'', not just $F$, if we follow the definition of the data set, earlier in the document, right?}
+
+\answer{%
+}
+
+\subsection*{Reviewer 3}
+
+\reviewc{r3q0}{The authors have thoroughly revised the paper and provided a detailed letter with responses to the reviewers' comments. Unfortunately, most changes were not made in the paper, but in the supplementary material. Even more unfortunate was that the supplementary material was not a written document but a link to a github repository. The github repository contained a large number of generated images. However, no proper explanation about what one can conclude from the results was provided. This assessment comes with the caveat that I could not run the python scripts. I have downloaded the supplementary material, which then required me to install the authors tool ``vera'' (more precisely ``vera-explain'') itself, which then required me to install further python libraries. I stopped when the module ``vera.explain'' was missing. Hence, I looked at the images only and was not able to draw any conclusions from the images and file names alone. Without grasping all the supplementary material, which, as I mentioned above, included most of the changes, I cannot assess all these changes.}
+
+\answer{%
+}
+
+\reviewc{r3q1}{I agree with the authors that VERA is doing more than explanations by single attributes, such as Sohns et al.'s work, or also DimReader. Still, the explanations are done in a univariate setting and then combined. Hence, the approach can only extract axis-aligned regions of interest (in the high-dimensional space). Clusters are generally not axis-aligned regions in a multivariate setting. Hence, the approach extracts regions of interest similar to what one could achieve by brushing on parallel coordinates. While this is a drawback, it is also a feature, as one could then describe each region by a logical AND-combination of 1D rules.}
+
+\answer{%
+}
+
+\reviewc{r3q2}{The authors changed the wording about the dimensionality of the data, going from thousands to hundreds. I don't think that matters. What matters is how many dimensions are required to describe the regions. Here, only a few dimensions can be used. Using hundreds of dimensions for explanations is not feasible. However, I would think that in a dataset with hundreds of attributes, there are generally more than a handful of attributes that are of interest. Hence, the scalability of the approach to high dimensionality is very limited.}
+
+\answer{%
+}
+
+\reviewc{r3q3}{The parameter choices remain unspecific. For example, the authors talk about ``practical middle ground'' and that ``nearby but distinct structures remain separate''. On the other hand, they have conducted a thorough parameter sensitivity study and provided practical guidance. Unfortunately, both belong to the supplementary material only, with the issue described above.}
+
+\answer{%
+}
+
+\reviewc{r3q4}{The authors have now clarified that they used k-means for univariate binning. That's much better than equidistant binning. Still, there are also methods (such as multi-Otsu thresholding) that do not require the setting of k. How was k actually chosen here?}
+
+\answer{%
+}
+
+\reviewc{r3q5}{The method still has the disadvantage of misleading labels, when the labels do not provide the full logical ANDs of the region definition. This should either be avoided or made explicit, e.g., by visual encodings.}
+
+\answer{%
+}
+
+\reviewc{r3q6}{Also, the issue of occlusion with many labels is an issue. I think long explaining rules are also difficult to understand. A visualization of the rules, e.g. in coordinated views, may be helpful and would make the longish labels obsolete. I don't think that VERA needs to be static. Why not provide more details on demand? BTW, I agree with another reviewer that LLMs cannot make the explanations shorter without losing relevant information.}
+
+\answer{%
+}
+
+\reviewc{r3q7}{The user study details are now also provided in the supplementary material, with the issue described above.}
+
+\answer{%
+}
+
+\reviewc{r3q8}{I think an ablation study on which ranking criterion adds how much importance would have provided additional insight.}
+
+\answer{%
+}
+
+\reviewc{r3q9}{The authors now state that they ``downweight poorly mapped samples during KDE estimation''. That is interesting, but raises questions. How exactly is this done? By how much are they downweighted? What is the impact thereof? How does this affect the outcome?}
+
+\answer{%
+}
+
+\reviewc{r3q10}{The authors provided more details on computational scalability. That is laudable, but the main issues are visual scalability due to overplotting and scalability with the number of variables used for the explanations.}
+
+\answer{%
+}
+
+\reviewc{r3q11}{While the user study does not show a major gain in accuracy, the participants were significantly faster, which shows the benefit of the approach.}
+
+\answer{%
+}
+
+\end{document}
