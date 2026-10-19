@@ -26,6 +26,25 @@ tvcg-embedding-annotation/
 
 The main paper source lives in `2026-tvcg-resubmission-1/`. The remaining directories provide supplementary material, replication resources, and reviewer-facing evidence for the methodological choices and evaluation described in the manuscript.
 
+## User study
+
+The complete user-study materials are in [`user-study/`](user-study/), in the form participants saw them. [`user-study/README.md`](user-study/README.md) describes the study design and the order in which each group saw the materials.
+
+- Tool introductions: [VERA](user-study/vera-introduction.md), [Orange](user-study/orange-introduction.md)
+- Quizzes, with the VERA explanations shown for each data set:
+
+  | Data set | Quiz | VERA explanations |
+  |---|---|---|
+  | Iris | [quiz](user-study/quiz-1-iris.md) | [PDF](user-study/vera-explanations/vera_explanations_iris.pdf) |
+  | Employee Attrition | [quiz](user-study/quiz-2-employee-attrition.md) | [PDF](user-study/vera-explanations/vera_explanations_attrition.pdf) |
+  | Raisin | [quiz](user-study/quiz-3-raisin.md) | [PDF](user-study/vera-explanations/vera_explanations_raisin.pdf) |
+  | Penguins | [quiz](user-study/quiz-1-penguins.md) | [PDF](user-study/vera-explanations/vera_explanations_penguins.pdf) |
+  | Titanic | [quiz](user-study/quiz-2-titanic.md) | [PDF](user-study/vera-explanations/vera_explanations_titanic.pdf) |
+  | Wine Quality | [quiz](user-study/quiz-3-wine-quality.md) | [PDF](user-study/vera-explanations/vera_explanations_wine_quality.pdf) |
+
+- Tool surveys: [VERA](user-study/vera-survey.md), [Orange](user-study/orange-survey.md)
+- Final comparative survey: [survey](user-study/final-survey.md)
+
 ## Setup
 
 From the repository root, create an environment and install the shared supplementary dependencies:
