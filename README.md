@@ -26,6 +26,10 @@ tvcg-embedding-annotation/
 
 The main paper source lives in `2026-tvcg-resubmission-1/`. The remaining directories provide supplementary material, replication resources, and reviewer-facing evidence for the methodological choices and evaluation described in the manuscript.
 
+## User study
+
+The complete user-study materials, in the form participants saw them, are in [`user-study/`](user-study/): the tool introductions, the six quizzes with the VERA explanations shown for each data set, the tool surveys, and the final comparative survey. Its README describes the study design and the order in which each group saw the materials.
+
 ## Setup
 
 From the repository root, create an environment and install the shared supplementary dependencies:
