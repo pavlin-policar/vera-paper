@@ -17,16 +17,24 @@ tvcg-embedding-annotation/
 ├── 2026-tvcg-resubmission-2/      # Current manuscript, response to reviewers, and supplement, with every figure they include
 ├── 2026-tvcg-resubmission-1/      # Previous revision (frozen)
 ├── figure_scripts/                # Scripts that render the manuscript's and the supplement's figures
-├── supplement-data/               # Shared datasets, their downloader, and the figure style
+│   ├── fig*.py                    # One script per figure or group of figures
+│   ├── prepare_football.py        # Builds the football data (Fig. 2, Fig. S3)
+│   ├── prepare_single_cell.py     # Downloads and embeds the single-cell data (Fig. S4)
+│   ├── run_benchmarks.py          # Reruns the runtime benchmarks (Fig. 12)
+│   ├── related_methods/           # Reimplemented related methods of Fig. 2
+│   ├── data/benchmarks/           # Runtime benchmark results
+│   └── figures/                   # Rendered figures (PNG)
+├── supplement-data/               # Downloader of the shared datasets, and the figure style
 ├── parameter-study/               # Full parameter sensitivity study
 ├── region-method-comparison/      # KDE regions against rangeset regions, for every dataset
 ├── purity-indication-comparison/  # Purity-based visual emphasis, for every dataset
-├── bookworm/                      # Synthetic book-purchase example data
+├── bookworm/                      # Fictional Bookworm dataset of Fig. 3 and its generator
 ├── orange-workflow-examples/      # Orange workflows and screenshots
-└── user-study/                    # User-study materials
+├── user-study/                    # User-study materials
+└── requirements.txt               # Python dependencies
 ```
 
-The manuscript and the supplementary document (`supplementary-material.tex`) live in `2026-tvcg-resubmission-2/`, together with every figure they include. `figure_scripts/` renders those figures. The remaining directories hold the full studies the supplement summarizes, the user-study materials, and the Orange workflows.
+The manuscript and the supplementary document (`supplementary-material.tex`) live in `2026-tvcg-resubmission-2/`, together with every figure they include. `figure_scripts/` renders those figures. The remaining directories hold the full studies the supplement summarizes, the Bookworm example data, the user-study materials, and the Orange workflows.
 
 ## User study
 
@@ -42,8 +50,6 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-The single-cell data of supplement Fig. S4 additionally needs `scanpy`.
-
 Then download the eight shared datasets (Iris, Penguins, Abalone, Titanic, Employee Attrition, Wine Quality, Adult, Forest Covertype):
 
 ```bash
@@ -52,7 +58,36 @@ python supplement-data/download_data.py
 
 ## Reproduce the figures
 
-`figure_scripts/README.md` lists every figure of the manuscript and the supplement with the script and command that render it and the data it needs. The scripts write PDF and PNG files to `figure_scripts/figures/` (only the PNGs are tracked), and a re-rendered PDF is copied into the paper folder under the same name. The football and single-cell data are built by `figure_scripts/prepare_football.py` and `figure_scripts/prepare_single_cell.py`. Figures are drawn in the manuscript's style (`supplement-data/figstyle.py`), at the width at which the paper includes them.
+`figure_scripts/README.md` lists every figure of the manuscript and the supplement with the script that renders it and the data it needs. Run the scripts from the repository root, after the setup above.
+
+First build the football and single-cell data. The runtime benchmarks of Fig. 12 are tracked in `figure_scripts/data/benchmarks/`, so rerunning them is optional.
+
+```bash
+python figure_scripts/prepare_football.py
+python figure_scripts/prepare_single_cell.py
+python figure_scripts/run_benchmarks.py  # optional
+```
+
+Then render the figures of the manuscript:
+
+```bash
+python figure_scripts/fig02_related_methods.py
+python figure_scripts/fig09_attrition.py
+python figure_scripts/fig10_abalone.py
+python figure_scripts/fig12_benchmarks.py
+```
+
+and of the supplement:
+
+```bash
+python figure_scripts/figS01_S02_rangesets.py
+python figure_scripts/figS03_football.py
+python figure_scripts/figS04_single_cell.py
+python figure_scripts/figS05_S09_parameters.py
+python figure_scripts/figS10_S11_distortion.py
+```
+
+The scripts write PDF and PNG files to `figure_scripts/figures/` (only the PNGs are tracked), and a re-rendered PDF is copied into the paper folder under the same name. Figures are drawn in the manuscript's style (`supplement-data/figstyle.py`), at the width at which the paper includes them.
 
 ## Run the full studies
 

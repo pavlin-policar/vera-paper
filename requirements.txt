@@ -8,3 +8,4 @@ shapely
 openTSNE
 umap-learn
 glasbey
+scanpy
