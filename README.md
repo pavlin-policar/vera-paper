@@ -17,13 +17,6 @@ tvcg-embedding-annotation/
 ├── 2026-tvcg-resubmission-2/      # Current manuscript, response to reviewers, and supplement, with every figure they include
 ├── 2026-tvcg-resubmission-1/      # Previous revision (frozen)
 ├── figure_scripts/                # Scripts that render the manuscript's and the supplement's figures
-│   ├── fig*.py                    # One script per figure or group of figures
-│   ├── prepare_football.py        # Builds the football data (Fig. 2, Fig. S3)
-│   ├── prepare_single_cell.py     # Downloads and embeds the single-cell data (Fig. S4)
-│   ├── run_benchmarks.py          # Reruns the runtime benchmarks (Fig. 12)
-│   ├── related_methods/           # Reimplemented related methods of Fig. 2
-│   ├── data/benchmarks/           # Runtime benchmark results
-│   └── figures/                   # Rendered figures (PNG)
 ├── supplement-data/               # Downloader of the shared datasets, and the figure style
 ├── parameter-study/               # Full parameter sensitivity study
 ├── region-method-comparison/      # KDE regions against rangeset regions, for every dataset
