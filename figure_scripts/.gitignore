@@ -1,0 +1,4 @@
+# PDFs are rendered from the scripts; the PNGs are tracked for viewing
+figures/*.pdf
+cache/
+__pycache__/

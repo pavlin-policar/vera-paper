@@ -10,6 +10,8 @@ This page shows how explanation-construction parameters affect the final contras
 | Contour level | `0.25` |
 | Bandwidth scale factor | `1.0` |
 | Merge overlap threshold | `0.8` |
+| Sample size | `5000` |
+| Random state | `0` |
 
 ## Contrastive defaults
 

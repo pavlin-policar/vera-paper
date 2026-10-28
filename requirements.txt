@@ -1,4 +1,10 @@
-vera-explain
+vera-explain>=1.2.0
 matplotlib
 numpy
 pandas
+scipy
+scikit-learn
+shapely
+openTSNE
+umap-learn
+glasbey

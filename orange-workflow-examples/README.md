@@ -38,7 +38,7 @@ The workflow uses:
 
 This setup is useful for quickly inspecting how categorical variables align with the embedding geometry and for identifying coarse cluster structure, overlap, and separation. However, the user must still go through the variables one by one to determine which ones exhibit interesting structure.
 
-![Orange glyph workflow screenshot 1](screenshots/glyph-1.png)
+![Orange glyph workflow screenshot 1](screenshots/fig_supp_glyph-1.png)
 
 *We first show a simple view in which color is used to encode a numeric variable, revealing a transition from low to high values across the embedding.*
 
@@ -60,7 +60,7 @@ The workflow uses:
 
 This setup is well suited for comparing one selected cluster or trajectory segment against the rest of the data and for answering questions such as *what characterizes the selected samples?*
 
-![Orange distribution workflow screenshot 1](screenshots/distribution-2.png)
+![Orange distribution workflow screenshot 1](screenshots/fig_supp_distribution-2.png)
 
 *After loading the data, the user selects a group of points of interest. Their characteristics are immediately reflected in the linked box plot and distribution view. Note that Orange sorts the variables by their relevance to the selection, prioritizing features with the largest differences for the selected points.*
 
@@ -85,7 +85,7 @@ The workflow uses:
 
 This provides a compact rule-based description of the selected region and is useful for questions of the form *which features best distinguish this cluster from the rest?*
 
-![Orange tree workflow screenshot 1](screenshots/tree-1.png)
+![Orange tree workflow screenshot 1](screenshots/fig_supp_tree-1.png)
 
 *In this example, the user selects a group of points and constructs a decision tree based on that selection. The user then inspects the resulting tree. In this instance, the tree is quite simple, and the selection can be classified by splitting on a single variable.*
 
@@ -107,7 +107,7 @@ The workflow uses:
 
 This is useful when the analyst wants Orange to propose candidate groups first and then interactively inspect how the discovered clusters differ in terms of the original features.
 
-![Orange clustering workflow screenshot 1](screenshots/cluster-1.png)
+![Orange clustering workflow screenshot 1](screenshots/fig_supp_cluster-1.png)
 
 *In this example, we use the DBSCAN clustering algorithm to determine clusters. Orange provides an easy, interactive way to adjust parameter values, allowing users fine control over the resulting clustering. We then inspect the clustering result in the Scatter Plot widget and examine the most informative features in a box plot.*
 

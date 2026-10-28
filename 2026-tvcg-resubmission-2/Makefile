@@ -3,13 +3,10 @@ LATEXDIFF ?= latexdiff
 OLD_MAIN ?= main-old.tex
 DIFF_TEX ?= diff.tex
 
-.PHONY: paper cover resp supplement supp diff clean
+.PHONY: paper resp supplement supp diff clean
 
 paper:
 	$(LATEXMK) -pdf main.tex
-
-cover:
-	$(LATEXMK) -pdf cover.tex
 
 resp:
 	$(LATEXMK) -pdf response-to-reviewers.tex
@@ -28,4 +25,4 @@ diff:
 	pdflatex diff
 
 clean:
-	$(LATEXMK) -c main.tex cover.tex response-to-reviewers.tex supplementary-material.tex
+	$(LATEXMK) -c main.tex response-to-reviewers.tex supplementary-material.tex

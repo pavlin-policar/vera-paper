@@ -22,6 +22,7 @@ from importlib.util import module_from_spec, spec_from_file_location
 import matplotlib
 matplotlib.use("Agg")  # non-interactive backend
 import matplotlib.pyplot as plt
+import numpy as np
 
 import vera  # noqa: E402
 import vera.explain  # noqa: E402
@@ -64,6 +65,34 @@ def load_datasets_module():
 ds = load_datasets_module()
 
 
+def load_figstyle_module():
+    module_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "..",
+        "supplement-data",
+        "figstyle.py",
+    )
+    spec = spec_from_file_location("_supplement_figstyle", module_path)
+    module = module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
+fs = load_figstyle_module()
+fs.setup()
+
+# The supplement shows the region figures of these data sets two to a row, at
+# 0.49\textwidth, so they are drawn at that width
+HALF_WIDTH_REGION_FIGURES = {"iris"}
+
+
+def region_figure_width(dataset_name: str) -> float:
+    if dataset_name in HALF_WIDTH_REGION_FIGURES:
+        return 0.49 * fs.SUPPLEMENT_TEXTWIDTH_IN
+    return fs.SUPPLEMENT_TEXTWIDTH_IN
+
+
 def generate_region_annotations(features, embedding, ra_kwargs: dict):
     """Run VERA region construction and return raw region annotations."""
     return vera.an.generate_region_annotations(features, embedding, **ra_kwargs)
@@ -96,21 +125,28 @@ def save_figure(
     layout,
     save_path: str,
     per_row: int = 4,
-    figwidth: float = 16,
+    figwidth: float = fs.SUPPLEMENT_TEXTWIDTH_IN,
 ):
-    """Plot a VERA layout and save to disk."""
-    fig, ax = vera.pl.plot_annotations(
-        layout,
-        per_row=per_row,
-        figwidth=figwidth,
-        return_ax=True,
-        indicate_membership=True,
-        scatter_kwargs={"rasterized": True, "s": 2, "lw": 0},
-        label_kwargs={"fontsize": 6, "clip_on": True},
-    )
+    """Plot a VERA layout in the manuscript's figure style and save it as a PNG
+    at `save_path`. Figures are drawn at the width they are included at in the
+    supplement, so their fonts print at the manuscript's sizes."""
+    if len(layout) == 0:
+        raise ValueError("Nothing to plot: the layout is empty.")
+    n_rows = int(np.ceil(len(layout) / per_row))
+    fig, axes = fs.grid(n_rows, per_row, figwidth=figwidth)
+    colors = vera.pl.layout_variable_colors(layout)
+    for i, ax in enumerate(axes):
+        if i >= len(layout):
+            fs.blank(ax)
+            continue
+        vera.pl.plot_annotation(
+            layout[i], ax=ax, ra_colors=colors, indicate_membership=True,
+            label_kwargs=fs.LABEL_KWARGS, scatter_kwargs=fs.SCATTER_KWARGS,
+            leader_kwargs=fs.LEADER_KWARGS, **fs.RULE_LABEL_KWARGS,
+        )
+        fs.letter(ax, i)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
-    fig.savefig(save_path, dpi=150, bbox_inches="tight", transparent=False)
-    plt.close(fig)
+    fs.save(fig, os.path.splitext(save_path)[0], dpi=600, pad_inches=0, formats=("png",))
 
 
 def param_tag(param_name: str, value) -> str:
@@ -311,7 +347,7 @@ def run(config_path: str):
 
         # Save raw region annotations
         save_path = os.path.join(fig_dir, "defaults-regions.png")
-        save_figure(default_ras, save_path)
+        save_figure(default_ras, save_path, figwidth=region_figure_width(dataset_name))
         print(f"    saved {os.path.relpath(save_path, output_dir)}")
 
         # Save contrastive/descriptive explanations
@@ -343,7 +379,7 @@ def run(config_path: str):
                         features, embedding, ra_kwargs
                     )
                     save_path = os.path.join(fig_dir, f"{tag}-regions.png")
-                    save_figure(ras, save_path)
+                    save_figure(ras, save_path, figwidth=region_figure_width(dataset_name))
                     print(f"    saved {os.path.relpath(save_path, output_dir)}")
                 except Exception as exc:
                     print(f"    ERROR: {exc}")

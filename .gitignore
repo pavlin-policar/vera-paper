@@ -1,7 +1,19 @@
 .ipynb_checkpoints/
 __pycache__/
 data/*
-/supplement-data/data/
+/supplement-data/data
 .DS_STORE
 .idea/
 
+.venv/
+/high-dimensional-examples/*/cache
+/high-dimensional-examples/coverage-sweep/cache
+
+# The full candidate-dataset builder is kept locally; only the football builder is published
+/supplement-data/prepare_tabular.py
+
+# PDFs belong only in the paper folders and the user-study materials; figure scripts write PNGs for the repository
+*.pdf
+!/2026-tvcg-resubmission-2/*.pdf
+!/2026-tvcg-resubmission-1/**/*.pdf
+!/user-study/**/*.pdf

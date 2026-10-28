@@ -18,6 +18,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import numpy as np
 
 import vera  # noqa: E402
 import vera.explain  # noqa: E402
@@ -59,6 +60,24 @@ def load_datasets_module():
 
 
 ds = load_datasets_module()
+
+
+def load_figstyle_module():
+    module_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "..",
+        "supplement-data",
+        "figstyle.py",
+    )
+    spec = spec_from_file_location("_supplement_figstyle", module_path)
+    module = module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
+fs = load_figstyle_module()
+fs.setup()
 
 
 def generate_region_annotations(features, embedding, ra_kwargs: dict):
@@ -116,20 +135,28 @@ def save_figure(
     layout,
     save_path: str,
     per_row: int = 4,
-    figwidth: float = 16,
+    figwidth: float = fs.SUPPLEMENT_TEXTWIDTH_IN,
 ):
-    fig, ax = vera.pl.plot_annotations(
-        layout,
-        per_row=per_row,
-        figwidth=figwidth,
-        return_ax=True,
-        indicate_membership=True,
-        scatter_kwargs={"rasterized": True, "s": 2, "lw": 0},
-        label_kwargs={"fontsize": 6, "clip_on": True},
-    )
+    """Plot a VERA layout in the manuscript's figure style and save it as a PNG
+    at `save_path`. Figures are drawn at the width they are included at in the
+    supplement, so their fonts print at the manuscript's sizes."""
+    if len(layout) == 0:
+        raise ValueError("Nothing to plot: the layout is empty.")
+    n_rows = int(np.ceil(len(layout) / per_row))
+    fig, axes = fs.grid(n_rows, per_row, figwidth=figwidth)
+    colors = vera.pl.layout_variable_colors(layout)
+    for i, ax in enumerate(axes):
+        if i >= len(layout):
+            fs.blank(ax)
+            continue
+        vera.pl.plot_annotation(
+            layout[i], ax=ax, ra_colors=colors, indicate_membership=True,
+            label_kwargs=fs.LABEL_KWARGS, scatter_kwargs=fs.SCATTER_KWARGS,
+            leader_kwargs=fs.LEADER_KWARGS, **fs.RULE_LABEL_KWARGS,
+        )
+        fs.letter(ax, i)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
-    fig.savefig(save_path, dpi=150, bbox_inches="tight", transparent=False)
-    plt.close(fig)
+    fs.save(fig, os.path.splitext(save_path)[0], dpi=600, pad_inches=0, formats=("png",))
 
 
 def sampling_note(num_samples: int, defaults: dict) -> str:

@@ -5,10 +5,22 @@
 \usepackage{amsmath}
 \usepackage{booktabs}
 \usepackage{graphicx}
-\usepackage[hidelinks]{hyperref}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage{xcolor}
 \usepackage{xr-hyper}
+\usepackage[hidelinks]{hyperref}
 
 \externaldocument{main}
+\graphicspath{{../}}
+
+\captionsetup{font=small,labelfont=bf}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thesection}{S\arabic{section}}
+
+\newcommand{\etal}{et al.}
+\newcommand{\code}[1]{\texttt{#1}}
 
 \title{Supplementary Material for\\
 \textit{VERA: Generating Visual Explanations of Two-Dimensional Embeddings
@@ -20,48 +32,421 @@ via Region Annotation}}
 
 \maketitle
 
-\noindent\textbf{Manuscript ID:} TVCG-2026-04-0488
+\medskip
+\noindent This supplement evaluates VERA beyond the experiments of the main manuscript, comparing it with rangesets, applying it to high-dimensional datasets, and testing its sensitivity to parameters and embedding distortion. We include the scripts and data required for its replication at \url{https://github.com/pavlin-policar/vera-paper}, as well as the Orange workflow files illustrated in Section~\ref{sec:supp-orange}. The repository also contains all materials used in the user study described in Section~\ref{sec:user-study}, including every quiz question with its stimulus image, the VERA explanations shown to participants, and the questionnaires.
 
-\tableofcontents
+% \tableofcontents
 
-\section{Qualitative Comparison with Existing Visual Explanation Methods}
-\label{sec:supp-comparison}
+%% ---------------------------------------------------------------------------
+\section{Comparison with Rangesets}
+\label{sec:supp-rangesets}
 
-% TODO: Present the focused comparison requested by the Associate Editor and
-% Reviewer 1. Explain the setup, show directly comparable outputs, and state
-% the conclusions that can be drawn from the comparison.
+Rangesets~\cite{Sohns2022} are a visual encoding based on non-convex alpha hulls that group together data points sharing a feature value or range of values.
+In their paper, Sohns~\etal\ propose rangesets as part of NoLiES, an interactive Jupyter widget that aids in the interpretation of two-dimensional embeddings.
+Given a two-dimensional embedding, NoLiES produces a small multiple view showing each available feature using the rangeset visual encoding. Users can then select individual panels and inspect them in more detail in a larger, central viewport.
+NoLiES thus shares VERA's motivation, and also its first two steps: both discretize numeric features into bins and indicate feature values in the embedding space by drawing regions around the points of each bin.
+Beyond these steps, however, the two approaches diverge: NoLiES leaves much of the exploration to the user, including the choice of bin ranges and of the features worth inspecting, whereas VERA aims to automate as much of this process as possible.
 
-\section{Example with Hundreds of Features}
-\label{sec:supp-high-dimensional}
+Figures~\ref{fig:supp-rangeset-contrastive-abalone} and \ref{fig:supp-rangeset-contrastive-attrition} compare rangesets with VERA's contrastive explanations---the closest counterpart of a NoLiES small multiple view---on the abalone~\cite{Nash1994} and employee attrition~\cite{IbmEmployeeAttrition} datasets, shown in Figures~\ref{fig:abalone} and~\ref{fig:attrition} in the manuscript.
+The first row shows rangesets, drawn by our reimplementation of NoLiES, which reproduces the regions of the authors' code.
+The second row shows VERA's standard contrastive explanations, built from regions extracted from KDE contours, and the third row shows the same VERA explanations built from rangeset regions instead.
+Since NoLiES does not rank features, the columns primarily reflect VERA's ranking mechanism.
+We used the default parameters of VERA and NoLiES, except for the edge-length threshold of rangesets, which we set to twice its default, as this produces less fragmented regions and is consistent with the examples in the original publication.
+At its default thresholds, VERA's contrastive merge step does not merge any features, so every VERA panel shows a single feature, reflecting the rangeset panels from the first row.
+The figures show differences at each step of VERA's pipeline, which we now discuss in turn: how features are discretized, how their bins are merged, which features are shown, and how regions are drawn around them.
 
-% TODO: Document the high-dimensional example, including the data, embedding,
-% explanatory feature set, generated explanations, runtime, and observed
-% visual-scalability limitations.
+\paragraph{Discretization.}
+One of the first steps in both VERA and NoLiES is to discretize each numeric feature into bins.
+By default, NoLiES uses five equal-width bins spanning the range between the feature's minimum and maximum values.
+Although simple, equal-width binning is sensitive to outliers, which can stretch the range so that nearly all samples fall into a single bin. In Figure~\ref{fig:supp-rangeset-contrastive-abalone}.b, for instance, two abalones are much taller than the rest, so equal-width binning places 4,152 of the 4,177 abalones (99.4\%) in the lowest height bin corresponding to the blue region covering nearly the entire embedding.
+Although this can be addressed by the user through interactive sliders that adjust the minimum and maximum values of the discretization, this must be done for every feature individually, which can become cumbersome for a large number of features. 
+VERA instead uses $k$-means discretization, which adapts the bins to the distribution of the data (Section~\ref{sec:discretization}).
+In Figure~\ref{fig:supp-rangeset-contrastive-abalone}.f, each of the two outliers is assigned its own bin, drawn as the red and purple regions, while the remaining abalones are split into three bins that follow the gradual increase in height across the embedding.
 
+\paragraph{Region merging.}
+Once a feature is discretized, NoLiES draws a region for every one of its bins. When several values of a feature occupy the same part of the embedding, their regions overlap and the visualization becomes difficult to read. In Figure~\ref{fig:supp-rangeset-contrastive-attrition}.b, for instance, the two large clusters are covered by the overlapping regions corresponding to five education fields.
+Since such overlap would occur with any visual encoding, VERA first applies a post hoc merging procedure (detailed in Section~\ref{sec:post-hoc-merge}) that merges regions with substantial spatial overlap. The resulting visualizations include fewer regions that convey essentially the same information.
+For instance, in Figure~\ref{fig:supp-rangeset-contrastive-attrition}.f, the overlapping regions of Figure~\ref{fig:supp-rangeset-contrastive-attrition}.b become a single orange region, whose label lists all education fields except Human Resources.
+Merging also identifies uninformative features. When all the regions associated with a feature overlap, the feature is not localized anywhere in the embedding. VERA's merge then produces a single region that covers nearly the entire embedding, which is not informative, so VERA discards the feature before constructing explanations.
+
+\paragraph{Feature ranking.}
+With the regions in place, it remains to decide which features to show.
+NoLiES leaves this decision to the user, who inspects the panels one by one. Since NoLiES produces one panel per feature, the user must inspect every feature to find the informative ones.
+VERA instead uses heuristics to rank the features according to their informativeness (Section~\ref{sec:contrastive-selection}), so that the user sees the most interesting ones first and can stop once the panels no longer appear interesting.
+VERA's contrastive merge step also groups features whose regions spatially coincide into a single panel (Figure~\ref{fig:contrastive_merge}), conveying several features at once and making their spatial correlation explicit.
+For instance, Figure~\ref{fig:abalone}.c--d describes three weight and two size measurements in two panels, and Figure~\ref{fig:supp-football}.c joins ten features that set goalkeepers apart into a single panel.
+
+\paragraph{VERA visual encoding.}
+In VERA, the choice of visual encoding is not critical.
+We opted for a visual encoding based on contours extracted from kernel density estimates, a familiar way of showing where the points of a scatter plot concentrate~\cite{MayorgaGleicher2013,Sarikaya2018,Li2022}.
+However, the core steps of VERA apply to any region encoding, and since version~1.1.0 the \texttt{vera-explain} package also includes the option to construct regions using rangesets.
+On the employee attrition dataset, the explanations built from rangeset regions (Figure~\ref{fig:supp-rangeset-contrastive-attrition}.i--l) describe the same regions with the same rules as those built from KDE regions (Figure~\ref{fig:supp-rangeset-contrastive-attrition}.e--h).
+The two encodings differ where the values of a feature are spatially interleaved. A KDE contour encloses only the area where the points of a bin are dense, whereas a rangeset region joins all points of a bin that lie within the edge-length threshold of one another, however sparse. The rangeset region of each value therefore extends across the points of the other values, so the regions overlap more and VERA merges them further.
+On the abalone dataset, for instance, height retains only two regions instead of five (Figure~\ref{fig:supp-rangeset-contrastive-abalone}.j), and the regions of the three sexes merge into one, so VERA discards sex, which it separates into infants and adults on KDE regions (Figure~\ref{fig:abalone}.b).
+The two encodings also differ in computational cost: KDE contours can be extracted in linear time, whereas rangesets scale as $\mathcal{O}(N \log N)$ and become slower on large datasets.
+Finally, rangesets do not naturally support sample weights, which is critical when incorporating distortion measures into the explanations to avoid generating explanations for poorly embedded regions. We discuss distortions and their effects on explanations in more detail in Section~\ref{sec:supp-distortion}.
+
+\paragraph{Descriptive explanations.}
+A rangeset describes one feature at a time, whereas VERA also generates descriptive explanations, which describe regions by their combination of characteristic feature values (Figures~\ref{fig:attrition}.e--h and~\ref{fig:supp-football}.e--h).
+In NoLiES, finding such a combination requires the user to inspect the panels one by one, and to determine mentally where their regions overlap. In VERA, this is done automatically.
+In their publication, Sohns~\etal~\cite{Sohns2022} discuss Boolean operations and the automated analysis of cluster properties as possible extensions to their approach, which is the idea underpinning VERA's descriptive explanations.
+
+\begin{figure}[tbp]
+  \centering
+  \includegraphics[width=\textwidth]{fig_supp_rangeset-contrastive-abalone.pdf}
+  \caption{Rangesets and VERA's contrastive explanations on the UMAP embedding of the Abalone dataset (4,177 abalones), for age, shucked weight, and diameter, as in Figure~\ref{fig:abalone}, and for height in place of sex: height's two outliers show the effect of equal-width bins, and VERA discards sex on rangeset regions. (a--d) Rangeset views. (e--h) VERA's contrastive explanations of the same features, built from KDE regions. (i--l) VERA's contrastive explanations built from rangeset regions.}
+  \label{fig:supp-rangeset-contrastive-abalone}
+\end{figure}
+
+\begin{figure}[tbp]
+  \centering
+  \includegraphics[width=\textwidth]{fig_supp_rangeset-contrastive-attrition.pdf}
+  \caption{Rangesets and VERA's contrastive explanations on the t-SNE embedding of the IBM Employee Attrition dataset (1,470 employees, 33 features). Since NoLiES does not rank features, all three rows show the four features VERA ranks highest, which are also those of Figure~\ref{fig:attrition}. (a--d) Rangeset views. (e--h) VERA's contrastive explanations of the same features, built from KDE regions. (i--l) VERA's contrastive explanations built from rangeset regions.}
+  \label{fig:supp-rangeset-contrastive-attrition}
+\end{figure}
+
+%% ---------------------------------------------------------------------------
+\newpage
+\section{High-Dimensional Datasets}
+\label{sec:high-dimensional-examples}
+
+\subsection{Football Players}
+\label{sec:supp-football}
+
+In the main manuscript, Figure~\ref{fig:related_methods}.h shows only VERA's highest-ranked descriptive explanation of the football players dataset~\cite{Pappalardo2019}.
+Figure~\ref{fig:supp-football} shows VERA's four highest-ranked contrastive and four highest-ranked descriptive explanations.
+Since this dataset has several times more features than those of the manuscript's case studies, we follow it through VERA's pipeline and report how many explanatory variables and regions each step leaves.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{fig_supp_football.pdf}
+  \caption{VERA's explanations of the t-SNE embedding of the football players of Figure~\ref{fig:related_methods}. (a--d) The four highest-ranked contrastive explanations. (e--h) The four highest-ranked descriptive explanations, with regions of at least 100 players.}
+  \label{fig:supp-football}
+\end{figure}
+
+\paragraph{Data.}
+The Wyscout match events dataset contains aggregated player statistics of the 2017-18 football season, covering the five major European leagues: French Ligue 1, English Premier League, Italian Serie A, Spanish La Liga, and the German Bundesliga~\cite{Pappalardo2019}.
+It includes 1,634 players who played at least 900 minutes, each characterized by 239 features: 238 per-90-minute counts and percentages of actions such as passes, duels, and crosses, many broken down by the third and side of the pitch where the action took place, and the player's position (goalkeeper, defender, midfielder, or forward).
+We construct a t-SNE embedding from the 238 numeric features, standardized after log-transforming 56 heavy-tailed counts. We do not use player positions in the embedding construction process. We use the default parameters in the \textsf{openTSNE} library~\cite{Policar2024}.
+
+\paragraph{Region construction.}
+VERA discretizes each of the 238 numeric features into five bins and treats each of the four positions as a separate value, expanding the 239 features into 1,194 explanatory variables, each with its own region in the embedding.
+Post hoc merging (Section~\ref{sec:post-hoc-merge}) merges the overlapping regions of each feature, leaving 610 regions.
+For 24 features, their associated regions merge into a single region that covers nearly the entire embedding. These features are not localized anywhere, so VERA discards them as uninformative.
+The remaining 215 features are described by 586 regions, fewer than three per feature on average.
+These regions are then used as the starting point in constructing both contrastive and descriptive explanations.
+
+\paragraph{Contrastive explanations.}
+Figure~\ref{fig:supp-football}.a--d shows the top four ranked contrastive panels.
+A key part of generating contrastive explanations is the contrastive merge, which joins features whose regions coincide spatially into a single panel. In this example, the merge reduces the 215 features to 199 candidate panels: one panel joins ten features, another joins three, and five more panels each join two.
+For instance, Figure~\ref{fig:supp-football}.c shows the ten-feature panel. Goalkeeping actions such as hand passes, reflex saves, and rushes off the line all set the 121 goalkeepers apart from all outfield players. Due to the relatively small plotting area, we show the top five features and truncate the remaining five.
+
+\paragraph{Descriptive explanations.}
+Figure~\ref{fig:supp-football}.e--h shows the top four ranked descriptive panels. 
+Again beginning with the 586 regions, VERA first splits each region into its spatially disjoint parts (Figure~\ref{fig:descriptive_merge}.b), so that a region with two parts, such as the blue region in Figure~\ref{fig:supp-football}.b, is split into two, yielding 1,556 regions.
+It then discards regions with a purity below 0.5 or with fewer than a minimum number of players. We keep the default purity threshold but raise the minimum from 5 to 100 players, which, in this case, leaves 992 regions. Although this removes only 52 regions (1,044 remain at the default), these small regions rarely coincide with any other, so at the default the merge below yields 50 regions instead of 15.
+The descriptive merge joins regions that cover nearly the same players (a minimum overlap of at least 0.8), compressing the 992 regions into 15. Each merged region is described by the rules of all the regions it joins, enriched with the rules of larger, background regions that contain it. Each of the eleven regions in Figure~\ref{fig:supp-football}.e--h is therefore characterized by between 151 and 268 descriptors, of which its label shows only the top three.
+VERA lays out the 15 regions in eight panels (Section~\ref{sec:descriptive-explanations:selection}).
+The first four hold eleven regions (Figure~\ref{fig:supp-football}.e--h) and describe the players' roles. Figure~\ref{fig:supp-football}.e divides the players into goalkeepers, defenders, and midfielders and forwards, and Figure~\ref{fig:supp-football}.f--h subdivide these groups by where on the pitch the players act.
+The remaining four panels hold one region each, three of which describe attacking players on the left or the right.
+
+%% ---------------------------------------------------------------------------
+\subsection{Single-Cell Gene Expression Datasets}
+\label{sec:supp-single-cell}
+
+Single-cell RNA-seq data are a prototypical example of high-dimensional data. These data describe thousands to millions of cells, each characterized by the expression of tens of thousands of genes. 
+Studies that publish such data usually include a t-SNE or UMAP embedding annotated with the cell types identified by the authors.
+These cell types are typically identified by clustering the cells and characterizing each cluster by a small set of \textit{marker genes}, genes that are expressed specifically in that cell type.
+We ask whether VERA, given only gene expression and no cell types, annotates the regions of these embeddings with the known marker genes.
+
+\paragraph{Data and preprocessing.}
+We apply VERA to four single-cell RNA-seq datasets widely used in the bioinformatics literature: PBMC~3k from 10x Genomics (2,638 cells), mouse pancreatic endocrinogenesis~\cite{BastidasPonce2019} (3,696 cells), mouse retina~\cite{Macosko2015} (44,808 cells), and human pancreas~\cite{Baron2016} (8,569 cells). We preprocess each dataset as in the Scanpy clustering tutorial~\cite{Wolf2018}: we keep genes detected in at least three cells, normalize each cell to 10,000 counts, and log-transform the counts. We then select highly variable genes as those with mean expression between 0.0125 and 3 and normalized dispersion above 0.5, regress out total counts and, where available, the fraction of mitochondrial counts, standardize each gene, and compute 50 principal components. We embed the first 40 components with t-SNE (\textsf{openTSNE}~\cite{Policar2024}, perplexity 30) for the mouse retina and human pancreas, and with UMAP (\textsf{umap-learn}~\cite{McInnes2018}, 10 neighbors, minimum distance 0.5) for PBMC~3k. For the mouse pancreas, we use the UMAP published with the data.
+
+\paragraph{Presence indicators.}
+Gene expression differs from the features typically found in tabular data. 
+Each cell expresses only a small fraction of all genes, so the resulting gene expression matrices are sparse.
+Sparse data of this kind appear in other domains as well. For instance, documents can be characterized by the occurrence of words~\cite{Heimerl2016} and recipes by the ingredients they require~\cite{Ahn2011}.
+In such data, usually only the positive case is of interest. A region of cells that express a gene is informative, whereas a region of cells that do not express it rarely is.
+We therefore represent each gene by a single binary indicator variable, which is true where the gene's expression is above zero, and construct regions for positive cases only.
+VERA was designed for typical tabular features whose values cannot be reduced to an indicator, so its ranking heuristics may not be well suited to presence indicators. Heuristics designed for indicator variables are an interesting direction for future work.
+
+Treating genes as presence indicators has two consequences.
+First, contrastive explanations, which set the regions of one variable against one another, have nothing to contrast, so we show only descriptive explanations.
+Second, VERA recognizes an uninformative variable during post hoc merging, when all of its regions merge into one that covers nearly the whole embedding (Section~\ref{sec:post-hoc-merge}). A gene has only one region to begin with, so VERA discards it only if this region alone covers nearly all cells. VERA's default threshold keeps genes whose regions hold up to 95\% of the cells and span nearly the whole embedding without describing any particular part of it. We therefore lower the threshold to 80\%.
+
+\paragraph{Generating VERA explanations.}
+The variables used in VERA explanations do not need to be the same as those used to compute the embedding. In our single-cell experiments, the t-SNE/UMAP embeddings are computed from principal components of the highly variable genes, while VERA receives individual genes.
+Most genes vary little across cells and carry little information about the embedding, so we give VERA the 500 genes with the largest analytic Pearson-residual variance~\cite{Lause2021}. This ranking is computed from the raw counts and uses neither the clustering nor the cell types.
+For each dataset, Figure~\ref{fig:supp-single-cell} shows VERA's three highest-ranked descriptive panels.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{fig_supp_singlecell.pdf}
+  \caption{VERA's descriptive explanations of four single-cell RNA-seq datasets: PBMC~3k (a--d, UMAP), mouse pancreatic endocrinogenesis (e--h, the UMAP published with the data), mouse retina (i--l, t-SNE), and human pancreas (m--p, t-SNE). The first column shows the published cell types (for PBMC~3k, the Louvain clusters of the Scanpy tutorial). The remaining columns show VERA's three highest-ranked descriptive panels. Each region is labeled with up to five of its genes (up to three for the retina), and ``(+$N$)'' counts the further genes characteristic of the region. Genes in bold indicate canonical markers of the region's majority cell type.}
+  \label{fig:supp-single-cell}
+\end{figure}
+
+\paragraph{Results.}
+Figure~\ref{fig:supp-single-cell} shows VERA's explanations of the four datasets.
+The first column shows the published cell types, which VERA does not receive, and the remaining three columns show VERA's three highest-ranked descriptive explanations.
+For each region, genes in bold are canonical markers of the cell type that makes up most of the region.
+We chose these markers before running VERA and confirmed each of them in CellMarker~3.0~\cite{Hu2023}.
+Although VERA's ranking heuristics were not designed for presence indicators, canonical markers appear among the top-ranked genes of many cell types in all four datasets.
+In PBMC~3k, for instance, VERA's regions coincide with the major blood cell types and are labeled with their textbook markers, \emph{CD3E} and \emph{IL7R} for T cells, \emph{CD79A} and \emph{MS4A1} for B cells, \emph{FCGR3A} and \emph{MS4A7} for \emph{FCGR3A}$^+$ monocytes, and \emph{FCER1A} for dendritic cells (Figure~\ref{fig:supp-single-cell}.b--d).
+Similarly, in the mouse pancreas, VERA labels the endocrine progenitors with \emph{Neurog3} and the beta, delta, and epsilon cells with \emph{Ins2}, \emph{Sst}, and \emph{Ghrl}.
+In the mouse retina, a single panel (Figure~\ref{fig:supp-single-cell}.j) separates rods, cones, horizontal cells, ganglion cells, and M\"uller glia, each labeled with one of its markers.
+VERA likewise identifies the main cell types of the human pancreas (Figure~\ref{fig:supp-single-cell}.n--p), labelling, for instance, the alpha, beta, gamma, and mast cells with \emph{IRX2}, \emph{IAPP}, \emph{PPY}, and \emph{TPSAB1}.
+
+\paragraph{Limitations.}
+Representing genes as presence indicators has its limitations.
+First, because VERA filters out regions that span a large portion of the embedding, it misses marker genes that are detected in most cells. For instance, the rod marker \emph{RHO} is detected in 86\% of the retina cells and the beta-cell marker \emph{INS} in 92\% of the human pancreas cells, so VERA discards both genes as uninformative.
+Second, presence indicators record only whether a gene is detected, so a marker detected in only part of its cell type can be outweighed by a more numerous neighboring cell type in which it is detected occasionally. In PBMC~3k, for instance, \emph{CD8B} is detected in 38\% (120 cells) of the 316 CD8 T cells but also in 16\% (188 cells) of the 1,144 CD4 T cells, so most cells with \emph{CD8B} are CD4 T cells, which also make up 78\% of its region. VERA therefore cannot distinguish CD8 T cells from CD4 T cells by this marker.
+Third, two of VERA's criteria for selecting descriptive panels, the mean variable occurrence and the variable in all score (Section~\ref{sec:descriptive-explanations:selection}), favor variables that appear in several regions of a panel, as is common in tabular data. Gene indicators rarely recur across regions, so these criteria usually have little effect. When genes do recur in every region of a panel, however, the variable in all score, which carries the largest weight among VERA's criteria, can rank a small panel above larger ones. In the human pancreas, for instance, the three regions in Figure~\ref{fig:supp-single-cell}.o, which cover only 10\% of the cells, share 24 genes, such as \emph{JUN} and \emph{EGR1}, so VERA ranks this panel above the one in Figure~\ref{fig:supp-single-cell}.p, whose 13 regions cover 68\%.
+Given only gene detection, VERA thus annotates most well-separated cell populations with their canonical markers without a clustering step, but leaves finer distinctions to analyses of expression levels.
+Future work could address these limitations by using expression levels rather than detection alone, and by panel-selection criteria designed for indicator variables.
+
+%% ---------------------------------------------------------------------------
+\newpage
 \section{Parameter Sensitivity}
 \label{sec:supp-parameters}
 
-% TODO: Consolidate the parameter study into a written account with methods,
-% results, practical guidance, and explicit conclusions.
+VERA's explanations depend on parameters at each of its three stages, region construction, contrastive explanation construction, and descriptive explanation construction.
+Table~\ref{tab:supp-parameters} lists the main ones with their defaults in the VERA library.
+We conduct an exhaustive parameter sensitivity study, varying each parameter on eight datasets: Iris~\cite{Anderson1936}, Penguins~\cite{Horst2020}, Abalone~\cite{Nash1994}, Titanic~\cite{Dawson1995}, Employee Attrition~\cite{IbmEmployeeAttrition}, Wine Quality~\cite{Cortez2009}, Adult~\cite{Becker1996}, and Forest Covertype~\cite{Blackard1998}.
+The results of the full parameter study can be found in the accompanying GitHub repository.\footnote{\url{https://github.com/pavlin-policar/vera-paper}}
+Here we discuss the most impactful parameters of every stage.
 
-\section{Additional Method Details and Ablations}
-\label{sec:supp-method-details}
+\begin{table}[htbp]
+  \centering\small
+  \caption{Parameters of VERA and their defaults. Overlap thresholds are fractions of shared samples.}
+  \label{tab:supp-parameters}
+  \begin{tabular}{lll}
+    \toprule
+    Stage & Parameter & Default \\
+    \midrule
+    Region construction & Discretization bins $k$ & 5 \\
+    & KDE contour level (fraction of the density's maximum) & 0.25 \\
+    & Bandwidth scale factor & 1.0 \\
+    & Post hoc merge threshold (maximum overlap) & 0.8 \\
+    & Uninformative-variable coverage threshold & 0.95 \\
+    Contrastive & Contrastive merge threshold (Jaccard similarity) & 0.95 \\
+    & Ranking weights (overlap, purity, attention) & 5, 5, 1 \\
+    Descriptive & Minimum samples in a candidate region & 5 \\
+    & Minimum purity of a candidate region & 0.5 \\
+    & Descriptive merge threshold (minimum overlap) & 0.8 \\
+    & Background enrichment & on \\
+    & Containment for background enrichment & 0.9 \\
+    & Overlap tolerance within a panel & 0.0 \\
+    & Ranking weights (VIA, MVO, attention, coverage, purity) & 30, 10, 10, 10, 2 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
-% TODO: Include any ranking ablation and the precise details needed for
-% distortion weighting, thresholds, and other method choices that do not fit
-% in the main manuscript.
+\subsection{Region Construction}
 
-\section{User Study Materials}
-\label{sec:supp-user-study}
+\paragraph{Discretization bins $k$.}
+In our experiments, VERA was largely robust to the number of discretization bins.
+Although a fine discretization produces many bins, the post hoc merge typically joins overfragmented bins that cover the same part of the embedding, leaving far fewer regions.
+Figure~\ref{fig:supp-param-bins} shows the effects of using different numbers of discretization bins.
+For instance, with 10 bins, the post hoc merge reduces the regions of age, shucked weight, diameter, and height to 4, 6, 7, and 5, respectively (Figure~\ref{fig:supp-param-bins}.i--l).
+We chose $k=5$ as the default for two reasons.
+First, we found that five bins typically allow enough flexibility without producing too many regions, which would add cognitive load on the end user.
+Second, five bins resemble the five-point Likert scale familiar to most end users, so the regions of a numeric feature read as levels from very low to very high.
 
-% TODO: Describe the study materials and provide a navigable catalogue of the
-% participant instructions, questions, visualizations, and questionnaires.
+\paragraph{Bandwidth scale factor.}
+The scale factor controls the granularity of the regions.
+Figure~\ref{fig:supp-param-bandwidth} shows the effects of different scale factors.
+Using a small scale produces many small, disjoint regions that closely follow the points of each bin.
+Conversely, a large scale produces very large, high-level regions, typically only three or four per feature (Figure~\ref{fig:supp-param-bandwidth}.i--l).
+The scale factors can thus be seen as zoom levels of the explanations.
+We default to a scale factor of 1, which we found to be a good middle ground, with a resolution fine enough to separate distinct areas of the embedding, without overwhelming the user with regions.
+Small scale factors also affect the descriptive explanations, since every disjoint part of a region can become a candidate for a panel.
+On abalone, the regions at a scale of 0.25 consist of 301 disjoint parts, against 53 at the default, and the descriptive explanations grow from 7 panels with 18 regions to 12 panels with 118, making them considerably harder to parse.
 
-\section{Reproducibility}
-\label{sec:supp-reproducibility}
+\paragraph{Post hoc merge threshold.}
+A key step of region construction is the post hoc merging procedure. When discretization splits a feature into overfragmented, spatially overlapping regions, this procedure merges them back into one. The critical parameter here is the overlap threshold, the value that the maximum overlap of two regions must exceed for them to be merged (Section~\ref{sec:post-hoc-merge}).
+Figure~\ref{fig:supp-param-merge} shows the effects of different thresholds. A low threshold merges more regions, while a high threshold requires the regions to overlap almost completely, resulting in fewer merges.
+For instance, consider shucked weight, shown in the second column of Figure~\ref{fig:supp-param-merge}. At the default threshold of 0.8, it has four regions (Figure~\ref{fig:supp-param-merge}.f). Lowering the threshold to 0.5 merges its two highest bands, leaving three regions (Figure~\ref{fig:supp-param-merge}.b). Conversely, raising the threshold to 0.95 keeps the heaviest abalones (shucked weight $\geq 0.79$) apart from the band below them, which the default merges into a single region (Figure~\ref{fig:supp-param-merge}.j).
 
-% TODO: Provide the software version, environment and dependency information,
-% data provenance, and exact commands required to reproduce the supplementary
-% results from a clean installation.
+\begin{figure}[tp]
+  \centering
+  \includegraphics[width=\textwidth]{fig_supp_region-bins.pdf}
+  \caption{Regions of four features (columns) of the abalone UMAP embedding with 3, 5 (the default), and 10 discretization bins (rows). All other parameters are set to their defaults.}
+  \label{fig:supp-param-bins}
+\end{figure}
+
+\begin{figure}[tp]
+  \centering
+  \includegraphics[width=\textwidth]{fig_supp_region-bandwidth.pdf}
+  \caption{Regions of four features (columns) of the abalone UMAP embedding at bandwidth scale factors (rows) of 0.25, 1 (the default), and 2. All other parameters are set to their defaults.}
+  \label{fig:supp-param-bandwidth}
+\end{figure}
+
+\begin{figure}[tp]
+  \centering
+  \includegraphics[width=\textwidth]{fig_supp_region-merge.pdf}
+  \caption{Regions of four features (columns) of the abalone UMAP embedding at post hoc merge thresholds (rows) of 0.5, 0.8 (the default), and 0.95. All other parameters are set to their defaults.}
+  \label{fig:supp-param-merge}
+\end{figure}
+
+\clearpage
+\subsection{Contrastive Explanations}
+
+\paragraph{Contrastive merge threshold.}
+The contrastive merge combines features whose regions occupy the same parts of the embedding (Section~\ref{sec:contrastive:explanation-construction}). Merged features can then be shown in a single panel.
+Two features are merged when their regions admit a one-to-one matching in which every matched pair has a Jaccard similarity exceeding the threshold.
+The threshold thus provides a trade-off between the number of panels and the precision of their rules.
+A low threshold merges more features into fewer panels, but the merged rule of a region then no longer holds for all of its samples.
+A high threshold merges only features whose regions exhibit near-perfect overlap, so that each panel describes all of its features equally well.
+Figure~\ref{fig:supp-param-contrastive} shows the effects of different thresholds.
+At the default of 0.95, each of the nine abalone features is shown in its own panel, and no features are merged at the default (Figure~\ref{fig:supp-param-contrastive}.i--l).
+Lowering the threshold to 0.8 merges whole weight and viscera weight, leaving eight candidate panels (Figure~\ref{fig:supp-param-contrastive}.e), and at 0.75, shucked weight joins them, leaving seven (Figure~\ref{fig:supp-param-contrastive}.a--b).
+We default to 0.95 so that a merged panel can be read as describing each of its features.
+To illustrate the contrastive merge, Figure~\ref{fig:abalone} of the manuscript uses a threshold of 0.75 together with a post hoc merge threshold of 0.9, at which diameter and length merge in addition to the three weights (Figure~\ref{fig:abalone}.c--d).
+
+\begin{figure}[htp]
+  \centering
+  \includegraphics[width=\textwidth]{fig_supp_contrastive-parameters.pdf}
+  \caption{Contrastive explanations of four features (columns) of the abalone UMAP embedding at contrastive merge thresholds (rows) of 0.75, 0.8, and 0.95 (the default). Each column shows the panel that contains its feature, so a panel of merged features appears in several columns (a, b). All other parameters are set to their defaults.}
+  \label{fig:supp-param-contrastive}
+\end{figure}
+
+\clearpage
+\subsection{Descriptive Explanations}
+\paragraph{Background enrichment.}
+Background enrichment augments the description of a region with the rules of larger, encompassing regions (Section~\ref{sec:descriptive-explanations:construction}). This step does not merge the regions, but only adds descriptors to them.
+The first two rows of Figure~\ref{fig:supp-param-descriptive} show the effects of background enrichment.
+For instance, consider the region of the smallest abalones, shown in the first column of Figure~\ref{fig:supp-param-descriptive}.
+Without enrichment, it is described only by its diameter and length (Figure~\ref{fig:supp-param-descriptive}.e).
+With enrichment, its description also states that these abalones are the youngest and lightest (Figure~\ref{fig:supp-param-descriptive}.a).
+Although shorter, descriptions without background enrichment omit characteristics shared by nearly all samples in the region.
+We therefore enable background enrichment by default, which provides a more complete description of the samples in each region.
+
+\paragraph{Overlap tolerance.}
+The overlap tolerance controls how much the regions within a single descriptive panel may overlap with one another (Section~\ref{sec:descriptive-explanations:selection}).
+The first and last rows of Figure~\ref{fig:supp-param-descriptive} show the effects of allowing some overlap.
+An overlap tolerance of 0 admits only non-overlapping regions into a panel, while a higher value admits more combinations of regions, changing which regions are shown together.
+For instance, in Figure~\ref{fig:supp-param-descriptive}.k, the region of $0.11 \leq$ height $< 0.16$ shares a panel with the region of the oldest abalones (age $\geq 12$), and the two overlap.
+A small degree of overlap can result in panels that explain more of the embedding (for instance, Figure~\ref{fig:supp-param-descriptive}.i), but it can also crowd a panel with many partially overlapping regions, making it difficult to read.
+We therefore default to an overlap tolerance of 0, so that the regions in a panel never overlap and the panel remains easy to read.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{fig_supp_descriptive-parameters.pdf}
+  \caption{Descriptive explanations of the abalone UMAP embedding at the defaults, without background enrichment, and with an overlap tolerance of 0.25 within a panel (rows). The columns show the four highest-ranked panels of each row. All other parameters are set to their defaults.}
+  \label{fig:supp-param-descriptive}
+\end{figure}
+
+%% ---------------------------------------------------------------------------
+\newpage
+\section{Accounting for Embedding Distortion}
+\label{sec:supp-distortion}
+
+Regardless of our chosen dimensionality reduction algorithm, every low-dimensional embedding of high-dimensional data inevitably distorts relationships between data points to some degree~\cite{Venna2010,NonatoAupetit2019}.
+There are two main types of distortions: missing neighbors and false neighbors~\cite{NonatoAupetit2019}.
+Missing neighbors are samples that lie close to one another in the input space but far apart in the embedding, so that the embedding tears apart a group of similar samples.
+False neighbors are samples that lie far apart in the input space but close to one another in the embedding.
+These two kinds of distortions affect explanations differently.
+A tear splits a group of similar samples across several parts of the embedding, and VERA describes each part with its own region, so the explanation remains correct but the same region annotation appears in more than one place.
+False neighbors are more harmful, as they place distinct groups of samples in the same part of the embedding, where a single region may then describe their characteristics together and suggest a relationship that does not exist in the data.
+Since VERA is agnostic to the method that produced the embedding, it cannot correct these distortions.
+It can, however, account for them when generating explanations.
+
+\paragraph{Weighted region construction.}
+When a sample-wise measure of embedding quality is available, VERA accounts for distortion by downweighting poorly embedded samples during the region construction process (Section~\ref{sec:region_construction}).
+VERA estimates the density of each indicator variable with a Gaussian KDE, and a distortion weight scales the contribution of each sample to this estimate. Consequently, a poorly embedded sample contributes less to the density of every indicator variable it has.
+Since regions are extracted at a fixed contour level, downweighting alone would not shrink a region whose samples are all downweighted equally. VERA therefore scales each weighted density by the maximum of the corresponding unweighted density before extracting contours, so that weights of one reproduce the unweighted regions and lower weights shrink them.
+Regions in poorly embedded parts of the embedding thus shrink or disappear, whereas regions in faithfully embedded parts remain largely unchanged.
+The weights affect only the outlines of the regions.
+VERA computes the purity and coverage of each region from the samples it contains, without weights, and identifies uninformative variables from their unweighted regions.
+Weighting thus changes where a region is drawn, but not what its rule says about the samples it contains.
+Rangesets, by contrast, offer no straightforward way to incorporate sample weights, so weighting applies only to KDE regions (Section~\ref{sec:supp-rangesets}).
+
+\paragraph{Effect of weighting.}
+Figures~\ref{fig:supp-distortion-abalone} and~\ref{fig:supp-distortion-attrition-pca} compare the regions constructed with and without weights on two embeddings of the abalone~\cite{Nash1994} and employee attrition datasets~\cite{IbmEmployeeAttrition}.
+We measure distortion by $k$-nearest-neighbor (KNN) recall, the fraction of a sample's $k$ nearest neighbors in the input space that are also among its $k$ nearest neighbors in the embedding. Here we select $k = 100$ and use each sample's recall directly as its weight.
+
+Figure~\ref{fig:supp-distortion-abalone}.a shows the weights on the abalone embedding. In this embedding, 54\% of the abalones have a weight below one half.
+With weights, every region contracts from its unweighted outline (Figure~\ref{fig:supp-distortion-abalone}.b--d), most noticeably on the right side of the embedding, where poorly embedded abalones are most common.
+Since weighting changes the regions, it also changes the outcome of the post hoc merge.
+Smaller regions overlap less, so regions that the merge joins without weights may remain separate with weights.
+For instance, the two bins of the longest abalones form a single region without weights (the purple region in Figure~\ref{fig:supp-distortion-abalone}.e) but remain separate with weights (the green and brown regions in Figure~\ref{fig:supp-distortion-abalone}.f).
+Similarly, the three bins of the heaviest shells form a single region without weights and three separate regions with weights (Figure~\ref{fig:supp-distortion-abalone}.g--h).
+
+Figure~\ref{fig:supp-distortion-attrition-pca} shows a PCA projection of the employee attrition dataset.
+PCA prioritizes global structure over local structure, and since KNN recall measures local structure preservation, it is unsurprising that 93\% of samples have a weight below one half (Figure~\ref{fig:supp-distortion-attrition-pca}.a).
+Consequently, nearly all regions contract, and many disappear altogether (Figure~\ref{fig:supp-distortion-attrition-pca}.b--d).
+Without weights, VERA's explanations cover nearly the entire projection (Figures~\ref{fig:supp-distortion-attrition-pca}.e and~\ref{fig:supp-distortion-attrition-pca}.g).
+With weights, however, the regions in the poorly embedded left part of the projection disappear, and the remaining regions lie almost entirely in its sparse right part (Figures~\ref{fig:supp-distortion-attrition-pca}.f and~\ref{fig:supp-distortion-attrition-pca}.h).
+Distortion weighting thus restricts VERA's explanations to the parts of an embedding that faithfully represent the input data.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{fig_supp_distortion-abalone.pdf}
+  \caption{Regions of the abalone UMAP embedding (4,177 abalones) constructed with and without distortion weights. We weight each sample by its KNN recall using $k = 100$. (a)~Abalones colored by their weight. (b--d) Regions of three features without (dashed) and with (solid) weights, with colors identifying the rules within each panel. (e--h) Regions of two further features without (e, g) and with (f, h) weights. Each rule keeps its color across the two panels of a pair.}
+  \label{fig:supp-distortion-abalone}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{fig_supp_distortion-attrition-pca.pdf}
+  \caption{Regions of a two-dimensional PCA projection of the IBM Employee Attrition dataset (1,470 employees) constructed with and without distortion weights. We weight each sample by its KNN recall using $k = 100$. (a)~Employees colored by their weight. (b--d) Regions of three features without (dashed) and with (solid) weights, with colors identifying the rules within each panel. (e--h) Regions of two further features without (e, g) and with (f, h) weights. Each rule keeps its color across the two panels of a pair.}
+  \label{fig:supp-distortion-attrition-pca}
+\end{figure}
+
+%% ---------------------------------------------------------------------------
+\newpage
+\section{Orange Workflows for Embedding Explanation}
+\label{sec:supp-orange}
+
+In Section~\ref{sec:user-study}, we describe a user study comparing the static visual explanations produced by VERA to explanations obtained from Orange, an interactive data mining toolkit~\cite{Demsar2013}.
+Many approaches designed for explaining two-dimensional embeddings can be reproduced in Orange using only a handful of widgets. This section covers some prototypical examples.
+We include the complete user study materials in the accompanying GitHub repository.\footnote{\url{https://github.com/pavlin-policar/vera-paper/tree/master/user-study}}
+
+Orange is a visual programming toolkit for data mining, in which users build workflows by placing widgets on a canvas and connecting them to one another. Changes and selections made in one widget are immediately reflected in every widget connected downstream, which is the kind of brushing and linking on which many interactive systems for exploring embeddings are built~\cite{Endert2014,Krause2014,Chatzimparmpas2020}.
+For instance, in the workflow of Figure~\ref{fig:supp-orange-distributions}, the user loads the data with the File widget, plots the embedding in the Scatter Plot widget, selects a group of points, and inspects their feature distributions in the Box Plot and Distributions widgets.
+This workflow reproduces the selection-based exploration of Stahnke~\etal~\cite{Stahnke2016} and Eckelt~\etal~\cite{Eckelt2022}, in which the analyst selects a group of points and inspects how its feature values differ from those of the remaining points.
+Since Box Plot ranks the features by a $\chi^2$ test or ANOVA, it also reproduces the statistical comparison of a selection with the remaining points by Marc{\'\i}lio-Jr~\etal~\cite{Marcilio2021}.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{orange-workflow-examples/screenshots/fig_supp_distribution-2.png}
+  \caption{An Orange workflow that compares the feature distributions of a selection with those of the remaining points, as the histograms of Figure~\ref{fig:related_methods}.b do. A group of points selected in the t-SNE embedding of Wine Quality~\cite{Cortez2009} is passed to Box Plot and Distributions. Box Plot lists the wine type first, as the selection holds nearly all red wines.}
+  \label{fig:supp-orange-distributions}
+\end{figure}
+
+Several approaches first cluster the embedding and then explain the clusters~\cite{Kandogan2012,Joia2015,Fujiwara2020,Plumb2020,Bibal2021,MarcilioEler2021}.
+Orange provides several widgets for clustering. For instance, in Figure~\ref{fig:supp-orange-cluster}, we use DBSCAN clustering to obtain four clusters. The simplest explanation compares the feature distributions of the clusters to find the features most characteristic of each, here with the Box Plot widget.
+IXVC~\cite{Bibal2021} instead fits a decision tree that predicts each point's cluster from its features and presents the tree's rules as the explanation.
+In Orange, this corresponds to adding the Tree widget, which fits the tree, and the Tree Viewer widget, which shows it (Figure~\ref{fig:supp-orange-tree}).
+
+The simplest workflow, in Figure~\ref{fig:supp-orange-glyph}, colors the points by the values of one feature, as color- and glyph-based encodings do.
+With its color regions, Scatter Plot also resembles the Voronoi partitions of Broeksema~\etal~\cite{Broeksema2013} and the rangesets of Sohns~\etal~\cite{Sohns2022}, which likewise show one feature at a time across the embedding.
+In these examples, the data file includes the embedding coordinates, but Orange can also compute an embedding with its t-SNE~\cite{Maaten2008}, MDS~\cite{Kruskal1978}, and PCA widgets.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{orange-workflow-examples/screenshots/fig_supp_cluster-1.png}
+  \caption{An Orange workflow that clusters the embedding and compares the clusters, as in Figure~\ref{fig:related_methods}.a. Select Columns keeps only the two t-SNE coordinates of Employee Attrition~\cite{IbmEmployeeAttrition}, so that DBSCAN clusters the embedding rather than the features. DBSCAN finds four clusters, which Scatter Plot colors, and Box Plot compares the clusters on each feature, here the department. C1 holds the sales staff, C2 research and development, and the two small clusters human resources.}
+  \label{fig:supp-orange-cluster}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{orange-workflow-examples/screenshots/fig_supp_tree-1.png}
+  \caption{An Orange workflow that explains a selection with a decision tree, in the manner of IXVC (Figure~\ref{fig:related_methods}.c). The selection of Figure~\ref{fig:supp-orange-distributions} is passed to a classification tree that separates it from the remaining points. Its single split on the wine type misclassifies 191 of the 6,497 wines. IXVC instead predicts each point's cluster, which in Orange amounts to fitting the tree to the clusters of Figure~\ref{fig:supp-orange-cluster}.}
+  \label{fig:supp-orange-tree}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{orange-workflow-examples/screenshots/fig_supp_glyph-1.png}
+  \caption{An Orange workflow that shows one feature across the embedding, much like the rangesets of Figure~\ref{fig:related_methods}.e. Scatter Plot colors the UMAP embedding of Abalone~\cite{Nash1994} by length and shades the areas where each color prevails.}
+  \label{fig:supp-orange-glyph}
+\end{figure}
+
+\clearpage
+\bibliographystyle{ieeetr}
+\bibliography{main}
 
 \end{document}

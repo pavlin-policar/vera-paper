@@ -14,17 +14,19 @@ The goal is to provide a fast, high-level summary of what an embedding shows. VE
 
 ```text
 tvcg-embedding-annotation/
-├── 2026-tvcg-resubmission-1/      # Current manuscript source
+├── 2026-tvcg-resubmission-2/      # Current manuscript, response to reviewers, and supplement, with every figure they include
+├── 2026-tvcg-resubmission-1/      # Previous revision (frozen)
+├── figure_scripts/                # Scripts that render the manuscript's and the supplement's figures
+├── supplement-data/               # Shared datasets, their downloader, and the figure style
+├── parameter-study/               # Full parameter sensitivity study
+├── region-method-comparison/      # KDE regions against rangeset regions, for every dataset
+├── purity-indication-comparison/  # Purity-based visual emphasis, for every dataset
 ├── bookworm/                      # Synthetic book-purchase example data
-├── supplement-data/               # Shared dataset downloader for supplementary studies
-├── parameter-study/               # Parameter sensitivity study for VERA
-├── region-method-comparison/      # KDE-versus-rangeset comparison
-├── purity-indication-comparison/  # Purity-based visual emphasis comparison
-├── user-study/                    # User-study materials
-└── orange-workflow-examples/      # Orange baseline workflows and screenshots
+├── orange-workflow-examples/      # Orange workflows and screenshots
+└── user-study/                    # User-study materials
 ```
 
-The main paper source lives in `2026-tvcg-resubmission-1/`. The remaining directories provide supplementary material, replication resources, and reviewer-facing evidence for the methodological choices and evaluation described in the manuscript.
+The manuscript and the supplementary document (`supplementary-material.tex`) live in `2026-tvcg-resubmission-2/`, together with every figure they include. `figure_scripts/` renders those figures. The remaining directories hold the full studies the supplement summarizes, the user-study materials, and the Orange workflows.
 
 ## User study
 
@@ -32,7 +34,7 @@ The complete user-study materials, in the form participants saw them, are in [`u
 
 ## Setup
 
-From the repository root, create an environment and install the shared supplementary dependencies:
+From the repository root, create an environment and install the dependencies, which include VERA 1.2.0 or newer:
 
 ```bash
 python -m venv .venv
@@ -40,48 +42,34 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Then download the eight shared datasets used by the supplementary studies:
+The single-cell data of supplement Fig. S4 additionally needs `scanpy`.
+
+Then download the eight shared datasets (Iris, Penguins, Abalone, Titanic, Employee Attrition, Wine Quality, Adult, Forest Covertype):
 
 ```bash
 python supplement-data/download_data.py
 ```
 
-The datasets are stored in `supplement-data/data/` and reused by all supplementary studies and comparisons.
+## Reproduce the figures
 
-## Run the studies
+`figure_scripts/README.md` lists every figure of the manuscript and the supplement with the script and command that render it and the data it needs. The scripts write PDF and PNG files to `figure_scripts/figures/` (only the PNGs are tracked), and a re-rendered PDF is copied into the paper folder under the same name. The football and single-cell data are built by `figure_scripts/prepare_football.py` and `figure_scripts/prepare_single_cell.py`. Figures are drawn in the manuscript's style (`supplement-data/figstyle.py`), at the width at which the paper includes them.
 
-Parameter sensitivity study:
+## Run the full studies
+
+The supplement shows selected results of these studies on one or two datasets; each study covers the eight shared datasets.
 
 ```bash
 python parameter-study/run_parameter_study.py parameter-study/config.json
-```
-
-Region-method comparison:
-
-```bash
+python parameter-study/summarize_parameter_study.py parameter-study/config.json
 python region-method-comparison/run_region_method_comparison.py region-method-comparison/config.json
-```
-
-Purity-indication comparison:
-
-```bash
 python purity-indication-comparison/run_purity_indication_comparison.py purity-indication-comparison/config.json
 ```
 
-These supplementary studies and comparisons document several important methodological aspects of VERA, in particular:
+Each study writes one report per dataset; the study READMEs describe the outputs:
 
-- robustness of VERA to parameter choices
-- practical guidance for default settings
-- positioning of VERA relative to alternative region-construction backends such as rangesets
-- effect of purity-based visual emphasis in the final plotted explanations
-
-Additional details, study outputs, and supporting materials are documented in:
-
-- `bookworm/`
 - `parameter-study/README.md`
 - `region-method-comparison/README.md`
 - `purity-indication-comparison/README.md`
 - `supplement-data/README.md`
 - `user-study/README.md`
 - `orange-workflow-examples/README.md`
-

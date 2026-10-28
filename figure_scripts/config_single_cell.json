@@ -1,0 +1,488 @@
+{
+  "supplement_figure": [
+    {
+      "dataset": "pbmc3k",
+      "embedding": "umap"
+    },
+    {
+      "dataset": "pancreas",
+      "embedding": "umap"
+    },
+    {
+      "dataset": "macosko",
+      "embedding": "tsne"
+    },
+    {
+      "dataset": "baron",
+      "embedding": "tsne"
+    }
+  ],
+  "datasets": {
+    "pbmc3k": {
+      "name": "PBMC 3k (10x Genomics)",
+      "label_source": "Louvain cell types from the scanpy tutorial",
+      "min_cells": 3,
+      "cell_qc": {
+        "min_genes": 200,
+        "max_genes": 2500,
+        "max_pct_mt": 5
+      },
+      "cell_types": {
+        "CD4 T cells": "CD4 T",
+        "CD8 T cells": "CD8 T",
+        "NK cells": "NK",
+        "B cells": "B",
+        "CD14+ Monocytes": "CD14 Mono",
+        "FCGR3A+ Monocytes": "FCGR3A Mono",
+        "Dendritic cells": "DC",
+        "Megakaryocytes": "Mk"
+      },
+      "markers": {
+        "IL7R": [
+          "CD4 T cells",
+          "CD8 T cells"
+        ],
+        "CCR7": [
+          "CD4 T cells"
+        ],
+        "CD3E": [
+          "CD4 T cells",
+          "CD8 T cells"
+        ],
+        "CD8A": [
+          "CD8 T cells"
+        ],
+        "CD8B": [
+          "CD8 T cells"
+        ],
+        "GNLY": [
+          "NK cells"
+        ],
+        "NKG7": [
+          "NK cells",
+          "CD8 T cells"
+        ],
+        "MS4A1": [
+          "B cells"
+        ],
+        "CD79A": [
+          "B cells"
+        ],
+        "CD14": [
+          "CD14+ Monocytes"
+        ],
+        "LYZ": [
+          "CD14+ Monocytes",
+          "FCGR3A+ Monocytes",
+          "Dendritic cells"
+        ],
+        "FCGR3A": [
+          "FCGR3A+ Monocytes",
+          "NK cells"
+        ],
+        "MS4A7": [
+          "FCGR3A+ Monocytes"
+        ],
+        "FCER1A": [
+          "Dendritic cells"
+        ],
+        "CST3": [
+          "Dendritic cells",
+          "CD14+ Monocytes",
+          "FCGR3A+ Monocytes"
+        ],
+        "PPBP": [
+          "Megakaryocytes"
+        ]
+      }
+    },
+    "pancreas": {
+      "name": "Mouse pancreas (Bastidas-Ponce et al., 2019)",
+      "label_source": "Cell types from Bastidas-Ponce et al. (2019)",
+      "min_cells": 3,
+      "published_embeddings": {
+        "umap": "X_umap"
+      },
+      "cell_types": {
+        "Ductal": "Ductal",
+        "Ngn3 low EP": "Ngn3 low EP",
+        "Ngn3 high EP": "Ngn3 high EP",
+        "Pre-endocrine": "Pre-endocrine",
+        "Alpha": "Alpha",
+        "Beta": "Beta",
+        "Delta": "Delta",
+        "Epsilon": "Epsilon"
+      },
+      "markers": {
+        "Sox9": [
+          "Ductal",
+          "Ngn3 low EP"
+        ],
+        "Spp1": [
+          "Ductal"
+        ],
+        "Krt19": [
+          "Ductal"
+        ],
+        "Hes1": [
+          "Ductal",
+          "Ngn3 low EP"
+        ],
+        "Neurog3": [
+          "Ngn3 low EP",
+          "Ngn3 high EP"
+        ],
+        "Fev": [
+          "Ngn3 high EP",
+          "Pre-endocrine"
+        ],
+        "Pax4": [
+          "Ngn3 high EP",
+          "Pre-endocrine"
+        ],
+        "Chga": [
+          "Pre-endocrine",
+          "Alpha",
+          "Beta",
+          "Delta",
+          "Epsilon"
+        ],
+        "Gcg": [
+          "Alpha"
+        ],
+        "Arx": [
+          "Alpha"
+        ],
+        "Irx2": [
+          "Alpha"
+        ],
+        "Ins1": [
+          "Beta"
+        ],
+        "Ins2": [
+          "Beta"
+        ],
+        "Sst": [
+          "Delta"
+        ],
+        "Hhex": [
+          "Delta"
+        ],
+        "Ghrl": [
+          "Epsilon"
+        ]
+      }
+    },
+    "macosko": {
+      "name": "Mouse retina (Macosko et al., 2015)",
+      "label_source": "Cell types from Macosko et al. (2015)",
+      "min_cells": 3,
+      "sample_size": null,
+      "figure_max_descriptors": 3,
+      "cell_types": {
+        "Rods": "Rods",
+        "Cones": "Cones",
+        "Bipolar cells": "Bipolar",
+        "Amacrine cells": "Amacrine",
+        "Horizontal cells": "Horizontal",
+        "Retinal ganglion cells": "RGC",
+        "Muller glia": "Müller glia",
+        "Astrocytes": "Astrocytes",
+        "Fibroblasts": "Fibroblasts",
+        "Vascular endothelium": "Endothelium",
+        "Pericytes": "Pericytes",
+        "Microglia": "Microglia"
+      },
+      "cell_type_colors": {
+        "Rods": "#538CBA",
+        "Cones": "#538CBA",
+        "Bipolar cells": "#2000D7",
+        "Amacrine cells": "#A5C93D",
+        "Horizontal cells": "#B33B19",
+        "Retinal ganglion cells": "#C38A1F",
+        "Muller glia": "#8B006B",
+        "Astrocytes": "#8B006B",
+        "Fibroblasts": "#8B006B",
+        "Vascular endothelium": "#8B006B",
+        "Pericytes": "#8B006B",
+        "Microglia": "#8B006B"
+      },
+      "markers": {
+        "RHO": [
+          "Rods"
+        ],
+        "NRL": [
+          "Rods"
+        ],
+        "GNAT1": [
+          "Rods"
+        ],
+        "SAG": [
+          "Rods",
+          "Cones"
+        ],
+        "OPN1MW": [
+          "Cones"
+        ],
+        "OPN1SW": [
+          "Cones"
+        ],
+        "ARR3": [
+          "Cones"
+        ],
+        "GNAT2": [
+          "Cones"
+        ],
+        "VSX2": [
+          "Bipolar cells",
+          "Muller glia"
+        ],
+        "PRKCA": [
+          "Bipolar cells"
+        ],
+        "GRM6": [
+          "Bipolar cells"
+        ],
+        "CABP5": [
+          "Bipolar cells"
+        ],
+        "PAX6": [
+          "Amacrine cells",
+          "Horizontal cells",
+          "Retinal ganglion cells"
+        ],
+        "GAD1": [
+          "Amacrine cells"
+        ],
+        "SLC6A9": [
+          "Amacrine cells"
+        ],
+        "TFAP2B": [
+          "Amacrine cells",
+          "Horizontal cells"
+        ],
+        "LHX1": [
+          "Horizontal cells"
+        ],
+        "ONECUT1": [
+          "Horizontal cells"
+        ],
+        "POU4F1": [
+          "Retinal ganglion cells"
+        ],
+        "NEFL": [
+          "Retinal ganglion cells",
+          "Horizontal cells"
+        ],
+        "SNCG": [
+          "Retinal ganglion cells"
+        ],
+        "RBPMS": [
+          "Retinal ganglion cells"
+        ],
+        "THY1": [
+          "Retinal ganglion cells"
+        ],
+        "RLBP1": [
+          "Muller glia"
+        ],
+        "GLUL": [
+          "Muller glia"
+        ],
+        "GFAP": [
+          "Astrocytes"
+        ],
+        "PAX2": [
+          "Astrocytes"
+        ],
+        "COL1A1": [
+          "Fibroblasts"
+        ],
+        "DCN": [
+          "Fibroblasts"
+        ],
+        "CLDN5": [
+          "Vascular endothelium"
+        ],
+        "PECAM1": [
+          "Vascular endothelium"
+        ],
+        "KCNJ8": [
+          "Pericytes"
+        ],
+        "RGS5": [
+          "Pericytes"
+        ],
+        "C1QA": [
+          "Microglia"
+        ],
+        "CX3CR1": [
+          "Microglia"
+        ]
+      }
+    },
+    "baron": {
+      "name": "Human pancreas (Baron et al., 2016)",
+      "label_source": "Cell types from Baron et al. (2016)",
+      "min_cells": 3,
+      "sample_size": null,
+      "cell_types": {
+        "alpha": "Alpha",
+        "beta": "Beta",
+        "delta": "Delta",
+        "gamma": "Gamma",
+        "epsilon": "Epsilon",
+        "acinar": "Acinar",
+        "ductal": "Ductal",
+        "activated_stellate": "Act. stellate",
+        "quiescent_stellate": "Qui. stellate",
+        "endothelial": "Endothelial",
+        "macrophage": "Macrophage",
+        "mast": "Mast",
+        "schwann": "Schwann",
+        "t_cell": "T cell"
+      },
+      "markers": {
+        "GCG": [
+          "alpha"
+        ],
+        "ARX": [
+          "alpha"
+        ],
+        "IRX2": [
+          "alpha"
+        ],
+        "INS": [
+          "beta"
+        ],
+        "IAPP": [
+          "beta"
+        ],
+        "MAFA": [
+          "beta"
+        ],
+        "SST": [
+          "delta"
+        ],
+        "HHEX": [
+          "delta"
+        ],
+        "PPY": [
+          "gamma"
+        ],
+        "GHRL": [
+          "epsilon"
+        ],
+        "CHGA": [
+          "alpha",
+          "beta",
+          "delta",
+          "gamma",
+          "epsilon"
+        ],
+        "PRSS1": [
+          "acinar"
+        ],
+        "CPA1": [
+          "acinar"
+        ],
+        "CELA3A": [
+          "acinar"
+        ],
+        "KRT19": [
+          "ductal"
+        ],
+        "SOX9": [
+          "ductal"
+        ],
+        "CFTR": [
+          "ductal"
+        ],
+        "COL1A1": [
+          "activated_stellate"
+        ],
+        "COL1A2": [
+          "activated_stellate"
+        ],
+        "PDGFRB": [
+          "activated_stellate",
+          "quiescent_stellate"
+        ],
+        "RGS5": [
+          "quiescent_stellate"
+        ],
+        "PECAM1": [
+          "endothelial"
+        ],
+        "PLVAP": [
+          "endothelial"
+        ],
+        "C1QB": [
+          "macrophage"
+        ],
+        "CD68": [
+          "macrophage"
+        ],
+        "TPSAB1": [
+          "mast"
+        ],
+        "KIT": [
+          "mast"
+        ],
+        "SOX10": [
+          "schwann"
+        ],
+        "CD3E": [
+          "t_cell"
+        ]
+      }
+    }
+  },
+  "preprocessing": {
+    "target_sum": 10000,
+    "hvg": {
+      "min_mean": 0.0125,
+      "max_mean": 3,
+      "min_disp": 0.5
+    },
+    "n_pcs": 50,
+    "n_pcs_embedding": 40
+  },
+  "embeddings": {
+    "tsne": {
+      "perplexity": 30,
+      "random_state": 0
+    },
+    "umap": {
+      "n_neighbors": 10,
+      "min_dist": 0.5,
+      "random_state": 0
+    }
+  },
+  "explanatory_genes": {
+    "selection": "pearson_residuals",
+    "n_genes": 500
+  },
+  "indicators": {
+    "threshold": 0,
+    "uninformative_max_sample_coverage": 0.8
+  },
+  "region_defaults": {
+    "sample_size": 5000,
+    "random_state": 0,
+    "merge_min_sample_overlap": 0.8
+  },
+  "descriptive_defaults": {
+    "max_panels": 4,
+    "merge_threshold": 0.8,
+    "enrich_with_background": true,
+    "max_overlap": 0.0
+  },
+  "descriptor_ranking": "purity_lift",
+  "max_descriptors": 5,
+  "labels": {
+    "max_width": 14,
+    "truncation_template": "(+{n})"
+  },
+  "frame_padding": 0.3
+}

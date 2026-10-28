@@ -25,6 +25,7 @@ class Dataset:
         embedding: np.ndarray,
         features: pd.DataFrame,
         metadata: dict[str, Any] | None = None,
+        labels: pd.DataFrame | None = None,
     ):
         self.name = name
 
@@ -35,14 +36,28 @@ class Dataset:
         self.embedding = embedding
         self.features = features
         self.metadata = metadata or {}
+        # Post hoc labels (class, cuisine, genre, ...) used only to read an
+        # embedding, never to construct it
+        self.labels = labels
 
     @property
     def data_dir(self) -> str:
         return path.join(DATA_DIR, self.name)
 
+    @property
+    def indicator_columns(self):
+        """Columns to hand to VERA as presence indicators, or None."""
+        return self.metadata.get("indicator_cols", None)
+
     @classmethod
-    def load(cls, name: str) -> "Dataset":
-        embedding_fname = path.join(DATA_DIR, name, "embedding.csv")
+    def load(cls, name: str, embedding: str = None) -> "Dataset":
+        """Load a prepared dataset.
+
+        `embedding` selects an alternative layout stored next to the default
+        one, e.g. ``"umap"`` reads ``embedding_umap.csv``.
+        """
+        embedding_basename = "embedding.csv" if embedding is None else f"embedding_{embedding}.csv"
+        embedding_fname = path.join(DATA_DIR, name, embedding_basename)
         features_fname = path.join(DATA_DIR, name, "features.csv")
 
         if not path.exists(embedding_fname):
@@ -69,7 +84,12 @@ class Dataset:
             with open(metadata_fname, "r") as f:
                 metadata = json.load(f)
 
-        dataset = cls(name, embedding, features, metadata=metadata)
+        labels = None
+        labels_fname = path.join(DATA_DIR, name, metadata.get("label_col_file", "labels.csv"))
+        if os.path.exists(labels_fname):
+            labels = pd.read_csv(labels_fname)
+
+        dataset = cls(name, embedding, features, metadata=metadata, labels=labels)
 
         categorical_cols = dataset.metadata.get("categorical_cols", None)
         if categorical_cols is not None:

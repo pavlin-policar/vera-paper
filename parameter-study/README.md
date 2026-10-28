@@ -130,6 +130,10 @@ Results are written to per-dataset directories. Each directory contains:
 - `explanation-construction.md` — contrastive and descriptive explanations under varying explanation parameters
 - `figures/` — all generated images
 
+## Supplement figures
+
+The supplementary material's five parameter figures of the abalone embedding (Figs. S5-S9) are drawn from this study's defaults (`config.json`) by `figure_scripts/figS05_S09_parameters.py`, which `figure_scripts/README.md` describes.
+
 ## Modifying the study
 
 Edit `config.json` to add/remove datasets or change parameter ranges. The script will regenerate all outputs on the next run.
