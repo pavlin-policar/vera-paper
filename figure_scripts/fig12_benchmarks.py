@@ -135,7 +135,7 @@ def plot_samples(ax):
         ax.text(
             subset["N"].iloc[-1], subset["duration"].iloc[-1] + 6, f"|F|={key}",
             va="bottom", ha="right", rotation=angle, rotation_mode="anchor",
-            fontsize=FONTSIZE - 1, zorder=3,
+            fontsize=FONTSIZE - 1.5, zorder=3,
         )
 
     style_axis(ax)
