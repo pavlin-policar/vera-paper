@@ -1,7 +1,7 @@
 \documentclass[lettersize,journal]{IEEEtran}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL main-old.tex   Wed Apr 29 20:57:34 2026
-%DIF ADD main.tex       Wed Oct 28 20:40:52 2026
+%DIF ADD main.tex       Sat Oct 31 10:11:05 2026
 \usepackage{amsmath,amsfonts}
 \usepackage{algorithmic}
 \usepackage{algorithm}
@@ -129,7 +129,7 @@
 \begin{abstract}
 Two-dimensional embeddings obtained from dimensionality reduction techniques such as MDS, t-SNE, or UMAP, are widely used to visualize high-dimensional data and support researchers in visually identifying clusters, outliers, and other interesting patterns in the data. However, the main challenge is not only to detect such patterns, but to explain what they represent in terms of the original, human-interpretable features of the data. Existing approaches often rely on interactive exploration or direct feature encodings, requiring substantial manual inspection that can be time-consuming and repetitive.
 As an alternative, we propose VERA (Visual Explanations via Region Annotation), a general-purpose method for explaining two-dimensional embeddings through automatically generated, static, region-based visual explanations.
-VERA identifies informative regions in the embedding space and associates them with user-provided human-interpretable features, producing concise visual annotations that summarize the structure of the embedding landscape at a glance. Rather than merely showing where feature values occur, VERA automatically filters, merges, and ranks candidate explanations, enabling users to focus on the most informative embedding structures without manual exploration.
+VERA identifies informative regions in the embedding space and \DIFdelbegin \DIFdel{associates them with user-provided }\DIFdelend \DIFaddbegin \DIFadd{describes each by the combination of }\DIFaddend human-interpretable features \DIFaddbegin \DIFadd{that jointly characterize it}\DIFaddend , producing concise visual annotations that summarize the structure of the embedding landscape at a glance. Rather than merely showing where feature values occur, VERA automatically filters, merges, and ranks candidate explanations, enabling users to focus on the most informative embedding structures without manual exploration.
 We demonstrate VERA's utility on several real-world datasets and evaluate its effectiveness in a user study comparing it with the utility of a comprehensive interactive data mining toolkit.
 Our results show that VERA's generated static explanations can convey the essential insights of complex embeddings and support users in typical exploratory data analysis tasks, while requiring significantly less time and user effort.
 \end{abstract}
@@ -200,9 +200,11 @@ Given the repetitive nature of these exploratory data analysis tasks, automated,
 }\DIFaddend 
 
 % How do we solve the problem?
-In this paper, we propose \textit{Visual Explanations via Region Annotation (VERA)}, an automated, general-purpose method for generating static visual explanations of two-dimensional embeddings. VERA automatically identifies informative regions in the embedding space and associates them with a smaller set of user-provided human-interpretable features, presenting these associations as concise, small-multiple visual summaries.
-\DIFaddbegin \DIFadd{For instance, Fig.~\ref{fig:related_methods}.h shows the top-ranked descriptive panel of such a summary.
-}\DIFaddend This approach helps analysts quickly and easily obtain a high-level overview of the embedding.
+In this paper, we propose \textit{Visual Explanations via Region Annotation (VERA)}, an automated, general-purpose method for generating static visual explanations of two-dimensional embeddings. VERA automatically identifies informative regions in the embedding space and associates them with a smaller set of user-provided human-interpretable features, presenting these associations as concise, small-multiple visual summaries. \DIFaddbegin \DIFadd{Unlike rangesets~\mbox{%DIFAUXCMD
+\cite{Sohns2022}}\hskip0pt%DIFAUXCMD
+, which show one feature per view, or the attribute-based explanation~\mbox{%DIFAUXCMD
+\cite{DaSilva2015}}\hskip0pt%DIFAUXCMD
+, which assigns each point a single feature, VERA annotates each region with all features whose values jointly characterize it. Such joint annotation is important because structures in an embedding arise from samples that are similar in many features, and characterizing these areas by displaying these features one at a time leaves the analyst to find and mentally intersect the relevant views. A single VERA annotation instead characterizes the region directly, with a conjunction of features. For instance, Fig.~\ref{fig:related_methods}.h shows such an explanation summary. }\DIFaddend This approach helps analysts \DIFaddbegin \DIFadd{to }\DIFaddend quickly and easily obtain a high-level overview of the embedding.
 
 Our main contributions are as follows:
 \begin{enumerate}
@@ -503,7 +505,7 @@ Notice that many of the identified regions in Fig.~\ref{fig:attrition} do not co
 \begin{figure}[htb]
   \centering
     \includegraphics{case_study-abalone.pdf}
-    \caption{\label{fig:abalone}Contrastive explanations for a UMAP embedding of the Abalone dataset. Panels (\DIFdelbeginFL \DIFdelFL{a-d}\DIFdelendFL \DIFaddbeginFL \DIFaddFL{a--d}\DIFaddendFL ) highlight selected features, showing the spatial distribution of age, sex, and physical measurements, as well as correlations between features related to animal weight and size.}
+    \caption{\label{fig:abalone}Contrastive explanations for a UMAP embedding of the Abalone dataset. Panels (\DIFdelbeginFL \DIFdelFL{a-d}\DIFdelendFL \DIFaddbeginFL \DIFaddFL{a--d}\DIFaddendFL ) highlight selected features, showing the spatial distribution of age, sex, and physical measurements, as well as correlations between features related to animal weight and size. \DIFaddbeginFL \DIFaddFL{To illustrate the contrastive merge, we lower its threshold to 0.75 and set the post hoc merge threshold to 0.9 (Section~\ref{sec:supp-parameters}).}\DIFaddendFL }
 \end{figure}
 
 The Abalone dataset~\cite{Nash1994} contains 4,177 samples of abalones -- marine mollusks with distinctive ear-shaped shells. Each sample is characterized by \DIFdelbegin \DIFdel{eight }\DIFdelend \DIFaddbegin \DIFadd{nine }\DIFaddend features, including physical measurements of the body and shell and biological attributes such as age and sex. We generate a two-dimensional embedding with the UMAP algorithm using the \textsf{umap-learn} library~\cite{McInnes2018}. The embedding reveals an elongated structure extending from left to right.
