@@ -125,7 +125,7 @@ Since this dataset has several times more features than those of the manuscript'
 \end{figure}
 
 \paragraph{Data.}
-The Wyscout match events dataset contains aggregated player statistics of the 2017-18 football season, covering the five major European leagues: French Ligue 1, English Premier League, Italian Serie A, Spanish La Liga, and the German Bundesliga~\cite{Pappalardo2019}.
+The Wyscout match events dataset contains aggregated player statistics of the 2017--18 football season, covering the five major European leagues: French Ligue 1, English Premier League, Italian Serie A, Spanish La Liga, and the German Bundesliga~\cite{Pappalardo2019}.
 It includes 1,634 players who played at least 900 minutes, each characterized by 239 features: 238 per-90-minute counts and percentages of actions such as passes, duels, and crosses, many broken down by the third and side of the pitch where the action took place, and the player's position (goalkeeper, defender, midfielder, or forward).
 We construct a t-SNE embedding from the 238 numeric features, standardized after log-transforming 56 heavy-tailed counts. We do not use player positions in the embedding construction process. We use the default parameters in the \textsf{openTSNE} library~\cite{Policar2024}.
 
@@ -195,7 +195,7 @@ Although VERA's ranking heuristics were not designed for presence indicators, ca
 In PBMC~3k, for instance, VERA's regions coincide with the major blood cell types and are labeled with their textbook markers, \emph{CD3E} and \emph{IL7R} for T cells, \emph{CD79A} and \emph{MS4A1} for B cells, \emph{FCGR3A} and \emph{MS4A7} for \emph{FCGR3A}$^+$ monocytes, and \emph{FCER1A} for dendritic cells (Figure~\ref{fig:supp-single-cell}.b--d).
 Similarly, in the mouse pancreas, VERA labels the endocrine progenitors with \emph{Neurog3} and the beta, delta, and epsilon cells with \emph{Ins2}, \emph{Sst}, and \emph{Ghrl}.
 In the mouse retina, a single panel (Figure~\ref{fig:supp-single-cell}.j) separates rods, cones, horizontal cells, ganglion cells, and M\"uller glia, each labeled with one of its markers.
-VERA likewise identifies the main cell types of the human pancreas (Figure~\ref{fig:supp-single-cell}.n--p), labelling, for instance, the alpha, beta, gamma, and mast cells with \emph{IRX2}, \emph{IAPP}, \emph{PPY}, and \emph{TPSAB1}.
+VERA likewise identifies the main cell types of the human pancreas (Figure~\ref{fig:supp-single-cell}.n--p), labeling, for instance, the alpha, beta, gamma, and mast cells with \emph{IRX2}, \emph{IAPP}, \emph{PPY}, and \emph{TPSAB1}.
 
 \paragraph{Limitations.}
 Representing genes as presence indicators has its limitations.
@@ -299,7 +299,7 @@ The threshold thus provides a trade-off between the number of panels and the pre
 A low threshold merges more features into fewer panels, but the merged rule of a region then no longer holds for all of its samples.
 A high threshold merges only features whose regions exhibit near-perfect overlap, so that each panel describes all of its features equally well.
 Figure~\ref{fig:supp-param-contrastive} shows the effects of different thresholds.
-At the default of 0.95, each of the nine abalone features is shown in its own panel, and no features are merged at the default (Figure~\ref{fig:supp-param-contrastive}.i--l).
+At the default of 0.95, each of the nine abalone features is shown in its own panel, and no features are merged (Figure~\ref{fig:supp-param-contrastive}.i--l).
 Lowering the threshold to 0.8 merges whole weight and viscera weight, leaving eight candidate panels (Figure~\ref{fig:supp-param-contrastive}.e), and at 0.75, shucked weight joins them, leaving seven (Figure~\ref{fig:supp-param-contrastive}.a--b).
 We default to 0.95 so that a merged panel can be read as describing each of its features.
 To illustrate the contrastive merge, Figure~\ref{fig:abalone} of the manuscript uses a threshold of 0.75 together with a post hoc merge threshold of 0.9, at which diameter and length merge in addition to the three weights (Figure~\ref{fig:abalone}.c--d).
